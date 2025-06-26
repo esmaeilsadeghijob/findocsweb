@@ -17,6 +17,20 @@
   src: url("/src/assets/fonts/Digikala -_font.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "Lalezar";
+  src: url("/src/assets/fonts/Lalezar-Regular.ttf") format("truetype");
+}
+
+.dashboard-title {
+  font-family: "Lalezar", sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  color: #222;
+  margin: 0;
+}
+
+
 .dashboard-header {
   text-align: center;
   margin: 1rem 0;

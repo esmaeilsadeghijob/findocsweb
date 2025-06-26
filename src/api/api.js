@@ -34,3 +34,7 @@ export const approveUser = (userId) =>
     API.put(`/api/users/${userId}/approve`);
 export const deleteUser = (userId) =>
     API.delete(`/api/users/${userId}`);
+
+export const getClients = () => API.get("/api/clients");
+export const getProjects = () => API.get("/api/projects");
+

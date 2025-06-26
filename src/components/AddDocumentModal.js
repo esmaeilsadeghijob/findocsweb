@@ -1,107 +1,132 @@
-import { Modal, Form, Input, DatePicker, Button, Select, message } from "antd";
-import { useState } from "react";
-import { createDocument } from "../api/api";
-import dayjs from "dayjs";
+import { Modal, Form, Input, Select, Button, message } from "antd";
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
+import { useEffect, useState } from "react";
+import { createDocument, getClients, getProjects } from "../api/api";
 
 function AddDocumentModal({ onSuccess, onCancel }) {
-    const [loading, setLoading] = useState(false);
-
     const [form] = Form.useForm();
+    const [clients, setClients] = useState([]);
+    const [projects, setProjects] = useState([]);
 
-    const handleOk = async () => {
+    useEffect(() => {
+        getClients()
+            .then((res) => setClients(res.data))
+            .catch(() => setClients([]));
+
+        getProjects()
+            .then((res) => setProjects(res.data))
+            .catch(() => setProjects([]));
+    }, []);
+
+    const onFinish = async (values) => {
         try {
-            const values = await form.validateFields();
-
-            const payload = {
-                documentNumber: values.documentNumber,
-                fiscalYear: values.fiscalYear,
-                documentDate: values.documentDate.format("YYYY-MM-DD"),
-                description: values.description,
-                nature: values.nature,
-                clientId: values.clientId,
-                projectId: values.projectId,
+            const date = values.documentDate?.toDate?.();
+            const doc = {
+                ...values,
+                documentDate: date?.toISOString().split("T")[0] || null,
             };
-
-            setLoading(true);
-            await createDocument(payload);
-            message.success("سند با موفقیت ثبت شد");
+            await createDocument(doc);
+            message.success("سند ثبت شد");
             onSuccess();
-        } catch (err) {
-            message.error("ورودی‌ها را بررسی کنید");
-        } finally {
-            setLoading(false);
+        } catch {
+            message.error("ثبت سند با خطا مواجه شد");
         }
     };
 
     return (
         <Modal
             open
-            onCancel={onCancel}
-            onOk={handleOk}
-            confirmLoading={loading}
             title="افزودن سند جدید"
+            onCancel={onCancel}
+            footer={null}
+            centered
         >
-            <Form layout="vertical" form={form}>
-                <Form.Item
-                    name="documentNumber"
-                    label="شماره سند"
-                    rules={[{ required: true }]}
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="fiscalYear"
-                    label="سال مالی"
-                    rules={[{ required: true }]}
-                >
-                    <Input placeholder="مثلاً: 1403" />
-                </Form.Item>
-
-                <Form.Item
-                    name="documentDate"
-                    label="تاریخ سند"
-                    rules={[{ required: true }]}
-                >
-                    <DatePicker
-                        style={{ width: "100%" }}
-                        format="YYYY-MM-DD"
-                        defaultValue={dayjs()}
-                    />
-                </Form.Item>
-
-                <Form.Item name="description" label="شرح سند">
-                    <Input.TextArea rows={2} />
-                </Form.Item>
-
-                <Form.Item
-                    name="nature"
-                    label="ماهیت سند"
-                    rules={[{ required: true }]}
-                >
-                    <Select
-                        placeholder="انتخاب ماهیت"
-                        options={[
-                            { label: "دریافت", value: "RECEIVE" },
-                            { label: "پرداخت", value: "PAYMENT" },
-                        ]}
-                    />
-                </Form.Item>
-
+            <Form
+                layout="vertical"
+                form={form}
+                onFinish={onFinish}
+                style={{ marginTop: "1rem" }}
+            >
                 <Form.Item
                     name="clientId"
                     label="مشتری"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "انتخاب مشتری الزامی است" }]}
                 >
-                    <Input placeholder="client UUID" />
+                    <Select
+                        size="large"
+                        placeholder="انتخاب مشتری"
+                        options={clients.map((c) => ({ label: c.name, value: c.id }))}
+                    />
                 </Form.Item>
 
                 <Form.Item
                     name="projectId"
                     label="پروژه"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "انتخاب پروژه الزامی است" }]}
                 >
-                    <Input placeholder="project UUID" />
+                    <Select
+                        size="large"
+                        placeholder="انتخاب پروژه"
+                        options={projects.map((p) => ({ label: p.name, value: p.id }))}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    name="documentNumber"
+                    label="شماره سند"
+                    rules={[{ required: true, message: "شماره سند الزامی است" }]}
+                >
+                    <Input
+                        size="large"
+                        style={{ textAlign: "left", height: 48, fontSize: "1rem" }}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    name="fiscalYear"
+                    label="سال مالی"
+                    rules={[{ required: true, message: "سال مالی الزامی است" }]}
+                >
+                    <Input
+                        size="large"
+                        style={{ textAlign: "left", height: 48, fontSize: "1rem" }}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    name="documentDate"
+                    label="تاریخ سند"
+                    rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
+                >
+                    <DatePicker
+                        calendar={persian}
+                        locale={persian_fa}
+                        calendarPosition="bottom-center"
+                        style={{
+                            width: "100%",
+                            height: "48px",
+                            fontSize: "1rem",
+                            textAlign: "center",
+                        }}
+                    />
+                </Form.Item>
+
+                <Form.Item name="description" label="شرح سند">
+                    <Input.TextArea rows={3} />
+                </Form.Item>
+
+                <Form.Item>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        size="large"
+                        style={{ height: 48, fontSize: "1rem" }}
+                    >
+                        ثبت سند
+                    </Button>
                 </Form.Item>
             </Form>
         </Modal>
