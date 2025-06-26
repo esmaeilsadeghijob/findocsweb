@@ -1,5 +1,5 @@
 import { Card, Table, Button, Modal, Input, message } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {EditOutlined, DeleteOutlined, RightOutlined, LeftOutlined} from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import {
     getUnits,
@@ -99,13 +99,24 @@ function UnitManager() {
                         اضافه کردن uid
                     </Button>
                 }
+                style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                bodyStyle={{ padding: 0, flex: 1 }}
             >
-                <Table
-                    columns={columns}
-                    dataSource={units}
-                    rowKey="id"
-                    pagination={false}
-                />
+                <div style={{ height: "100%", overflowY: "auto" }}>
+                    <Table
+                        columns={columns}
+                        dataSource={units}
+                        rowKey="id"
+                        pagination={{
+                            pageSize: 6,
+                            showSizeChanger: false,
+                            position: ["bottomCenter"],
+                            prevIcon: <RightOutlined />,
+                            nextIcon: <LeftOutlined />,
+                        }}
+                        size="small"
+                    />
+                </div>
             </Card>
 
             <Modal

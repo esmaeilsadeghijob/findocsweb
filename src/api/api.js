@@ -44,3 +44,12 @@ export const getUnits = () => API.get("/api/units");
 export const createUnit = (data) => API.post("/api/units", data);
 export const updateUnit = (id, data) => API.put(`/api/units/${id}`, data);
 export const deleteUnit = (id) => API.delete(`/api/units/${id}`);
+
+export const getServices = () => API.get("/api/services");
+export const createService = (data) => API.post("/api/services", data);
+export const updateService = (id, data) => API.put(`/api/services/${id}`, data);
+export const deleteService = (id) => API.delete(`/api/services/${id}`);
+export const getPeriods = () => API.get("/api/periods");
+export const createPeriod = (data) => API.post("/api/periods", data);
+export const updatePeriod = (id, data) => API.put(`/api/periods/${id}`, data);
+export const deletePeriod = (id) => API.delete(`/api/periods/${id}`);

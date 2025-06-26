@@ -1,5 +1,5 @@
 import { Card, Table, Button, Modal, Input, message } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined , LeftOutlined, RightOutlined} from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import {
     getClients,
@@ -14,18 +14,18 @@ function ClientManager() {
     const [editing, setEditing] = useState(null);
     const [name, setName] = useState("");
 
+    useEffect(() => {
+        loadClients();
+    }, []);
+
     const loadClients = async () => {
         try {
             const res = await getClients();
             setClients(res.data);
-        } catch (err) {
+        } catch {
             message.error("خطا در بارگذاری مشتری‌ها");
         }
     };
-
-    useEffect(() => {
-        loadClients();
-    }, []);
 
     const showModal = (record = null) => {
         setEditing(record);
@@ -34,30 +34,28 @@ function ClientManager() {
     };
 
     const handleSubmit = async () => {
-        if (!name.trim()) return message.warning("نام مشتری خالی است");
-
+        if (!name.trim()) return message.warning("نام مشتری الزامی است");
         try {
             if (editing) {
                 await updateClient(editing.id, { name });
-                message.success("مشتری ویرایش شد");
+                message.success("ویرایش انجام شد");
             } else {
                 await createClient({ name });
-                message.success("مشتری اضافه شد");
+                message.success("مشتری جدید اضافه شد");
             }
-
             setModalOpen(false);
             setEditing(null);
             setName("");
             loadClients();
-        } catch (err) {
-            message.error("خطا در ثبت");
+        } catch {
+            message.error("عملیات انجام نشد");
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await deleteClient(id);
-            message.success("مشتری حذف شد");
+            message.success("حذف شد");
             loadClients();
         } catch {
             message.error("خطا در حذف مشتری");
@@ -96,16 +94,27 @@ function ClientManager() {
                 title="مدیریت مشتری‌ها"
                 extra={
                     <Button type="dashed" onClick={() => showModal()}>
-                        اضافه کردن cid
+                        اضافه کردن مشتری
                     </Button>
                 }
+                style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                bodyStyle={{ padding: 0, flex: 1 }}
             >
-                <Table
-                    columns={columns}
-                    dataSource={clients}
-                    rowKey="id"
-                    pagination={false}
-                />
+                <div style={{ height: "100%", overflowY: "auto" }}>
+                    <Table
+                        columns={columns}
+                        dataSource={clients}
+                        rowKey="id"
+                        pagination={{
+                            pageSize: 6,
+                            showSizeChanger: false,
+                            position: ["bottomCenter"],
+                            prevIcon: <RightOutlined />, // برعکس
+                            nextIcon: <LeftOutlined />,
+                        }}
+                        size="small"
+                    />
+                </div>
             </Card>
 
             <Modal
