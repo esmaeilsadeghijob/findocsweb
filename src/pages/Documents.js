@@ -24,6 +24,11 @@ function Documents() {
         { title: "سال مالی", dataIndex: "fiscalYear" },
         { title: "شرح سند", dataIndex: "description" },
         {
+            title: "ایجادکننده",
+            dataIndex: "createdBy",
+            render: (user) => user || "نامشخص",
+        },
+        {
             title: "ضمیمه",
             render: (_, record) => (
                 <Button type="link" onClick={() => setSelectedDoc(record.id)}>

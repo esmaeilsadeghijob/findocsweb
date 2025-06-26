@@ -34,8 +34,15 @@ function AttachmentTable({ documentId }) {
         {
             title: "نوع فایل",
             render: (_, file) => (
-                <Tag color="blue">{file.extension?.toUpperCase() || "نامشخص"}</Tag>
+                <Tag color="blue">
+                    {file.extension?.toUpperCase() || "نامشخص"}
+                </Tag>
             ),
+        },
+        {
+            title: "آپلودکننده",
+            dataIndex: "uploadedBy",
+            render: (uploader) => uploader || "نامشخص",
         },
         {
             title: "پیش‌نمایش",

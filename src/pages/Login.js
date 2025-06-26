@@ -12,21 +12,24 @@ function Login() {
         try {
             const res = await login(values);
             loginContext(res.data.token);
-
-            // ذخیره نقش از response
             localStorage.setItem("role", res.data.role);
-
             message.success("ورود موفق");
             navigate("/");
         } catch {
-            message.error("نام کاربری یا رمز اشتباه است");
+            message.error("نام کاربری یا رمز عبور اشتباه است");
         }
     };
 
     return (
         <Card
             title="ورود به سامانه"
-            style={{ maxWidth: 400, margin: "5rem auto" }}
+            headStyle={{ textAlign: "center", fontSize: "1.4rem" }}
+            style={{
+                maxWidth: 520,
+                padding: "2rem",
+                margin: "6rem auto",
+                boxShadow: "0 0 12px rgba(0,0,0,0.08)",
+            }}
         >
             <Form layout="vertical" onFinish={onFinish}>
                 <Form.Item
@@ -34,19 +37,46 @@ function Login() {
                     label="نام کاربری"
                     rules={[{ required: true, message: "نام کاربری الزامی است" }]}
                 >
-                    <Input />
+                    <Input
+                        size="large"
+                        style={{ textAlign: "left", fontSize: "1rem", height: "48px" }}
+                    />
                 </Form.Item>
+
                 <Form.Item
                     name="password"
                     label="رمز عبور"
                     rules={[{ required: true, message: "رمز عبور الزامی است" }]}
                 >
-                    <Input.Password />
+                    <Input.Password
+                        size="large"
+                        style={{
+                            direction: "ltr",
+                            textAlign: "left",
+                            fontSize: "1rem",
+                            height: "48px",
+                        }}
+                        addonBefore={<span style={{ width: 0 }} />}
+                    />
                 </Form.Item>
-                <Button type="primary" htmlType="submit" block>
+
+                <Button
+                    type="primary"
+                    htmlType="submit"
+                    block
+                    size="large"
+                    style={{ height: "48px", fontSize: "1rem" }}
+                >
                     ورود
                 </Button>
-                <Button type="link" block onClick={() => navigate("/register")}>
+
+                <Button
+                    type="link"
+                    block
+                    size="large"
+                    style={{ fontSize: "1rem", paddingTop: "1rem" }}
+                    onClick={() => navigate("/register")}
+                >
                     حساب ندارید؟ ثبت‌نام کنید
                 </Button>
             </Form>

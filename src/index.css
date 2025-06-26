@@ -1,12 +1,44 @@
 /* فونت فارسی */
 @font-face {
   font-family: 'Vazirmatn';
-  src: url('/src/assets/fonts/Vazirmatn-Regular.woff2') format('woff2');
+  src: url('/src/assets/fonts/Vazirmatn-Regular.ttf') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
+@font-face {
+  font-family: "IranNastaliq";
+  src: url("/src/assets/fonts/IranNastaliq.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Digikala";
+  src: url("/src/assets/fonts/Digikala -_font.ttf") format("truetype");
+}
+
+.dashboard-header {
+  text-align: center;
+  margin: 1rem 0;
+  line-height: 1.4;
+}
+
+.dashboard-header .line1 {
+  font-family: "IranNastaliq";
+  font-size: 2rem;
+}
+
+.dashboard-header .line2 {
+  font-family: "Digikala";
+  font-size: 1.2rem;
+  color: #555;
+}
+
+
+input[type="password"] {
+  direction: ltr !important;
+  text-align: left !important;
+}
 
 /* تنظیمات عمومی */
 body {

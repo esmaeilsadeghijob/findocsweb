@@ -48,11 +48,12 @@ function Dashboard() {
                     style={{
                         background: "#fff",
                         padding: "0 1rem",
-                        textAlign: "center",
-                        fontWeight: "bold",
                     }}
                 >
-                    داشبورد مدیریتی Findocs
+                    <div className="dashboard-header">
+                        <div className="line1">شرکت دانشوران سرمد - نرم‌افزاری هوشا</div>
+                        <div className="line2">داشبورد مدیریتی اسناد</div>
+                    </div>
                 </Header>
                 <Content style={{ margin: "1rem", padding: "1rem", background: "#fff" }}>
                     {currentKey === "documents" && <Documents />}
