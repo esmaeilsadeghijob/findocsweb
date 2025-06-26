@@ -13,6 +13,8 @@ const { Header, Sider, Content } = Layout;
 function Dashboard() {
     const [currentKey, setCurrentKey] = useState("documents");
 
+    const role = localStorage.getItem("role");
+
     const handleMenuClick = (e) => {
         if (e.key === "logout") {
             localStorage.clear();
@@ -24,7 +26,9 @@ function Dashboard() {
 
     const menuItems = [
         { key: "documents", icon: <FileTextOutlined />, label: "اسناد" },
-        { key: "users", icon: <TeamOutlined />, label: "کاربران" },
+        ...(role === "ROLE_ADMIN"
+            ? [{ key: "users", icon: <TeamOutlined />, label: "مدیریت کاربران" }]
+            : []),
         { key: "logout", icon: <LogoutOutlined />, label: "خروج" },
     ];
 

@@ -1,6 +1,6 @@
 import { Table, Button, message } from "antd";
 import { useEffect, useState } from "react";
-import { approveUser, getPendingUsers } from "../api";
+import { approveUser, getPendingUsers } from "../api/api";
 
 function UsersApproval() {
     const [users, setUsers] = useState([]);

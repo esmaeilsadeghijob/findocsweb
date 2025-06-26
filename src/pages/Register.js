@@ -1,5 +1,5 @@
 import { Button, Form, Input, Card, message } from "antd";
-import { register } from "../api";
+import { register } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
