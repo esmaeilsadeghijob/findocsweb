@@ -1,5 +1,5 @@
 import { Card, Table, Button, Modal, Input, message } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {EditOutlined, DeleteOutlined, RightOutlined, LeftOutlined} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
     getServices,
@@ -103,7 +103,14 @@ function ServiceManager() {
                     columns={columns}
                     dataSource={services}
                     rowKey="id"
-                    pagination={false}
+                    pagination={{
+                        pageSize: 6,
+                        showSizeChanger: false,
+                        position: ["bottomCenter"],
+                        prevIcon: <RightOutlined />,
+                        nextIcon: <LeftOutlined />,
+                    }}
+                    size="small"
                 />
             </Card>
 

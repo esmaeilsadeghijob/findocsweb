@@ -4,6 +4,7 @@ import { getDocuments } from "../api/api";
 import UploadModal from "../components/UploadModal";
 import AddDocumentModal from "../components/AddDocumentModal";
 import AttachmentTable from "../components/AttachmentTable";
+import { PlusCircleOutlined } from "@ant-design/icons";
 
 function Documents() {
     const [docs, setDocs] = useState([]);
@@ -41,7 +42,19 @@ function Documents() {
     return (
         <>
             <Space style={{ marginBottom: "1rem" }}>
-                <Button type="primary" onClick={() => setShowAddModal(true)}>
+                <Button
+                    icon={<PlusCircleOutlined />}
+                    size="large"
+                    onClick={() => setShowAddModal(true)}
+                    style={{
+                        // background: "linear-gradient(to left, #4f46e5, #6366f1)",
+                        background: "#444444",
+                        color: "#fff",
+                        border: "none",
+                        paddingInline: 28,
+                        fontWeight: "bold",
+                    }}
+                >
                     افزودن سند جدید
                 </Button>
             </Space>
@@ -56,6 +69,7 @@ function Documents() {
                     ),
                     rowExpandable: () => true,
                 }}
+                pagination={{ pageSize: 8 }}
             />
 
             {selectedDoc && (
