@@ -95,3 +95,8 @@ textarea {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+.menu-item-wrapper {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}

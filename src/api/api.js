@@ -37,4 +37,10 @@ export const deleteUser = (userId) =>
 
 export const getClients = () => API.get("/api/clients");
 export const getProjects = () => API.get("/api/projects");
-
+export const createClient = (data) => API.post("/api/clients", data);
+export const updateClient = (id, data) => API.put(`/api/clients/${id}`, data);
+export const deleteClient = (id) => API.delete(`/api/clients/${id}`);
+export const getUnits = () => API.get("/api/units");
+export const createUnit = (data) => API.post("/api/units", data);
+export const updateUnit = (id, data) => API.put(`/api/units/${id}`, data);
+export const deleteUnit = (id) => API.delete(`/api/units/${id}`);

@@ -9,6 +9,7 @@ import { useState } from "react";
 import Documents from "./Documents";
 import UsersApproval from "./UsersApproval";
 import ReferenceManagement from "./ReferenceManagement";
+import React from "react";
 
 const { Header, Sider, Content } = Layout;
 
@@ -25,16 +26,43 @@ function Dashboard() {
         }
     };
 
-    const menuItems = [
+    const rawMenuItems = [
         { key: "documents", icon: <FileTextOutlined />, label: "اسناد" },
         ...(role === "ROLE_ADMIN"
             ? [
                 { key: "users", icon: <TeamOutlined />, label: "مدیریت کاربران" },
-                { key: "reference", icon: <SettingOutlined />, label: "مدیریت داده‌های پایه" },
+                { key: "reference", icon: <SettingOutlined />, label: " داده‌های پایه" },
             ]
             : []),
         { key: "logout", icon: <LogoutOutlined />, label: "خروج" },
     ];
+
+    const enhancedMenuItems = rawMenuItems.map((item) => ({
+        key: item.key,
+        style: {
+            minHeight: 180, // 👈 افزایش ارتفاع واقعی آیتم منو
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+        },
+        label: (
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                }}
+            >
+                {React.cloneElement(item.icon, {
+                    style: { fontSize: 40, color: "#333" },
+                })}
+                <div style={{ fontSize: "0.9rem", marginTop: 10 }}>{item.label}</div>
+            </div>
+        ),
+    }));
+
+
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
@@ -53,7 +81,7 @@ function Dashboard() {
                 <h1
                     style={{
                         fontFamily: "Lalezar",
-                        fontSize: "2.4rem",
+                        fontSize: "2.8rem",
                         margin: 0,
                         color: "#222",
                     }}
@@ -64,7 +92,7 @@ function Dashboard() {
 
             <Layout>
                 <Sider
-                    width={140}
+                    width={160}
                     style={{
                         background: "#fff",
                         display: "flex",
@@ -78,29 +106,11 @@ function Dashboard() {
                         onClick={handleMenuClick}
                         style={{
                             background: "#fff",
-                            border: "none",
                             textAlign: "center",
+                            border: "none",
                             paddingTop: "1rem",
-                            height: "100%",
                         }}
-                        items={menuItems.map((item) => ({
-                            ...item,
-                            icon: (
-                                <div style={{ fontSize: 100, marginBottom: 50 }}>{item.icon}</div>
-                            ),
-                            label: (
-                                <div
-                                    style={{
-                                        fontSize: "0.95rem",
-                                        lineHeight: 1.4,
-                                        whiteSpace: "normal",
-                                        wordBreak: "break-word",
-                                    }}
-                                >
-                                    {item.label}
-                                </div>
-                            ),
-                        }))}
+                        items={enhancedMenuItems}
                     />
                 </Sider>
 

@@ -1,14 +1,27 @@
-import { Modal, Form, Input, Select, Button, message } from "antd";
+import {
+    Modal,
+    Form,
+    Input,
+    Select,
+    Button,
+    message
+} from "antd";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { useEffect, useState } from "react";
-import { createDocument, getClients, getProjects } from "../api/api";
+import {
+    createDocument,
+    getClients,
+    getProjects,
+    getUnits
+} from "../api/api";
 
 function AddDocumentModal({ onSuccess, onCancel }) {
     const [form] = Form.useForm();
     const [clients, setClients] = useState([]);
     const [projects, setProjects] = useState([]);
+    const [units, setUnits] = useState([]);
 
     useEffect(() => {
         getClients()
@@ -18,6 +31,10 @@ function AddDocumentModal({ onSuccess, onCancel }) {
         getProjects()
             .then((res) => setProjects(res.data))
             .catch(() => setProjects([]));
+
+        getUnits()
+            .then((res) => setUnits(res.data))
+            .catch(() => setUnits([]));
     }, []);
 
     const onFinish = async (values) => {
@@ -25,7 +42,7 @@ function AddDocumentModal({ onSuccess, onCancel }) {
             const date = values.documentDate?.toDate?.();
             const doc = {
                 ...values,
-                documentDate: date?.toISOString().split("T")[0] || null,
+                documentDate: date?.toISOString().split("T")[0] || null
             };
             await createDocument(doc);
             message.success("سند ثبت شد");
@@ -57,7 +74,25 @@ function AddDocumentModal({ onSuccess, onCancel }) {
                     <Select
                         size="large"
                         placeholder="انتخاب مشتری"
-                        options={clients.map((c) => ({ label: c.name, value: c.id }))}
+                        options={clients.map((c) => ({
+                            label: c.name,
+                            value: c.id
+                        }))}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    name="unitId"
+                    label="واحد مربوطه"
+                    rules={[{ required: true, message: "انتخاب واحد الزامی است" }]}
+                >
+                    <Select
+                        size="large"
+                        placeholder="انتخاب واحد"
+                        options={units.map((u) => ({
+                            label: u.name,
+                            value: u.id
+                        }))}
                     />
                 </Form.Item>
 
@@ -69,7 +104,10 @@ function AddDocumentModal({ onSuccess, onCancel }) {
                     <Select
                         size="large"
                         placeholder="انتخاب پروژه"
-                        options={projects.map((p) => ({ label: p.name, value: p.id }))}
+                        options={projects.map((p) => ({
+                            label: p.name,
+                            value: p.id
+                        }))}
                     />
                 </Form.Item>
 
@@ -80,7 +118,11 @@ function AddDocumentModal({ onSuccess, onCancel }) {
                 >
                     <Input
                         size="large"
-                        style={{ textAlign: "left", height: 48, fontSize: "1rem" }}
+                        style={{
+                            textAlign: "left",
+                            height: 48,
+                            fontSize: "1rem"
+                        }}
                     />
                 </Form.Item>
 
@@ -91,7 +133,11 @@ function AddDocumentModal({ onSuccess, onCancel }) {
                 >
                     <Input
                         size="large"
-                        style={{ textAlign: "left", height: 48, fontSize: "1rem" }}
+                        style={{
+                            textAlign: "left",
+                            height: 48,
+                            fontSize: "1rem"
+                        }}
                     />
                 </Form.Item>
 
@@ -108,7 +154,7 @@ function AddDocumentModal({ onSuccess, onCancel }) {
                             width: "100%",
                             height: "48px",
                             fontSize: "1rem",
-                            textAlign: "center",
+                            textAlign: "center"
                         }}
                     />
                 </Form.Item>
