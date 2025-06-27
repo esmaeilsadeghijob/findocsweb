@@ -1,9 +1,18 @@
-import { Table, Popconfirm, message } from "antd";
+import {
+    Table,
+    Popconfirm,
+    message,
+    Button,
+    Tooltip,
+} from "antd";
+import { EyeOutlined, CloseOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { getAttachments, deleteAttachment } from "../api/api";
-import { CloseOutlined } from "@ant-design/icons"; // ← آیکون حذف
+import {
+    getAttachments,
+    deleteAttachment,
+} from "../api/api";
 
-function AttachmentTable({ documentId }) {
+function AttachmentTable({ documentId, onPreview }) {
     const [attachments, setAttachments] = useState([]);
 
     const fetch = () =>
@@ -55,13 +64,19 @@ function AttachmentTable({ documentId }) {
             title: "پیش‌نمایش",
             align: "center",
             render: (_, record) => (
-                <a
-                    href={`/api/attachments/${documentId}/preview/${record.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    مشاهده
-                </a>
+                <Tooltip title="پیش‌نمایش فایل">
+                    <Button
+                        type="link"
+                        icon={<EyeOutlined />}
+                        onClick={() =>
+                            onPreview({
+                                id: record.id,
+                                fileName: record.fileName,
+                                extension: record.extension?.toLowerCase(),
+                            })
+                        }
+                    />
+                </Tooltip>
             ),
         },
         {

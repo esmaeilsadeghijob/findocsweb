@@ -24,6 +24,7 @@ export const createDocument = (data) => API.post("/api/documents", data);
 //     API.post(`/api/attachments/${documentId}`, form);
 export const getAttachments = (documentId) =>
     API.get(`/api/attachments/${documentId}`);
+
 export const deleteAttachment = (documentId, fileId) =>
     API.delete(`/api/attachments/${documentId}/${fileId}`);
 
@@ -57,4 +58,6 @@ export const deletePeriod = (id) => API.delete(`/api/periods/${id}`);
 export const uploadFile = (documentId, form) =>
     API.post(`/api/attachments/${documentId}/attachments`, form);
 
+export const previewAttachment = (documentId, fileId) =>
+    API.get(`/api/attachments/${documentId}/preview/${fileId}`);
 

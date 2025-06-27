@@ -3,13 +3,18 @@ import { useEffect, useState } from "react";
 import { getDocuments } from "../api/api";
 import UploadModal from "../components/UploadModal";
 import AddDocumentModal from "../components/AddDocumentModal";
-import AttachmentTable from "../components/AttachmentTable";
-import {LeftOutlined, PlusCircleOutlined, RightOutlined} from "@ant-design/icons";
+import AttachmentPanel from "../components/AttachmentPanel"; // 👈 استفاده از کامپوننت جدید
+import {
+    LeftOutlined,
+    PlusCircleOutlined,
+    RightOutlined,
+} from "@ant-design/icons";
 
 function Documents() {
     const [docs, setDocs] = useState([]);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [expandedDocId, setExpandedDocId] = useState(null); // 👈 برای کنترل ردیف باز شده
 
     const fetchDocs = () =>
         getDocuments()
@@ -51,11 +56,11 @@ function Documents() {
                         borderStyle: "dashed",
                         paddingInline: 28,
                         fontWeight: "bold",
-                        color: "#222222",               // رنگ متن نوک‌مدادی
-                        borderColor: "#222222",         // رنگ خط‌چین
+                        color: "#222222",
+                        borderColor: "#222222",
                         height: 48,
                         fontSize: "1rem",
-                        backgroundColor: "#f9f9f9",  // زمینه روشن و ظریف
+                        backgroundColor: "#f9f9f9",
                     }}
                 >
                     افزودن سند جدید
@@ -68,15 +73,19 @@ function Documents() {
                 columns={columns}
                 expandable={{
                     expandedRowRender: (record) => (
-                        <AttachmentTable documentId={record.id} />
+                        <AttachmentPanel documentId={record.id} /> // ✅ پیش‌نمایش حرفه‌ای در جدول
                     ),
+                    expandedRowKeys: expandedDocId ? [expandedDocId] : [],
+                    onExpand: (expanded, record) => {
+                        setExpandedDocId(expanded ? record.id : null);
+                    },
                     rowExpandable: () => true,
                 }}
                 pagination={{
                     pageSize: 8,
                     position: ["bottomCenter"],
                     showSizeChanger: false,
-                    prevIcon: <RightOutlined />, // چون در rtl به سمت چپ نشون داده میشه
+                    prevIcon: <RightOutlined />,
                     nextIcon: <LeftOutlined />,
                 }}
             />
