@@ -6,13 +6,18 @@ import {
     Tooltip,
 } from "antd";
 import { EyeOutlined, CloseOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import React, {
+    useEffect,
+    useState,
+    forwardRef,
+    useImperativeHandle,
+} from "react";
 import {
     getAttachments,
     deleteAttachment,
 } from "../api/api";
 
-function AttachmentTable({ documentId, onPreview }) {
+const AttachmentTable = forwardRef(({ documentId, onPreview, onUploadSuccess }, ref) => {
     const [attachments, setAttachments] = useState([]);
 
     const fetch = () =>
@@ -23,6 +28,10 @@ function AttachmentTable({ documentId, onPreview }) {
     useEffect(() => {
         fetch();
     }, [documentId]);
+
+    useImperativeHandle(ref, () => ({
+        reload: fetch,
+    }));
 
     const handleDelete = async (fileId) => {
         try {
@@ -106,6 +115,6 @@ function AttachmentTable({ documentId, onPreview }) {
             pagination={false}
         />
     );
-}
+});
 
 export default AttachmentTable;
