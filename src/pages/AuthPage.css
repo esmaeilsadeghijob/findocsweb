@@ -1,0 +1,108 @@
+/* فونت سفارشی */
+@font-face {
+    font-family: "Vazir";
+    src: url("../assets/fonts/Vazirmatn-Regular.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Lalezar";
+    src: url("../assets/fonts/Lalezar-Regular.ttf") format("truetype");
+}
+@font-face {
+    font-family: "FarBaseet";
+    src: url("../assets/fonts/Far_Baseet.ttf") format("truetype");
+}
+
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    font-family: "Vazir", sans-serif;
+    direction: rtl;
+}
+
+.auth-left {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    justify-content: center; /* افقی */
+    align-items: center;     /* عمودی */
+    text-align: right;
+    padding: 0;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 500px;
+    padding: 0 24px;
+}
+
+
+.auth-form {
+    width: 100%;
+    max-width: 550px; /* ⬅ کنترل عرض فرم */
+ }
+
+.auth-gif {
+    width: 100%;
+    height: 100vh;
+    object-fit: contain;
+}
+
+.auth-right {
+    flex: 1;
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: white;
+    text-align: right;
+}
+
+.auth-title {
+    font-size: 2.5rem;
+    font-family: "Lalezar", cursive;
+    margin: 0;
+    color: #222;
+    text-align: center;
+}
+
+.auth-subtitle {
+    font-size: 1.5rem;
+    font-family: "FarBaseet";
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.auth-input {
+    border: none;
+    border-bottom: 1.5px solid #ccc;
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    height: 36px;
+    text-align: left;
+    direction: ltr;
+}
+
+.auth-input:focus,
+.auth-input:hover,
+.auth-input:active {
+    border-bottom-color: #1677ff;
+    box-shadow: none;
+}
+
+.auth-button {
+    width: 100%;
+    height: 38px;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+.auth-link {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+}

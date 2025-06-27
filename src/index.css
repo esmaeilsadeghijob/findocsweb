@@ -22,6 +22,14 @@
   src: url("/src/assets/fonts/Lalezar-Regular.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "FarBaseet";
+  src: url("/src/assets/fonts/Far_Baseet.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 .dashboard-title {
   font-family: "Lalezar", sans-serif;
   font-size: 2rem;
