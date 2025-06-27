@@ -3,7 +3,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { uploadFile } from "../api/api"; // ✅ استفاده از API با baseURL درست
 
-function UploadModal({ documentId, onClose }) {
+function UploadModal({ documentId, onClose, onSuccess }) {
     const [fileList, setFileList] = useState([]);
     const [uploading, setUploading] = useState(false);
 
@@ -13,7 +13,7 @@ function UploadModal({ documentId, onClose }) {
 
         const formData = new FormData();
         fileList.forEach((file) => {
-            formData.append("files", file); // name="files" ← مطابق با backend
+            formData.append("files", file);
         });
 
         setUploading(true);
@@ -21,7 +21,7 @@ function UploadModal({ documentId, onClose }) {
             await uploadFile(documentId, formData);
             message.success("فایل‌ها با موفقیت بارگذاری شدند");
             setFileList([]);
-            onClose();
+            onSuccess?.(); // ✅ برای رفرش لیست پیوست‌ها
         } catch {
             message.error("خطا در آپلود فایل‌ها");
         } finally {

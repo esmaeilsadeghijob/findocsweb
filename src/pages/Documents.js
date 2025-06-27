@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getDocuments } from "../api/api";
 import UploadModal from "../components/UploadModal";
 import AddDocumentModal from "../components/AddDocumentModal";
-import AttachmentPanel from "../components/AttachmentPanel"; // 👈 استفاده از کامپوننت جدید
+import AttachmentPanel from "../components/AttachmentPanel";
 import {
     LeftOutlined,
     PlusCircleOutlined,
@@ -14,7 +14,7 @@ function Documents() {
     const [docs, setDocs] = useState([]);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [expandedDocId, setExpandedDocId] = useState(null); // 👈 برای کنترل ردیف باز شده
+    const [expandedDocId, setExpandedDocId] = useState(null);
 
     const fetchDocs = () =>
         getDocuments()
@@ -38,6 +38,7 @@ function Documents() {
             title: "ضمیمه",
             render: (_, record) => (
                 <Button type="link" onClick={() => setSelectedDoc(record.id)}>
+
                     بارگذاری فایل
                 </Button>
             ),
@@ -73,7 +74,7 @@ function Documents() {
                 columns={columns}
                 expandable={{
                     expandedRowRender: (record) => (
-                        <AttachmentPanel documentId={record.id} /> // ✅ پیش‌نمایش حرفه‌ای در جدول
+                        <AttachmentPanel documentId={record.id} />
                     ),
                     expandedRowKeys: expandedDocId ? [expandedDocId] : [],
                     onExpand: (expanded, record) => {
@@ -94,6 +95,10 @@ function Documents() {
                 <UploadModal
                     documentId={selectedDoc}
                     onClose={() => setSelectedDoc(null)}
+                    onSuccess={() => {
+                        setExpandedDocId(selectedDoc);   // باز نگه داشتن پنل
+                        setSelectedDoc(null);            // بستن مودال
+                    }}
                 />
             )}
 
