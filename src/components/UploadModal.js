@@ -1,95 +1,70 @@
-import { Modal, Upload, Button, Input, message, List } from "antd";
-import { useState, useEffect } from "react";
-import { uploadFile, getAttachments } from "../api/api";
+import { Modal, Upload, Button, message, Space } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { uploadFile } from "../api/api"; // ✅ استفاده از API با baseURL درست
 
 function UploadModal({ documentId, onClose }) {
-    const [file, setFile] = useState(null);
-    const [description, setDescription] = useState("");
-    const [attachments, setAttachments] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [fileList, setFileList] = useState([]);
+    const [uploading, setUploading] = useState(false);
 
-    // دریافت لیست ضمائم
-    const fetchAttachments = async () => {
+    const handleUpload = async () => {
+        if (!fileList.length)
+            return message.warning("فایلی انتخاب نشده است");
+
+        const formData = new FormData();
+        fileList.forEach((file) => {
+            formData.append("files", file); // name="files" ← مطابق با backend
+        });
+
+        setUploading(true);
         try {
-            const res = await getAttachments(documentId);
-            setAttachments(res.data);
+            await uploadFile(documentId, formData);
+            message.success("فایل‌ها با موفقیت بارگذاری شدند");
+            setFileList([]);
+            onClose();
         } catch {
-            setAttachments([]);
+            message.error("خطا در آپلود فایل‌ها");
+        } finally {
+            setUploading(false);
         }
     };
 
-    useEffect(() => {
-        fetchAttachments();
-    }, [documentId]);
-
-    const handleUpload = async () => {
-        if (!file) {
-            message.warning("فایلی انتخاب نشده");
-            return;
-        }
-
-        const form = new FormData();
-        form.append("file", file);
-        form.append("description", description);
-
-        setLoading(true);
-        try {
-            await uploadFile(documentId, form);
-            message.success("فایل با موفقیت بارگذاری شد");
-            setFile(null);
-            setDescription("");
-            fetchAttachments(); // به‌روزرسانی لیست ضمائم
-        } catch {
-            message.error("خطا در بارگذاری فایل");
-        } finally {
-            setLoading(false);
-        }
+    const uploadProps = {
+        multiple: true,
+        accept: ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
+        beforeUpload: (file) => {
+            setFileList((prev) => [...prev, file]);
+            return false;
+        },
+        onRemove: (file) => {
+            setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+        },
+        fileList,
     };
 
     return (
         <Modal
             open
+            title="بارگذاری ضمیمه"
             onCancel={onClose}
-            onOk={handleUpload}
-            okButtonProps={{ loading }}
-            okText="بارگذاری"
-            cancelText="بستن"
-            title="بارگذاری ضمیمه سند"
+            footer={null}
+            centered
         >
-            <Upload
-                beforeUpload={(f) => {
-                    setFile(f);
-                    return false;
-                }}
-                maxCount={1}
-                showUploadList={file ? [{ name: file.name }] : []}
-            >
-                <Button>انتخاب فایل</Button>
-            </Upload>
+            <Space direction="vertical" style={{ width: "100%" }}>
+                <Upload {...uploadProps}>
+                    <Button icon={<UploadOutlined />}>انتخاب فایل‌ها</Button>
+                </Upload>
 
-            <Input.TextArea
-                rows={2}
-                placeholder="توضیحات ضمیمه (اختیاری)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{ marginTop: "1rem" }}
-            />
-
-            {attachments.length > 0 && (
-                <div style={{ marginTop: "2rem" }}>
-                    <b>فایل‌های بارگذاری‌شده:</b>
-                    <List
-                        size="small"
-                        bordered
-                        dataSource={attachments}
-                        renderItem={(item) => (
-                            <List.Item>
-                                📎 {item.filename} - {item.uploadDate || "بدون تاریخ"}
-                            </List.Item>
-                        )}
-                    />
-                </div>
-            )}
+                <Button
+                    type="primary"
+                    onClick={handleUpload}
+                    block
+                    loading={uploading}
+                    disabled={!fileList.length}
+                >
+                    {uploading ? "در حال آپلود..." : "بارگذاری فایل‌ها"}
+                </Button>
+            </Space>
         </Modal>
     );
 }

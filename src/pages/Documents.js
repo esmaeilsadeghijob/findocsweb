@@ -4,7 +4,7 @@ import { getDocuments } from "../api/api";
 import UploadModal from "../components/UploadModal";
 import AddDocumentModal from "../components/AddDocumentModal";
 import AttachmentTable from "../components/AttachmentTable";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import {LeftOutlined, PlusCircleOutlined, RightOutlined} from "@ant-design/icons";
 
 function Documents() {
     const [docs, setDocs] = useState([]);
@@ -43,16 +43,19 @@ function Documents() {
         <>
             <Space style={{ marginBottom: "1rem" }}>
                 <Button
+                    type="dashed"
                     icon={<PlusCircleOutlined />}
                     size="large"
                     onClick={() => setShowAddModal(true)}
                     style={{
-                        // background: "linear-gradient(to left, #4f46e5, #6366f1)",
-                        background: "#444444",
-                        color: "#fff",
-                        border: "none",
+                        borderStyle: "dashed",
                         paddingInline: 28,
                         fontWeight: "bold",
+                        color: "#222222",               // رنگ متن نوک‌مدادی
+                        borderColor: "#222222",         // رنگ خط‌چین
+                        height: 48,
+                        fontSize: "1rem",
+                        backgroundColor: "#f9f9f9",  // زمینه روشن و ظریف
                     }}
                 >
                     افزودن سند جدید
@@ -69,7 +72,13 @@ function Documents() {
                     ),
                     rowExpandable: () => true,
                 }}
-                pagination={{ pageSize: 8 }}
+                pagination={{
+                    pageSize: 8,
+                    position: ["bottomCenter"],
+                    showSizeChanger: false,
+                    prevIcon: <RightOutlined />, // چون در rtl به سمت چپ نشون داده میشه
+                    nextIcon: <LeftOutlined />,
+                }}
             />
 
             {selectedDoc && (

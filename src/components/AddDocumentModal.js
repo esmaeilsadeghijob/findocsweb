@@ -158,13 +158,13 @@ function AddDocumentModal({ onSuccess, onCancel }) {
 
                 <Form.Item>
                     <Button
-                        type="link"
+                        type="dashed"
                         htmlType="submit"
                         block
                         size="large"
                         style={{
-                            // backgroundColor: "rgb(236,236,237)", // نوک‌مدادی روشن
-                            color: "#3c005a",              // رنگ نوشته واضح
+                            backgroundColor: "rgb(58,59,63)", // نوک‌مدادی روشن
+                            color: "#ececed",              // رنگ نوشته واضح
                             border: "1px solid #bbb",   // حاشیه لطیف
                             height: 48,
                             fontSize: "1rem",

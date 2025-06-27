@@ -20,8 +20,8 @@ export const getDocuments = () => API.get("/api/documents");
 export const createDocument = (data) => API.post("/api/documents", data);
 
 // ضمایم
-export const uploadFile = (documentId, form) =>
-    API.post(`/api/attachments/${documentId}`, form);
+// export const uploadFile = (documentId, form) =>
+//     API.post(`/api/attachments/${documentId}`, form);
 export const getAttachments = (documentId) =>
     API.get(`/api/attachments/${documentId}`);
 export const deleteAttachment = (documentId, fileId) =>
@@ -53,3 +53,8 @@ export const getPeriods = () => API.get("/api/periods");
 export const createPeriod = (data) => API.post("/api/periods", data);
 export const updatePeriod = (id, data) => API.put(`/api/periods/${id}`, data);
 export const deletePeriod = (id) => API.delete(`/api/periods/${id}`);
+
+export const uploadFile = (documentId, form) =>
+    API.post(`/api/attachments/${documentId}/attachments`, form);
+
+
