@@ -1,4 +1,4 @@
-import { Table, Button, Space, message } from "antd";
+import { Table, Button, Space, message, Input, Row, Col } from "antd";
 import { useEffect, useState } from "react";
 import {
     getDocuments,
@@ -12,10 +12,12 @@ import {
     PlusCircleOutlined,
     RightOutlined,
     DeleteOutlined,
+    SearchOutlined,
 } from "@ant-design/icons";
 
 function Documents() {
     const [docs, setDocs] = useState([]);
+    const [searchText, setSearchText] = useState("");
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [expandedDocId, setExpandedDocId] = useState(null);
@@ -41,6 +43,21 @@ function Documents() {
             message.error("خطا در حذف سند");
         }
     };
+
+    const filteredDocs = docs.filter((doc) => {
+        const search = searchText.toLowerCase();
+        return Object.values(doc).some((val) =>
+            typeof val === "string"
+                ? val.toLowerCase().includes(search)
+                : typeof val === "object" && val !== null
+                    ? Object.values(val).some((v) =>
+                        typeof v === "string"
+                            ? v.toLowerCase().includes(search)
+                            : false
+                    )
+                    : false
+        );
+    });
 
     const columns = [
         { title: "شماره سند", dataIndex: "documentNumber" },
@@ -89,30 +106,56 @@ function Documents() {
 
     return (
         <>
-            <Space style={{ marginBottom: "1rem" }}>
-                <Button
-                    type="dashed"
-                    icon={<PlusCircleOutlined />}
-                    size="large"
-                    onClick={() => setShowAddModal(true)}
-                    style={{
-                        borderStyle: "dashed",
-                        paddingInline: 28,
-                        fontWeight: "bold",
-                        color: "#222222",
-                        borderColor: "#222222",
-                        height: 48,
-                        fontSize: "1rem",
-                        backgroundColor: "#f9f9f9",
-                    }}
-                >
-                    افزودن سند جدید
-                </Button>
-            </Space>
+            <Row
+                align="middle"
+                style={{ marginBottom: "1rem" }}
+                gutter={[16, 16]}
+            >
+                <Col span={6}>
+                    <Button
+                        type="dashed"
+                        icon={<PlusCircleOutlined />}
+                        size="large"
+                        onClick={() => setShowAddModal(true)}
+                        style={{
+                            borderStyle: "dashed",
+                            paddingInline: 28,
+                            fontWeight: "bold",
+                            color: "#222222",
+                            borderColor: "#222222",
+                            height: 48,
+                            fontSize: "1rem",
+                            backgroundColor: "#f9f9f9",
+                        }}
+                    >
+                        افزودن سند جدید
+                    </Button>
+                </Col>
+
+                <Col span={12} style={{ textAlign: "center" }}>
+                    <Input
+                        placeholder="جست‌وجو در همه‌ ستون‌ها..."
+                        prefix={<SearchOutlined />}
+                        allowClear
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        style={{
+                            width: 500,
+                            height: 45,       // 👈 ارتفاع بیشتر
+                            fontSize: "1rem", // 👈 متن خواناتر
+                            paddingInline: 12,
+                        }}
+                    />
+                </Col>
+
+                <Col span={6} style={{ textAlign: "end" }}>
+
+                </Col>
+            </Row>
 
             <Table
                 rowKey="id"
-                dataSource={docs}
+                dataSource={filteredDocs}
                 columns={columns}
                 expandable={{
                     expandedRowRender: (record) => (

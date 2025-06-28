@@ -17,7 +17,7 @@ import {
     deleteAttachment,
 } from "../api/api";
 
-const AttachmentTable = forwardRef(({ documentId, onPreview, onUploadSuccess }, ref) => {
+const AttachmentTable = forwardRef(({ documentId, onPreview }, ref) => {
     const [attachments, setAttachments] = useState([]);
 
     const fetch = () =>

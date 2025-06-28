@@ -1,7 +1,7 @@
 import { Modal, Upload, Button, message, Space } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
-import { uploadFile } from "../api/api"; // ✅ استفاده از API با baseURL درست
+import {getAttachments, uploadFile} from "../api/api";
 
 function UploadModal({ documentId, onClose, onSuccess }) {
     const [fileList, setFileList] = useState([]);
@@ -21,7 +21,12 @@ function UploadModal({ documentId, onClose, onSuccess }) {
             await uploadFile(documentId, formData);
             message.success("فایل‌ها با موفقیت بارگذاری شدند");
             setFileList([]);
-            onSuccess?.(); // ✅ برای رفرش لیست پیوست‌ها
+
+            getAttachments(documentId);
+
+            onSuccess?.(); // 👈 رفرش لیست ضمیمه‌ها از طریق والد
+
+            onClose?.();   // 👈 بستن مودال بعد از موفقیت
         } catch {
             message.error("خطا در آپلود فایل‌ها");
         } finally {
