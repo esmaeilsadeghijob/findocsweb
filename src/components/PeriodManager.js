@@ -1,5 +1,5 @@
 import { Card, Table, Button, Modal, Input, message } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {EditOutlined, DeleteOutlined, RightOutlined, LeftOutlined} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
     getPeriods,
@@ -100,13 +100,19 @@ function PeriodManager() {
                 bodyStyle={{ padding: 0 }}
                 style={{ maxHeight: 460, overflow: "hidden" }}
             >
-                <div style={{ maxHeight: 400, overflowY: "auto" }}>
+                <div style={{height: "100%", overflowY: "auto"}}>
                     <Table
                         columns={columns}
                         dataSource={periods}
                         rowKey="id"
-                        pagination={{ pageSize: 6 }}
-                        size="middle"
+                        pagination={{
+                            pageSize: 4,
+                            showSizeChanger: false,
+                            position: ["bottomCenter"],
+                            prevIcon: <RightOutlined/>,
+                            nextIcon: <LeftOutlined/>,
+                        }}
+                        size="small"
                     />
                 </div>
             </Card>

@@ -106,7 +106,7 @@ function ClientManager() {
                         dataSource={clients}
                         rowKey="id"
                         pagination={{
-                            pageSize: 6,
+                            pageSize: 4,
                             showSizeChanger: false,
                             position: ["bottomCenter"],
                             prevIcon: <RightOutlined />, // برعکس

@@ -61,3 +61,4 @@ export const uploadFile = (documentId, form) =>
 export const previewAttachment = (documentId, fileId) =>
     API.get(`/api/attachments/${documentId}/preview/${fileId}`);
 
+export const deleteDocument = (id) => API.delete(`/api/documents/${id}`);

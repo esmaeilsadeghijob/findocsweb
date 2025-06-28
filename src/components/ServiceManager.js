@@ -104,7 +104,7 @@ function ServiceManager() {
                     dataSource={services}
                     rowKey="id"
                     pagination={{
-                        pageSize: 6,
+                        pageSize: 4,
                         showSizeChanger: false,
                         position: ["bottomCenter"],
                         prevIcon: <RightOutlined />,

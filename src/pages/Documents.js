@@ -1,6 +1,9 @@
-import { Table, Button, Space } from "antd";
+import { Table, Button, Space, message } from "antd";
 import { useEffect, useState } from "react";
-import { getDocuments } from "../api/api";
+import {
+    getDocuments,
+    deleteDocument,
+} from "../api/api";
 import UploadModal from "../components/UploadModal";
 import AddDocumentModal from "../components/AddDocumentModal";
 import AttachmentPanel from "../components/AttachmentPanel";
@@ -8,6 +11,7 @@ import {
     LeftOutlined,
     PlusCircleOutlined,
     RightOutlined,
+    DeleteOutlined,
 } from "@ant-design/icons";
 
 function Documents() {
@@ -25,9 +29,37 @@ function Documents() {
         fetchDocs();
     }, []);
 
+    const handleDelete = async (id) => {
+        const confirm = window.confirm("آیا از حذف این سند مطمئن هستید؟");
+        if (!confirm) return;
+
+        try {
+            await deleteDocument(id);
+            message.success("سند با موفقیت حذف شد");
+            fetchDocs();
+        } catch {
+            message.error("خطا در حذف سند");
+        }
+    };
+
     const columns = [
         { title: "شماره سند", dataIndex: "documentNumber" },
-        { title: "سال مالی", dataIndex: "fiscalYear" },
+        {
+            title: "سال مالی",
+            render: (_, record) => record.period?.fiscalYear || "—",
+        },
+        {
+            title: "نام مشتری",
+            render: (_, record) => record.client?.name || "—",
+        },
+        {
+            title: "واحد",
+            render: (_, record) => record.unit?.name || "—",
+        },
+        {
+            title: "سرویس",
+            render: (_, record) => record.service?.name || "—",
+        },
         { title: "شرح سند", dataIndex: "description" },
         {
             title: "ایجادکننده",
@@ -38,9 +70,19 @@ function Documents() {
             title: "ضمیمه",
             render: (_, record) => (
                 <Button type="link" onClick={() => setSelectedDoc(record.id)}>
-
                     بارگذاری فایل
                 </Button>
+            ),
+        },
+        {
+            title: "حذف",
+            render: (_, record) => (
+                <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDelete(record.id)}
+                />
             ),
         },
     ];
@@ -96,8 +138,8 @@ function Documents() {
                     documentId={selectedDoc}
                     onClose={() => setSelectedDoc(null)}
                     onSuccess={() => {
-                        setExpandedDocId(selectedDoc);   // باز نگه داشتن پنل
-                        setSelectedDoc(null);            // بستن مودال
+                        setExpandedDocId(selectedDoc);
+                        setSelectedDoc(null);
                     }}
                 />
             )}
