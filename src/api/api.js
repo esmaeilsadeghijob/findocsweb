@@ -62,3 +62,7 @@ export const previewAttachment = (documentId, fileId) =>
     API.get(`/api/attachments/${documentId}/preview/${fileId}`);
 
 export const deleteDocument = (id) => API.delete(`/api/documents/${id}`);
+
+export const getIdentifiers = () => API.get("/api/identifiers");
+export const createIdentifier = (data) => API.post("/api/identifiers", data);
+export const deleteIdentifier = (id) => API.delete(`/api/identifiers/${id}`);

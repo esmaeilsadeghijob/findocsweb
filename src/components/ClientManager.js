@@ -1,52 +1,47 @@
 import { Card, Table, Button, Modal, Input, message } from "antd";
-import { EditOutlined, DeleteOutlined , LeftOutlined, RightOutlined} from "@ant-design/icons";
+import {
+    DeleteOutlined,
+    LeftOutlined,
+    RightOutlined,
+    PlusOutlined,
+} from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import {
-    getClients,
-    createClient,
-    updateClient,
-    deleteClient,
+    getIdentifiers,
+    createIdentifier,
+    deleteIdentifier,
 } from "../api/api";
 
 function ClientManager() {
-    const [clients, setClients] = useState([]);
+    const [identifiers, setIdentifiers] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState(null);
-    const [name, setName] = useState("");
+    const [code, setCode] = useState("");
 
     useEffect(() => {
-        loadClients();
+        loadIdentifiers();
     }, []);
 
-    const loadClients = async () => {
+    const loadIdentifiers = async () => {
         try {
-            const res = await getClients();
-            setClients(res.data);
+            const res = await getIdentifiers();
+            setIdentifiers(res.data);
         } catch {
-            message.error("خطا در بارگذاری مشتری‌ها");
+            message.error("خطا در بارگذاری شناسه‌ها");
         }
     };
 
-    const showModal = (record = null) => {
-        setEditing(record);
-        setName(record?.name || "");
+    const showModal = () => {
+        setCode("");
         setModalOpen(true);
     };
 
     const handleSubmit = async () => {
-        if (!name.trim()) return message.warning("نام مشتری الزامی است");
+        if (!code.trim()) return message.warning("شناسه مشتری الزامی است");
         try {
-            if (editing) {
-                await updateClient(editing.id, { name });
-                message.success("ویرایش انجام شد");
-            } else {
-                await createClient({ name });
-                message.success("مشتری جدید اضافه شد");
-            }
+            await createIdentifier({ code });
+            message.success("شناسه جدید ثبت شد");
             setModalOpen(false);
-            setEditing(null);
-            setName("");
-            loadClients();
+            loadIdentifiers();
         } catch {
             message.error("عملیات انجام نشد");
         }
@@ -54,27 +49,17 @@ function ClientManager() {
 
     const handleDelete = async (id) => {
         try {
-            await deleteClient(id);
+            await deleteIdentifier(id);
             message.success("حذف شد");
-            loadClients();
+            loadIdentifiers();
         } catch {
-            message.error("خطا در حذف مشتری");
+            message.error("خطا در حذف شناسه");
         }
     };
 
     const columns = [
         { title: "ردیف", render: (_, __, i) => i + 1 },
-        { title: "نام مشتری", dataIndex: "name" },
-        {
-            title: "ویرایش",
-            render: (_, record) => (
-                <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => showModal(record)}
-                />
-            ),
-        },
+        { title: "شناسه مشتری", dataIndex: "code" },
         {
             title: "حذف",
             render: (_, record) => (
@@ -91,10 +76,10 @@ function ClientManager() {
     return (
         <>
             <Card
-                title="مدیریت مشتری‌ها"
+                title="مدیریت شناسه‌های مشتری"
                 extra={
-                    <Button type="dashed" onClick={() => showModal()}>
-                        اضافه کردن مشتری
+                    <Button type="dashed" icon={<PlusOutlined />} onClick={showModal}>
+                        افزودن شناسه
                     </Button>
                 }
                 style={{ height: "100%", display: "flex", flexDirection: "column" }}
@@ -103,13 +88,13 @@ function ClientManager() {
                 <div style={{ height: "100%", overflowY: "auto" }}>
                     <Table
                         columns={columns}
-                        dataSource={clients}
+                        dataSource={identifiers}
                         rowKey="id"
                         pagination={{
                             pageSize: 4,
                             showSizeChanger: false,
                             position: ["bottomCenter"],
-                            prevIcon: <RightOutlined />, // برعکس
+                            prevIcon: <RightOutlined />,
                             nextIcon: <LeftOutlined />,
                         }}
                         size="small"
@@ -119,16 +104,16 @@ function ClientManager() {
 
             <Modal
                 open={modalOpen}
-                title={editing ? "ویرایش مشتری" : "افزودن مشتری"}
+                title="افزودن شناسه مشتری"
                 onCancel={() => setModalOpen(false)}
                 onOk={handleSubmit}
                 okText="ثبت"
                 cancelText="انصراف"
             >
                 <Input
-                    placeholder="نام مشتری"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    placeholder="شناسه مشتری"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
                 />
             </Modal>
         </>

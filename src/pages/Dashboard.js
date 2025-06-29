@@ -10,6 +10,7 @@ import Documents from "./Documents";
 import UsersApproval from "./UsersApproval";
 import ReferenceManagement from "./ReferenceManagement";
 import React from "react";
+import ClientDocument from "../pages/ClientDocument";
 
 const { Header, Sider, Content } = Layout;
 
@@ -121,7 +122,8 @@ function Dashboard() {
                         background: "#fff",
                     }}
                 >
-                    {currentKey === "documents" && <Documents />}
+                    {/*{currentKey === "documents" && <Documents />}*/}
+                    {currentKey === "documents" && <ClientDocument />}
                     {currentKey === "users" && <UsersApproval />}
                     {currentKey === "reference" && <ReferenceManagement />}
                 </Content>

@@ -1,16 +1,19 @@
 import { useRef, useState } from "react";
 import AttachmentTable from "./AttachmentTable";
+import UploadModal from "./UploadModal";
 
 function AttachmentPanel({ documentId }) {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const tableRef = useRef();
 
     const handlePreview = (file) => {
         const url = `http://localhost:8080/api/attachments/public/${documentId}/file/${file.id}`;
         setPreviewUrl(url);
 
-        const ext = file.extension || file.fileName?.split(".").pop()?.toLowerCase();
+        const ext =
+            file.extension || file.fileName?.split(".").pop()?.toLowerCase();
         if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)) {
             setFileType("image");
         } else if (ext === "pdf") {
@@ -33,15 +36,42 @@ function AttachmentPanel({ documentId }) {
                     onPreview={handlePreview}
                     onUploadSuccess={handleRefresh}
                 />
+
+                <div style={{ marginTop: 8, textAlign: "end" }}>
+                    <a onClick={() => setShowModal(true)}>➕ بارگذاری فایل جدید</a>
+                </div>
+
+                {showModal && (
+                    <UploadModal
+                        documentId={documentId}
+                        onClose={() => setShowModal(false)}
+                        onSuccess={() => {
+                            handleRefresh();
+                            setShowModal(false);
+                        }}
+                    />
+                )}
             </div>
 
-            <div style={{ width: "45%", border: "1px solid #ccc", borderRadius: 6, padding: 8 }}>
+            <div
+                style={{
+                    width: "45%",
+                    border: "1px solid #ccc",
+                    borderRadius: 6,
+                    padding: 8,
+                }}
+            >
                 {previewUrl ? (
                     fileType === "image" ? (
                         <img
                             src={previewUrl}
                             alt="پیش‌نمایش فایل"
-                            style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 6 }}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
+                                borderRadius: 6,
+                            }}
                         />
                     ) : fileType === "pdf" ? (
                         <embed

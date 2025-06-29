@@ -1,26 +1,44 @@
 import { useEffect, useState } from "react";
-import { Table, Button, message, Input, Row, Col, Spin } from "antd";
-import { getClients } from "../api/api";
-import ClientCreateModal from "../components/ClientCreateModal";
-import AddDocumentModal from "../components/AddDocumentModal";
-import DocumentTable from "../components/DocumentTable";
+import {
+    Table,
+    Button,
+    message,
+    Input,
+    Row,
+    Col,
+    Spin,
+    Popconfirm,
+} from "antd";
 import {
     UserAddOutlined,
     FileAddOutlined,
     SearchOutlined,
+    DeleteOutlined,
+    EditOutlined,
 } from "@ant-design/icons";
+import {
+    getClients,
+    deleteClient,
+} from "../api/api";
+import ClientCreateModal from "../components/ClientCreateModal";
+import AddDocumentModal from "../components/AddDocumentModal";
+import DocumentTable from "../components/DocumentTable";
 
-function Documents() {
+function ClientDocument() {
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showClientModal, setShowClientModal] = useState(false);
     const [selectedClientForDoc, setSelectedClientForDoc] = useState(null);
+    const [selectedClientForEdit, setSelectedClientForEdit] = useState(null);
     const [searchText, setSearchText] = useState("");
 
     const fetchClients = () => {
         setLoading(true);
         getClients()
-            .then((res) => setClients(res.data))
+            .then((res) => {
+                const activeClients = res.data.filter((c) => c.active !== false);
+                setClients(activeClients);
+            })
             .catch(() => {
                 setClients([]);
                 message.error("خطا در دریافت مشتری‌ها");
@@ -32,6 +50,21 @@ function Documents() {
         fetchClients();
     }, []);
 
+    const handleDelete = (id) => {
+        deleteClient(id)
+            .then(() => {
+                message.success("مشتری غیرفعال شد");
+                fetchClients();
+            })
+            .catch(() => {
+                message.error("حذف مشتری با خطا مواجه شد");
+            });
+    };
+
+    const handleEdit = (record) => {
+        setSelectedClientForEdit(record);
+    };
+
     const filteredClients = clients.filter((client) =>
         Object.values(client).some((val) =>
             typeof val === "string"
@@ -42,26 +75,37 @@ function Documents() {
 
     const columns = [
         {
-            title: "سرویس",
-            render: (_, record) => record.service?.name || "—",
+            title: "شناسه مشتری",
+            dataIndex: "identifierCode",
         },
         {
-            title: "نام مشتری",
-            dataIndex: "name",
+            title: "سرویس",
+            dataIndex: "serviceName",
         },
         {
             title: "واحد",
-            render: (_, record) => record.unit?.name || "—",
+            dataIndex: "unitName",
         },
         {
-            title: "افزودن سند",
+            title: "عملیات",
             render: (_, record) => (
-                <Button
-                    icon={<FileAddOutlined />}
-                    onClick={() => setSelectedClientForDoc(record)}
-                >
-                    سند جدید
-                </Button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                    <Popconfirm
+                        title="آیا از غیرفعالسازی مطمئنی؟"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="بله"
+                        cancelText="لغو"
+                    >
+                        <Button danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                    <Button
+                        icon={<FileAddOutlined />}
+                        onClick={() => setSelectedClientForDoc(record)}
+                    >
+                        سند جدید
+                    </Button>
+                </div>
             ),
         },
     ];
@@ -127,13 +171,18 @@ function Documents() {
                 />
             )}
 
-            {showClientModal && (
+            {(showClientModal || selectedClientForEdit) && (
                 <ClientCreateModal
-                    onClose={() => setShowClientModal(false)}
+                    onClose={() => {
+                        setShowClientModal(false);
+                        setSelectedClientForEdit(null);
+                    }}
                     onSuccess={() => {
                         setShowClientModal(false);
+                        setSelectedClientForEdit(null);
                         fetchClients();
                     }}
+                    initialData={selectedClientForEdit}
                 />
             )}
 
@@ -151,4 +200,4 @@ function Documents() {
     );
 }
 
-export default Documents;
+export default ClientDocument;
