@@ -14,6 +14,7 @@ import {
 import {
     getDocuments,
     deleteDocument,
+    advanceDocumentStatus,
 } from "../api/api";
 import AddDocumentModal from "./AddDocumentModal";
 import UploadModal from "./UploadModal";
@@ -35,23 +36,14 @@ function DocumentTable({ clientId }) {
                 setDocuments([]);
                 message.error("خطا در دریافت اسناد");
             });
-
-        console.log("::::::::::::::::");
-        console.log("::::::::::::::::");
-        console.log(documents);
-        console.log("::::::::::::::::");
-
     };
 
     useEffect(() => {
-        if (clientId) {
-            fetchDocs();
-        }
+        if (clientId) fetchDocs();
     }, [clientId]);
 
     const handleDelete = async (id) => {
-        const confirm = window.confirm("آیا از حذف این سند مطمئن هستید؟");
-        if (!confirm) return;
+        if (!window.confirm("آیا از حذف این سند مطمئن هستید؟")) return;
         try {
             await deleteDocument(id);
             message.success("سند حذف شد");
@@ -63,11 +55,11 @@ function DocumentTable({ clientId }) {
 
     const handleStatusChange = async (id) => {
         try {
-            await fetch(`/api/documents/${id}/status`, {
-                method: "PUT",
-                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-            fetchDocs();
+            const res = await advanceDocumentStatus(id);
+            const updated = res.data;
+            setDocuments((prev) =>
+                prev.map((doc) => (doc.id === updated.id ? updated : doc))
+            );
         } catch {
             message.error("خطا در تغییر وضعیت سند");
         }
@@ -133,16 +125,32 @@ function DocumentTable({ clientId }) {
                 );
             },
         },
+        // {
+        //     title: "پیوست",
+        //     render: (_, record) =>
+        //         record.status !== "FINALIZED" && (
+        //             <Button
+        //                 type="link"
+        //                 icon={<UploadOutlined />}
+        //                 onClick={() => setSelectedDoc(record.id)}
+        //             >
+        //                 فایل
+        //             </Button>
+        //         ),
+        // },
         {
-            title: "ضمیمه",
+            title: "پیوست‌ها",
+            align: "center",
             render: (_, record) => (
-                <Button
-                    type="link"
-                    icon={<UploadOutlined />}
-                    onClick={() => setSelectedDoc(record.id)}
-                >
-                    فایل
-                </Button>
+                <Tooltip title="نمایش ضمیمه‌ها">
+                    <Button
+                        style={{ fontSize: 20, width: 36, height: 36, padding: 0 }}
+                        icon={expandedId === record.id ? "−" : "+"}
+                        onClick={() =>
+                            setExpandedId(expandedId === record.id ? null : record.id)
+                        }
+                    />
+                </Tooltip>
             ),
         },
         {
@@ -173,7 +181,10 @@ function DocumentTable({ clientId }) {
                 columns={columns}
                 expandable={{
                     expandedRowRender: (record) => (
-                        <AttachmentPanel documentId={record.id} />
+                        <AttachmentPanel
+                            documentId={record.id}
+                            status={record.status} // ✅ اضافه شده
+                        />
                     ),
                     expandedRowKeys: expandedId ? [expandedId] : [],
                     onExpand: (expanded, record) => {

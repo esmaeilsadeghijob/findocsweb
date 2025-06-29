@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import AttachmentTable from "./AttachmentTable";
 import UploadModal from "./UploadModal";
 
-function AttachmentPanel({ documentId }) {
+function AttachmentPanel({ documentId, status }) {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -33,6 +33,7 @@ function AttachmentPanel({ documentId }) {
                 <AttachmentTable
                     ref={tableRef}
                     documentId={documentId}
+                    status={status}
                     onPreview={handlePreview}
                     onUploadSuccess={handleRefresh}
                 />

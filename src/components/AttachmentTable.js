@@ -17,7 +17,7 @@ import {
     deleteAttachment,
 } from "../api/api";
 
-const AttachmentTable = forwardRef(({ documentId, onPreview }, ref) => {
+const AttachmentTable = forwardRef(({ documentId, status, onPreview }, ref) => {
     const [attachments, setAttachments] = useState([]);
 
     const fetch = () =>
@@ -53,6 +53,12 @@ const AttachmentTable = forwardRef(({ documentId, onPreview }, ref) => {
             title: "فرمت",
             dataIndex: "extension",
             align: "center",
+        },
+        {
+            title: "شرح فایل",
+            dataIndex: "description",
+            align: "center",
+            render: (text) => text || "—",
         },
         {
             title: "تاریخ بارگذاری",
@@ -91,18 +97,21 @@ const AttachmentTable = forwardRef(({ documentId, onPreview }, ref) => {
         {
             title: "عملیات",
             align: "center",
-            render: (_, record) => (
-                <Popconfirm
-                    title="آیا مطمئنید که می‌خواهید حذف کنید؟"
-                    onConfirm={() => handleDelete(record.id)}
-                    okText="بله"
-                    cancelText="خیر"
-                >
-                    <CloseOutlined
-                        style={{ color: "red", fontSize: 18, cursor: "pointer" }}
-                    />
-                </Popconfirm>
-            ),
+            render: (_, record) =>
+                status !== "FINALIZED" ? (
+                    <Popconfirm
+                        title="آیا مطمئنید که می‌خواهید حذف کنید؟"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="بله"
+                        cancelText="خیر"
+                    >
+                        <CloseOutlined
+                            style={{ color: "red", fontSize: 18, cursor: "pointer" }}
+                        />
+                    </Popconfirm>
+                ) : (
+                    <span style={{ color: "#999" }}>—</span>
+                ),
         },
     ];
 
