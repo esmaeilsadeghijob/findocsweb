@@ -1,10 +1,31 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, message } from "antd";
-import { getCompanies, deleteCompany } from "../api/api";
+import {
+    Table,
+    Button,
+    Popconfirm,
+    message,
+    Space,
+    Input,
+    Card,
+} from "antd";
+import {
+    EditOutlined,
+    SaveOutlined,
+    DeleteOutlined,
+    LeftOutlined,
+    RightOutlined,
+} from "@ant-design/icons";
+import {
+    getCompanies,
+    deleteCompany,
+    updateCompany,
+} from "../api/api";
 import AddCompanyForm from "./AddCompanyForm";
 
 function CompanyManagement() {
     const [companies, setCompanies] = useState([]);
+    const [editingKey, setEditingKey] = useState(null);
+    const [editedRow, setEditedRow] = useState({});
 
     const fetch = () => {
         getCompanies()
@@ -16,6 +37,33 @@ function CompanyManagement() {
         fetch();
     }, []);
 
+    const isEditing = (record) => record.id === editingKey;
+
+    const handleEdit = (record) => {
+        setEditingKey(record.id);
+        setEditedRow({ ...record });
+    };
+
+    const handleChange = (e, field) => {
+        setEditedRow((prev) => ({ ...prev, [field]: e.target.value }));
+    };
+
+    const handleSave = async (id) => {
+        try {
+            await updateCompany(id, editedRow);
+            message.success("ویرایش با موفقیت انجام شد");
+            setEditingKey(null);
+            fetch();
+        } catch {
+            message.error("خطا در ذخیره‌سازی تغییرات");
+        }
+    };
+
+    const handleCancel = () => {
+        setEditingKey(null);
+        setEditedRow({});
+    };
+
     const handleDelete = (id) => {
         deleteCompany(id)
             .then(() => {
@@ -26,39 +74,123 @@ function CompanyManagement() {
     };
 
     const columns = [
-        { title: "نام", dataIndex: "name" },
-        { title: "شناسه ملی", dataIndex: "nationalId" },
-        { title: "تلفن", dataIndex: "phone" },
-        { title: "آدرس", dataIndex: "address" },
+        {
+            title: "نام",
+            dataIndex: "name",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.name}
+                        onChange={(e) => handleChange(e, "name")}
+                    />
+                ) : (
+                    record.name
+                ),
+        },
+        {
+            title: "شناسه ملی",
+            dataIndex: "nationalId",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.nationalId}
+                        onChange={(e) => handleChange(e, "nationalId")}
+                    />
+                ) : (
+                    record.nationalId
+                ),
+        },
+        {
+            title: "تلفن",
+            dataIndex: "phone",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.phone}
+                        onChange={(e) => handleChange(e, "phone")}
+                    />
+                ) : (
+                    record.phone
+                ),
+        },
+        {
+            title: "آدرس",
+            dataIndex: "address",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.address}
+                        onChange={(e) => handleChange(e, "address")}
+                    />
+                ) : (
+                    record.address
+                ),
+        },
         {
             title: "عملیات",
-            render: (_, record) => (
-                <Popconfirm
-                    title="آیا از حذف این مورد مطمئن هستید؟"
-                    onConfirm={() => handleDelete(record.id)}
-                    okText="بله"
-                    cancelText="خیر"
-                >
-                    <Button danger>حذف</Button>
-                </Popconfirm>
-            ),
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Space>
+                        <Button
+                            type="link"
+                            icon={<SaveOutlined />}
+                            onClick={() => handleSave(record.id)}
+                            title="ذخیره"
+                        />
+                        <Button type="text" danger onClick={handleCancel}>
+                            لغو
+                        </Button>
+                    </Space>
+                ) : (
+                    <Space>
+                        <Button
+                            type="text"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                            title="ویرایش"
+                        />
+                        <Popconfirm
+                            title="آیا از حذف این مورد مطمئن هستید؟"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="بله"
+                            cancelText="خیر"
+                        >
+                            <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                title="حذف"
+                            />
+                        </Popconfirm>
+                    </Space>
+                ),
         },
     ];
 
     return (
-        <div style={{ display: "flex", gap: 24 }}>
-            <div style={{ width: 700, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "start", gap: 32 }}>
+            {/* فرم افزودن شرکت */}
+            <div style={{ flex: "0 0 460px" }}>
                 <AddCompanyForm onSuccess={fetch} />
             </div>
 
+            {/* جدول شرکت‌ها */}
             <div style={{ flex: 1 }}>
-                <Table
-                    size="small"
-                    rowKey="id"
-                    columns={columns}
-                    dataSource={companies}
-                    pagination={false}
-                />
+                <Card title="لیست شرکت‌ها">
+                    <Table
+                        size="small"
+                        rowKey="id"
+                        columns={columns}
+                        dataSource={companies}
+                        pagination={{
+                            pageSize: 15,
+                            position: ["bottomCenter"],
+                            showSizeChanger: false,
+                            prevIcon: <RightOutlined />,
+                            nextIcon: <LeftOutlined />,
+                        }}
+                    />
+                </Card>
             </div>
         </div>
     );

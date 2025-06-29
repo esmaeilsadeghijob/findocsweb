@@ -73,3 +73,6 @@ export const advanceDocumentStatus = (id) =>
 export const getCompanies = () => API.get("/api/companies");
 export const createCompany = (data) => API.post("/api/companies", data);
 export const deleteCompany = (id) => API.delete(`/api/companies/${id}`);
+
+export const updateCompany = (id, data) =>
+    API.put(`/api/companies/${id}`, data);
