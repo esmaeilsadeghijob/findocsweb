@@ -69,3 +69,7 @@ export const deleteIdentifier = (id) => API.delete(`/api/identifiers/${id}`);
 
 export const advanceDocumentStatus = (id) =>
     API.put(`/api/documents/${id}/status`);
+
+export const getCompanies = () => API.get("/api/companies");
+export const createCompany = (data) => API.post("/api/companies", data);
+export const deleteCompany = (id) => API.delete(`/api/companies/${id}`);

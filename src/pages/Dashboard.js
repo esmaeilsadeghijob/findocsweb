@@ -4,6 +4,7 @@ import {
     TeamOutlined,
     LogoutOutlined,
     SettingOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import Documents from "./Documents";
@@ -11,6 +12,7 @@ import UsersApproval from "./UsersApproval";
 import ReferenceManagement from "./ReferenceManagement";
 import React from "react";
 import ClientDocument from "../pages/ClientDocument";
+import CompanyManagement from "../components/CompanyManagement";
 
 const { Header, Sider, Content } = Layout;
 
@@ -32,16 +34,17 @@ function Dashboard() {
         ...(role === "ROLE_ADMIN"
             ? [
                 { key: "users", icon: <TeamOutlined />, label: "مدیریت کاربران" },
-                { key: "reference", icon: <SettingOutlined />, label: " داده‌های پایه" },
+                { key: "reference", icon: <SettingOutlined />, label: "داده‌های پایه" },
             ]
             : []),
+        { key: "company", icon: <UserOutlined />, label: "شرکت (شخص)" }, // ✅ منوی جدید
         { key: "logout", icon: <LogoutOutlined />, label: "خروج" },
     ];
 
     const enhancedMenuItems = rawMenuItems.map((item) => ({
         key: item.key,
         style: {
-            minHeight: 180, // 👈 افزایش ارتفاع واقعی آیتم منو
+            minHeight: 160,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -58,12 +61,10 @@ function Dashboard() {
                 {React.cloneElement(item.icon, {
                     style: { fontSize: 40, color: "#333" },
                 })}
-                <div style={{ fontSize: "0.9rem", marginTop: 10 }}>{item.label}</div>
+                <div style={{ fontSize: "0.9rem", marginTop: 8 }}>{item.label}</div>
             </div>
         ),
     }));
-
-
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
@@ -93,7 +94,7 @@ function Dashboard() {
 
             <Layout>
                 <Sider
-                    width={160}
+                    width={150}
                     style={{
                         background: "#fff",
                         display: "flex",
@@ -122,10 +123,11 @@ function Dashboard() {
                         background: "#fff",
                     }}
                 >
-                    {/*{currentKey === "documents" && <Documents />}*/}
+                    {/* {currentKey === "documents" && <Documents />} */}
                     {currentKey === "documents" && <ClientDocument />}
                     {currentKey === "users" && <UsersApproval />}
                     {currentKey === "reference" && <ReferenceManagement />}
+                    {currentKey === "company" && <CompanyManagement />}
                 </Content>
             </Layout>
         </Layout>

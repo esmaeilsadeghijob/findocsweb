@@ -1,104 +1,131 @@
-import { Modal, Upload, Button, message, Space, Input, List } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import { uploadFile } from "../api/api";
+import { useEffect, useState } from "react";
+import {
+    Modal,
+    Upload,
+    Form,
+    Input,
+    Button,
+    Select,
+    message,
+} from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { uploadFile, getCompanies } from "../api/api";
 
 function UploadModal({ documentId, onClose, onSuccess }) {
+    const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
-    const [descriptions, setDescriptions] = useState({});
-    const [uploading, setUploading] = useState(false);
+    const [companies, setCompanies] = useState([]);
 
-    const handleUpload = async () => {
-        if (!fileList.length)
-            return message.warning("فایلی انتخاب نشده است");
+    useEffect(() => {
+        getCompanies()
+            .then((res) => setCompanies(res.data || []))
+            .catch(() => message.error("خطا در دریافت لیست شرکت‌ها"));
+    }, []);
+
+    const handleSubmit = async () => {
+        const values = await form.validateFields();
+
+        if (fileList.length === 0) {
+            message.warning("لطفاً حداقل یک فایل انتخاب کنید");
+            return;
+        }
 
         const formData = new FormData();
-        fileList.forEach((file) => {
-            formData.append("files", file);
-            formData.append("descriptions", descriptions[file.uid] || "");
+
+        fileList.forEach((file, index) => {
+            formData.append("files", file.originFileObj);
+            formData.append(
+                "descriptions",
+                values?.meta?.[index]?.description || ""
+            );
+            formData.append(
+                "companyIds",
+                values?.meta?.[index]?.companyId || ""
+            );
         });
 
-        setUploading(true);
-        try {
-            await uploadFile(documentId, formData);
-            message.success("فایل‌ها آپلود شدند");
-            setFileList([]);
-            setDescriptions({});
-            onSuccess?.();
-            onClose?.();
-        } catch {
-            message.error("خطا در آپلود فایل‌ها");
-        } finally {
-            setUploading(false);
-        }
+        uploadFile(documentId, formData)
+            .then(() => {
+                message.success("فایل‌ها با موفقیت بارگذاری شدند");
+                onSuccess?.();
+            })
+            .catch(() => {
+                message.error("خطا در بارگذاری فایل‌ها");
+            });
     };
 
-    const uploadProps = {
-        multiple: true,
-        accept: ".jpg,.jpeg,.png,.pdf,.doc,.docx,.xls,.xlsx",
-        beforeUpload: (file) => {
-            setFileList((prev) => [...prev, file]);
-            return false;
-        },
-        onRemove: (file) => {
-            setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-            setDescriptions((prev) => {
-                const copy = { ...prev };
-                delete copy[file.uid];
-                return copy;
-            });
-        },
-        fileList,
-        showUploadList: false,
+    const handleRemove = (file) => {
+        setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+        form.setFieldsValue({
+            meta: form
+                .getFieldValue("meta")
+                ?.filter((_, i) => fileList[i].uid !== file.uid),
+        });
+    };
+
+    const handleChange = ({ fileList: newList }) => {
+        setFileList(newList);
+        const metas = form.getFieldValue("meta") || [];
+        while (metas.length < newList.length)
+            metas.push({ description: "", companyId: null });
+        form.setFieldsValue({ meta: metas });
     };
 
     return (
         <Modal
-            open
-            title="بارگذاری ضمیمه"
+            title="بارگذاری فایل"
+            open={true}
             onCancel={onClose}
-            footer={null}
-            centered
+            onOk={handleSubmit}
+            okText="ارسال"
         >
-            <Space direction="vertical" style={{ width: "100%" }}>
-                <Upload {...uploadProps}>
-                    <Button icon={<UploadOutlined />}>انتخاب فایل‌ها</Button>
-                </Upload>
+            <Upload
+                multiple
+                fileList={fileList}
+                onRemove={handleRemove}
+                beforeUpload={() => false}
+                onChange={handleChange}
+            >
+                <Button icon={<PlusOutlined />}>انتخاب فایل‌ها</Button>
+            </Upload>
 
-                <List
-                    size="small"
-                    dataSource={fileList}
-                    bordered
-                    renderItem={(file) => (
-                        <List.Item>
-                            <div style={{ width: "100%" }}>
-                                <div style={{ fontWeight: "bold" }}>{file.name}</div>
-                                <Input
-                                    placeholder="شرح فایل"
-                                    value={descriptions[file.uid] || ""}
-                                    onChange={(e) =>
-                                        setDescriptions((prev) => ({
-                                            ...prev,
-                                            [file.uid]: e.target.value,
-                                        }))
-                                    }
-                                    style={{ marginTop: 4 }}
-                                />
-                            </div>
-                        </List.Item>
-                    )}
-                />
+            <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+                {fileList.map((file, index) => (
+                    <div
+                        key={file.uid}
+                        style={{
+                            borderBottom: "1px solid #eee",
+                            padding: "8px 0",
+                            marginBottom: 8,
+                        }}
+                    >
+                        <div style={{ fontWeight: 500 }}>{file.name}</div>
 
-                <Button
-                    type="primary"
-                    onClick={handleUpload}
-                    block
-                    loading={uploading}
-                    disabled={!fileList.length}
-                >
-                    {uploading ? "در حال آپلود..." : "بارگذاری فایل‌ها"}
-                </Button>
-            </Space>
+                        <Form.Item
+                            name={["meta", index, "description"]}
+                            label="شرح فایل"
+                            style={{ marginBottom: 8 }}
+                        >
+                            <Input placeholder="مثلاً: فاکتور شماره ۲۳ (اختیاری)" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name={["meta", index, "companyId"]}
+                            label="شرکت / شخص"
+                            style={{ marginBottom: 0 }}
+                        >
+                            <Select
+                                options={companies.map((c) => ({
+                                    label: c.name,
+                                    value: c.id,
+                                }))}
+                                allowClear
+                                placeholder="انتخاب شرکت (اختیاری)"
+                            />
+                        </Form.Item>
+                    </div>
+                ))}
+            </Form>
         </Modal>
     );
 }

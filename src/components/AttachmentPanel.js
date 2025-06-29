@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import AttachmentTable from "./AttachmentTable";
 import UploadModal from "./UploadModal";
+import { UploadOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 
 function AttachmentPanel({ documentId, status }) {
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -30,19 +32,28 @@ function AttachmentPanel({ documentId, status }) {
     return (
         <div style={{ display: "flex", gap: 16, height: "80vh" }}>
             <div style={{ flex: 1 }}>
+                {status !== "FINALIZED" && (
+                    <div style={{ marginTop: 8, textAlign: "end" }}>
+                        <Button
+                            type="link"
+                            icon={<UploadOutlined />}
+                            onClick={() => setShowModal(true)}
+                        >
+                            بارگذاری فایل جدید
+                        </Button>
+                    </div>
+                )}
+
+
                 <AttachmentTable
                     ref={tableRef}
                     documentId={documentId}
                     status={status}
                     onPreview={handlePreview}
-                    onUploadSuccess={handleRefresh}
                 />
 
-                <div style={{ marginTop: 8, textAlign: "end" }}>
-                    <a onClick={() => setShowModal(true)}>➕ بارگذاری فایل جدید</a>
-                </div>
 
-                {showModal && (
+                {status !== "FINALIZED" && showModal && (
                     <UploadModal
                         documentId={documentId}
                         onClose={() => setShowModal(false)}
@@ -87,7 +98,7 @@ function AttachmentPanel({ documentId, status }) {
                             فرمت فایل پشتیبانی نمی‌شود.
                             <br />
                             <a href={previewUrl} target="_blank" rel="noopener noreferrer">
-                                کلیک کنید برای دانلود فایل
+                                دانلود فایل
                             </a>
                         </div>
                     )
