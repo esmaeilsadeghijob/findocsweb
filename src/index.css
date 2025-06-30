@@ -94,10 +94,22 @@ textarea {
   text-align: right;
 }
 
-/* دکمه‌ها با فونت مناسب */
-.ant-btn {
-  font-family: 'Vazirmatn', sans-serif;
+/* وسط‌چین کردن تایتل جدول برای تمام جدول‌های Ant Design */
+.ant-table-thead > tr > th {
+  text-align: center !important;
+  vertical-align: middle !important;
 }
+
+/* اگر Ant Design داخل title یک wrap بزنه (مثلاً span یا div) */
+.ant-table-thead > tr > th > div,
+.ant-table-thead > tr > th > span {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
 
 /* استایل کد */
 code {
