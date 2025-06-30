@@ -110,6 +110,9 @@ textarea {
   text-align: center;
 }
 
+.ant-typography {
+  font-family: "B Homa", sans-serif !important;
+}
 
 /* استایل کد */
 code {
