@@ -1,10 +1,10 @@
-import { useRef, useState } from "react";
+import {useRef, useState} from "react";
 import AttachmentTable from "./AttachmentTable";
 import UploadModal from "./UploadModal";
-import { UploadOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import {UploadOutlined} from "@ant-design/icons";
+import {Button} from "antd";
 
-function AttachmentPanel({ documentId, status }) {
+function AttachmentPanel({documentId, status}) {
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -30,14 +30,24 @@ function AttachmentPanel({ documentId, status }) {
     };
 
     return (
-        <div style={{ display: "flex", gap: 16, height: "80vh" }}>
-            <div style={{ flex: 1 }}>
+        <div style={{display: "flex", gap: 16, height: "80vh"}}>
+            <div style={{flex: 1}}>
                 {status !== "FINALIZED" && (
-                    <div style={{ marginTop: 8, textAlign: "end" }}>
+                    <div style={{marginTop: 8, textAlign: "end"}}>
                         <Button
                             type="link"
-                            icon={<UploadOutlined />}
+                            icon={<UploadOutlined style={{
+                                fontSize: "1.1rem",
+                                marginBottom: 2,
+                            }}
+                            />}
                             onClick={() => setShowModal(true)}
+                            style={{
+                                fontSize: "1.05rem",         // ← بزرگ‌تر از حالت پیش‌فرض
+                                fontWeight: "bold",          // ← ضخیم‌تر
+                                paddingInline: 12,
+                                paddingBlock: 4,
+                            }}
                         >
                             بارگذاری فایل جدید
                         </Button>
@@ -91,19 +101,19 @@ function AttachmentPanel({ documentId, status }) {
                             type="application/pdf"
                             width="100%"
                             height="100%"
-                            style={{ borderRadius: 6 }}
+                            style={{borderRadius: 6}}
                         />
                     ) : (
-                        <div style={{ textAlign: "center", paddingTop: 60 }}>
+                        <div style={{textAlign: "center", paddingTop: 60}}>
                             فرمت فایل پشتیبانی نمی‌شود.
-                            <br />
+                            <br/>
                             <a href={previewUrl} target="_blank" rel="noopener noreferrer">
                                 دانلود فایل
                             </a>
                         </div>
                     )
                 ) : (
-                    <div style={{ textAlign: "center", paddingTop: 60, color: "#888" }}>
+                    <div style={{textAlign: "center", paddingTop: 60, color: "#888"}}>
                         پیش‌نمایش فایل در این قسمت نمایش داده می‌شود
                     </div>
                 )}

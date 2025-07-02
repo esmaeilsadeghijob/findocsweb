@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
-import { Table, Button, message, Input, Row, Col, Spin } from "antd";
-import { getClients } from "../api/api";
+import {
+    Table,
+    Button,
+    message,
+    Input,
+    Row,
+    Col,
+    Spin,
+} from "antd";
+import {
+    getClients,
+} from "../api/api";
 import ClientCreateModal from "../components/ClientCreateModal";
 import AddDocumentModal from "../components/AddDocumentModal";
 import DocumentTable from "../components/DocumentTable";
@@ -32,13 +42,29 @@ function Documents() {
         fetchClients();
     }, []);
 
-    const filteredClients = clients.filter((client) =>
-        Object.values(client).some((val) =>
-            typeof val === "string"
-                ? val.toLowerCase().includes(searchText.toLowerCase())
-                : false
-        )
-    );
+    const filteredClients = clients.filter((client) => {
+        const query = searchText.toLowerCase();
+
+        const matchClient = Object.values(client).some(
+            (val) => typeof val === "string" && val.toLowerCase().includes(query)
+        );
+
+        const matchDocuments = client.documents?.some((doc) => {
+            const matchDocFields = Object.values(doc).some(
+                (val) => typeof val === "string" && val.toLowerCase().includes(query)
+            );
+
+            const matchAttachments = doc.attachments?.some((att) =>
+                Object.values(att).some(
+                    (val) => typeof val === "string" && val.toLowerCase().includes(query)
+                )
+            );
+
+            return matchDocFields || matchAttachments;
+        });
+
+        return matchClient || matchDocuments;
+    });
 
     const columns = [
         {
@@ -96,7 +122,7 @@ function Documents() {
 
                 <Col flex="1" style={{ textAlign: "center" }}>
                     <Input
-                        placeholder="جست‌وجو در مشتری‌ها..."
+                        placeholder="جست‌وجو در مشتری‌ها و اسناد..."
                         prefix={<SearchOutlined />}
                         allowClear
                         value={searchText}
@@ -120,7 +146,7 @@ function Documents() {
                     columns={columns}
                     expandable={{
                         expandedRowRender: (record) => (
-                            <DocumentTable clientId={record.id} />
+                            <DocumentTable clientId={record.id} searchText={searchText} />
                         ),
                     }}
                     pagination={false}
