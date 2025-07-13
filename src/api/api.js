@@ -1,7 +1,12 @@
 import axios from "axios";
+import { Config } from "../config";
+
+// const API = axios.create({
+    // baseURL: "http://localhost:8080",
+// });
 
 const API = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: Config.REACT_APP_BASE_URL,
 });
 
 // افزودن توکن به هدر درخواست‌ها
@@ -55,8 +60,17 @@ export const createPeriod = (data) => API.post("/api/periods", data);
 export const updatePeriod = (id, data) => API.put(`/api/periods/${id}`, data);
 export const deletePeriod = (id) => API.delete(`/api/periods/${id}`);
 
-export const uploadFile = (documentId, form) =>
-    API.post(`/api/attachments/${documentId}/attachments`, form);
+// export const uploadFile = (documentId, form) =>
+//     API.post(`/api/attachments/${documentId}/attachments`, form);
+
+export const uploadFile = (documentId, formData, onProgress) =>
+    API.post(`/api/attachments/${documentId}/attachments`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+            if (onProgress) onProgress(event);
+        },
+    });
+
 
 export const previewAttachment = (documentId, fileId) =>
     API.get(`/api/attachments/${documentId}/preview/${fileId}`);

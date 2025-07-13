@@ -7,6 +7,7 @@ import {
     Button,
     Select,
     message,
+    Progress,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { uploadFile, getCompanies } from "../api/api";
@@ -15,6 +16,9 @@ function UploadModal({ documentId, onClose, onSuccess }) {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [showProgress, setShowProgress] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         getCompanies()
@@ -22,44 +26,67 @@ function UploadModal({ documentId, onClose, onSuccess }) {
             .catch(() => message.error("خطا در دریافت لیست شرکت‌ها"));
     }, []);
 
-    const handleSubmit = async () => {
+    const animateProgressBar = () => {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                startUpload(); // سرویس آپلود بعد از رسیدن به 100٪ فراخوانی می‌شود
+            }
+            setUploadProgress(progress);
+        }, 80); // سرعت پر شدن نوار (قابل تنظیم)
+    };
+
+    const startUpload = async () => {
         const values = await form.validateFields();
 
-        if (fileList.length === 0) {
-            message.warning("لطفاً حداقل یک فایل انتخاب کنید");
-            return;
-        }
-
         const formData = new FormData();
-
         fileList.forEach((file, index) => {
             formData.append("files", file.originFileObj);
-            formData.append(
-                "descriptions",
-                values?.meta?.[index]?.description || ""
-            );
-            formData.append(
-                "companyIds",
-                values?.meta?.[index]?.companyId || ""
-            );
+            formData.append("descriptions", values?.meta?.[index]?.description || "");
+            formData.append("companyIds", values?.meta?.[index]?.companyId || "");
         });
 
         uploadFile(documentId, formData)
             .then(() => {
                 message.success("فایل‌ها با موفقیت بارگذاری شدند");
-                onSuccess?.();
+                setTimeout(() => {
+                    setShowProgress(false);
+                    setUploadProgress(0);
+                    setUploading(false);
+                    onSuccess?.();
+                }, 1000);
             })
             .catch(() => {
                 message.error("خطا در بارگذاری فایل‌ها");
+                setShowProgress(false);
+                setUploadProgress(0);
+                setUploading(false);
             });
+    };
+
+    const handleSubmit = async () => {
+        if (fileList.length === 0) {
+            message.warning("لطفاً حداقل یک فایل انتخاب کنید");
+            return;
+        }
+
+        try {
+            await form.validateFields();
+            setShowProgress(true);
+            setUploading(true);
+            animateProgressBar();
+        } catch {
+            message.error("لطفاً تمام اطلاعات فایل‌ها را کامل کنید");
+        }
     };
 
     const handleRemove = (file) => {
         setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
         form.setFieldsValue({
-            meta: form
-                .getFieldValue("meta")
-                ?.filter((_, i) => fileList[i].uid !== file.uid),
+            meta: form.getFieldValue("meta")?.filter((_, i) => fileList[i].uid !== file.uid),
         });
     };
 
@@ -79,6 +106,12 @@ function UploadModal({ documentId, onClose, onSuccess }) {
             onOk={handleSubmit}
             okText="ارسال"
         >
+            {showProgress && (
+                <div style={{ marginBottom: 16 }}>
+                    <Progress percent={uploadProgress} status={uploading ? "active" : "normal"} />
+                </div>
+            )}
+
             <Upload
                 multiple
                 fileList={fileList}
