@@ -1,7 +1,7 @@
 import {useRef, useState} from "react";
 import AttachmentTable from "./AttachmentTable";
 import UploadModal from "./UploadModal";
-import {UploadOutlined} from "@ant-design/icons";
+import {UploadOutlined, LinkOutlined, ArrowsAltOutlined, FullscreenOutlined} from "@ant-design/icons";
 import {Button} from "antd";
 
 function AttachmentPanel({documentId, status}) {
@@ -36,15 +36,18 @@ function AttachmentPanel({documentId, status}) {
                     <div style={{marginTop: 8, textAlign: "end"}}>
                         <Button
                             type="link"
-                            icon={<UploadOutlined style={{
-                                fontSize: "1.1rem",
-                                marginBottom: 2,
-                            }}
-                            />}
+                            icon={
+                                <UploadOutlined
+                                    style={{
+                                        fontSize: "1.1rem",
+                                        marginBottom: 2,
+                                    }}
+                                />
+                            }
                             onClick={() => setShowModal(true)}
                             style={{
-                                fontSize: "1.05rem",         // ← بزرگ‌تر از حالت پیش‌فرض
-                                fontWeight: "bold",          // ← ضخیم‌تر
+                                fontSize: "1.05rem",
+                                fontWeight: "bold",
                                 paddingInline: 12,
                                 paddingBlock: 4,
                             }}
@@ -54,14 +57,12 @@ function AttachmentPanel({documentId, status}) {
                     </div>
                 )}
 
-
                 <AttachmentTable
                     ref={tableRef}
                     documentId={documentId}
                     status={status}
                     onPreview={handlePreview}
                 />
-
 
                 {status !== "FINALIZED" && showModal && (
                     <UploadModal
@@ -81,8 +82,45 @@ function AttachmentPanel({documentId, status}) {
                     border: "1px solid #ccc",
                     borderRadius: 6,
                     padding: 8,
+                    position: "relative",
                 }}
             >
+                {/* لینک مشاهده در تب جدید */}
+                {previewUrl && (
+                    <div style={{ textAlign: "center", marginBottom: 8 }}>
+                        <a
+                            href={previewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                padding: "4px 12px",
+                                backgroundColor: "transparent",
+                                color: "#1677ff",
+                                fontFamily: "FarBaseet",
+                                fontSize: "1.1rem",
+                                textDecoration: "none",
+                                transition: "transform 0.2s ease-in-out",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "scale(1.08)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "scale(1)";
+                            }}
+                        >
+                            <FullscreenOutlined
+                                style={{
+                                    transition: "transform 0.2s ease-in-out",
+                                }}
+                            />
+                            مشاهده در تب جدید
+                        </a>
+                    </div>
+                )}
+
                 {previewUrl ? (
                     fileType === "image" ? (
                         <img
@@ -93,7 +131,11 @@ function AttachmentPanel({documentId, status}) {
                                 height: "100%",
                                 objectFit: "contain",
                                 borderRadius: 6,
+                                cursor: "zoom-in",
                             }}
+                            onDoubleClick={() =>
+                                window.open(previewUrl, "_blank")
+                            }
                         />
                     ) : fileType === "pdf" ? (
                         <embed
@@ -101,19 +143,35 @@ function AttachmentPanel({documentId, status}) {
                             type="application/pdf"
                             width="100%"
                             height="100%"
-                            style={{borderRadius: 6}}
+                            style={{
+                                borderRadius: 6,
+                                cursor: "zoom-in",
+                            }}
+                            onDoubleClick={() =>
+                                window.open(previewUrl, "_blank")
+                            }
                         />
                     ) : (
                         <div style={{textAlign: "center", paddingTop: 60}}>
                             فرمت فایل پشتیبانی نمی‌شود.
                             <br/>
-                            <a href={previewUrl} target="_blank" rel="noopener noreferrer">
+                            <a
+                                href={previewUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
                                 دانلود فایل
                             </a>
                         </div>
                     )
                 ) : (
-                    <div style={{textAlign: "center", paddingTop: 60, color: "#888"}}>
+                    <div
+                        style={{
+                            textAlign: "center",
+                            paddingTop: 60,
+                            color: "#888",
+                        }}
+                    >
                         پیش‌نمایش فایل در این قسمت نمایش داده می‌شود
                     </div>
                 )}
