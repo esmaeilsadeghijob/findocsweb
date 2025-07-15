@@ -1,24 +1,10 @@
-import { useEffect, useState } from "react";
-import {
-    Table,
-    Button,
-    message,
-    Input,
-    Row,
-    Col,
-    Spin,
-} from "antd";
-import {
-    getClients,
-} from "../api/api";
+import {useEffect, useState} from "react";
+import {Button, Col, Input, message, Row, Spin, Table,} from "antd";
+import {getClients,} from "../api/api";
 import ClientCreateModal from "../components/ClientCreateModal";
 import AddDocumentModal from "../components/AddDocumentModal";
 import DocumentTable from "../components/DocumentTable";
-import {
-    UserAddOutlined,
-    FileAddOutlined,
-    SearchOutlined,
-} from "@ant-design/icons";
+import {FileAddOutlined, SearchOutlined, UserAddOutlined,} from "@ant-design/icons";
 
 function Documents() {
     const [clients, setClients] = useState([]);

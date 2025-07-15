@@ -1,16 +1,8 @@
-import { Layout, Menu } from "antd";
-import {
-    FileTextOutlined,
-    TeamOutlined,
-    LogoutOutlined,
-    SettingOutlined,
-    UserOutlined,
-} from "@ant-design/icons";
-import { useState } from "react";
-import Documents from "./Documents";
-import UsersApproval from "./UsersApproval";
+import {Layout, Menu} from "antd";
+import {FileTextOutlined, LogoutOutlined, SettingOutlined, TeamOutlined, UserOutlined,} from "@ant-design/icons";
+import React, {useState} from "react";
+import UsersApproval from '../components/UsersApproval'; // اگر Dashboard.js داخل src/pages هست
 import ReferenceManagement from "./ReferenceManagement";
-import React from "react";
 import ClientDocument from "../pages/ClientDocument";
 import CompanyManagement from "../components/CompanyManagement";
 

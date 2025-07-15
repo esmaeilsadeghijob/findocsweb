@@ -1,16 +1,7 @@
-import { Card, Table, Button, Modal, Input, message } from "antd";
-import {
-    DeleteOutlined,
-    LeftOutlined,
-    RightOutlined,
-    PlusOutlined,
-} from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import {
-    getIdentifiers,
-    createIdentifier,
-    deleteIdentifier,
-} from "../api/api";
+import {Button, Card, Input, message, Modal, Table} from "antd";
+import {DeleteOutlined, LeftOutlined, PlusOutlined, RightOutlined,} from "@ant-design/icons";
+import {useEffect, useState} from "react";
+import {createIdentifier, deleteIdentifier, getIdentifiers,} from "../api/api";
 
 function ClientManager() {
     const [identifiers, setIdentifiers] = useState([]);

@@ -1,12 +1,7 @@
-import { Card, Table, Button, Modal, Input, message } from "antd";
-import {EditOutlined, DeleteOutlined, RightOutlined, LeftOutlined} from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import {
-    getServices,
-    createService,
-    updateService,
-    deleteService,
-} from "../api/api";
+import {Button, Card, Input, message, Modal, Table} from "antd";
+import {DeleteOutlined, EditOutlined, LeftOutlined, RightOutlined} from "@ant-design/icons";
+import {useEffect, useState} from "react";
+import {createService, deleteService, getServices, updateService,} from "../api/api";
 
 function ServiceManager() {
     const [services, setServices] = useState([]);

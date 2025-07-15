@@ -1,16 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-    Modal,
-    Upload,
-    Form,
-    Input,
-    Button,
-    Select,
-    message,
-    Progress,
-} from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { uploadFile, getCompanies } from "../api/api";
+import {useEffect, useState} from "react";
+import {Button, Form, Input, message, Modal, Progress, Select, Upload,} from "antd";
+import {PlusOutlined} from "@ant-design/icons";
+import {getCompanies, uploadFile} from "../api/api";
 
 function UploadModal({ documentId, onClose, onSuccess }) {
     const [form] = Form.useForm();

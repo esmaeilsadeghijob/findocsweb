@@ -1,25 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-    Table,
-    Button,
-    Popconfirm,
-    message,
-    Space,
-    Input,
-    Card,
-} from "antd";
-import {
-    EditOutlined,
-    SaveOutlined,
-    DeleteOutlined,
-    LeftOutlined,
-    RightOutlined,
-} from "@ant-design/icons";
-import {
-    getCompanies,
-    deleteCompany,
-    updateCompany,
-} from "../api/api";
+import {useEffect, useState} from "react";
+import {Button, Card, Input, message, Popconfirm, Space, Table,} from "antd";
+import {DeleteOutlined, EditOutlined, LeftOutlined, RightOutlined, SaveOutlined,} from "@ant-design/icons";
+import {deleteCompany, getCompanies, updateCompany,} from "../api/api";
 import AddCompanyForm from "./AddCompanyForm";
 
 function CompanyManagement() {
