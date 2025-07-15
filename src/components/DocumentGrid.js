@@ -170,12 +170,12 @@ function DocumentGrid({clientId}) {
             field: "description",
             flex: 1,
         },
-        {
-            headerName: "سرویس",
-            field: "serviceName",
-            width: 120,
-            cellRenderer: (p) => p.value || "—",
-        },
+        // {
+        //     headerName: "سرویس",
+        //     field: "serviceName",
+        //     width: 120,
+        //     cellRenderer: (p) => p.value || "—",
+        // },
         {
             headerName: "واحد",
             field: "unitName",

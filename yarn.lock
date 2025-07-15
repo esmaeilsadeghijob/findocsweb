@@ -15,12 +15,34 @@
     ag-charts-types "10.3.5"
     tslib "^2.3.0"
 
+"@ag-grid-community/csv-export@32.3.5":
+  version "32.3.5"
+  resolved "https://registry.npmmirror.com/@ag-grid-community/csv-export/-/csv-export-32.3.5.tgz#1a2c4098ba33a1e8439a9a185dcd03a5201acdb0"
+  integrity sha512-uk7w/1recxRbBsS7zNcvcCTLNuojv5H2f1KU4g4hn6DnJUrr43i5eJIJR0wIDvrgcxk+LZz6nJ2Px6t1eYSiZA==
+  dependencies:
+    "@ag-grid-community/core" "32.3.5"
+    tslib "^2.3.0"
+
+"@ag-grid-community/locale@^34.0.2":
+  version "34.0.2"
+  resolved "https://registry.npmmirror.com/@ag-grid-community/locale/-/locale-34.0.2.tgz#77211f1be884ff63f3e0c2eb7d383a85a134813e"
+  integrity sha512-PewLEVD8drwNoSxbRhcB/DQqcKDaAAneAtaSN5XGo803k2VOCDEZu9bTqiHsfOJ+u+6SJ7xBxLYFcKMwcwgcEg==
+
 "@ag-grid-enterprise/core@32.3.5", "@ag-grid-enterprise/core@^32.3.5":
   version "32.3.5"
   resolved "https://registry.npmmirror.com/@ag-grid-enterprise/core/-/core-32.3.5.tgz#40556c4b6a09c7c866313d349ea52fb6734ee765"
   integrity sha512-9u9yCmLB3/W/SE/mP/FNSpxxETkiCcugPBucbXyc7FFngMNz7NYDZ+BeerPpRWkfYGGSZkGdRecm8N2YE9w9sg==
   dependencies:
     "@ag-grid-community/core" "32.3.5"
+
+"@ag-grid-enterprise/excel-export@^32.3.5":
+  version "32.3.5"
+  resolved "https://registry.npmmirror.com/@ag-grid-enterprise/excel-export/-/excel-export-32.3.5.tgz#3db131c8964e1023a1d15c08ad83c2cddd13025b"
+  integrity sha512-HmcGFRwiIpPsJmjMdodPDMwEXXoZfK0LEaccUcra0YCXaVEvb6I2bw52d/JGd80lnFEDsIkmYNOHh4VNNT4RQQ==
+  dependencies:
+    "@ag-grid-community/core" "32.3.5"
+    "@ag-grid-community/csv-export" "32.3.5"
+    "@ag-grid-enterprise/core" "32.3.5"
 
 "@ag-grid-enterprise/master-detail@^32.3.5":
   version "32.3.5"
@@ -8653,6 +8675,11 @@ react-error-overlay@^6.0.11:
   version "6.1.0"
   resolved "https://registry.npmmirror.com/react-error-overlay/-/react-error-overlay-6.1.0.tgz#22b86256beb1c5856f08a9a228adb8121dd985f2"
   integrity sha512-SN/U6Ytxf1QGkw/9ve5Y+NxBbZM6Ht95tuXNMKs8EJyFa/Vy/+Co3stop3KBHARfn/giv+Lj1uUnTfOJ3moFEQ==
+
+react-icons@^5.5.0:
+  version "5.5.0"
+  resolved "https://registry.npmmirror.com/react-icons/-/react-icons-5.5.0.tgz#8aa25d3543ff84231685d3331164c00299cdfaf2"
+  integrity sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==
 
 react-is@^16.12.0, react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

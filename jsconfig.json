@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@tools/*": ["components/tools/*"]
+    }
+  },
+  "include": ["src"]
+}

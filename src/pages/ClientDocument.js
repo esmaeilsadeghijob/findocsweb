@@ -44,7 +44,7 @@ function ClientDocument() {
     return (
         <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
             {/* ستون مشتری‌ها سمت راست */}
-            <div style={{width: 520}}>
+            <div style={{width: 200}}>
                 <Title level={5}>لیست مشتری‌ها</Title>
                 <Input
                     allowClear
@@ -64,9 +64,9 @@ function ClientDocument() {
                             borderBottom: "1px solid #ccc",
                         }}
                     >
-                        <div style={{width: "50%"}}>شناسه</div>
-                        <div style={{width: "25%"}}>سرویس</div>
-                        <div style={{width: "25%"}}>واحد</div>
+                        {/*<div style={{width: "50%"}}>شناسه</div>*/}
+                        {/*<div style={{width: "25%"}}>سرویس</div>*/}
+                        <div style={{width: "100%", textAlign: "center"}}>واحد</div>
                     </div>
 
                     {loadingClients ? (
@@ -91,17 +91,17 @@ function ClientDocument() {
                                     cursor: "pointer",
                                 }}
                             >
-                                <div
-                                    style={{
-                                        width: "50%",
-                                        fontSize: "1rem",
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    {client.identifierCode}
-                                </div>
-                                <div style={{width: "25%"}}>{client.serviceName}</div>
-                                <div style={{width: "25%"}}>{client.unitName}</div>
+                                {/*<div*/}
+                                {/*    style={{*/}
+                                {/*        width: "50%",*/}
+                                {/*        fontSize: "1rem",*/}
+                                {/*        fontWeight: "bold",*/}
+                                {/*    }}*/}
+                                {/*>*/}
+                                {/*    {client.identifierCode}*/}
+                                {/*</div>*/}
+                                {/*<div style={{width: "25%"}}>{client.serviceName}</div>*/}
+                                <div style={{width: "100%"}}>{client.unitName}</div>
                             </div>
                         ))
                     )}
@@ -121,12 +121,12 @@ function ClientDocument() {
                             }}
                         >
                             <Title level={5}>اطلاعات مشتری انتخاب‌شده</Title>
-                            <p>
-                                <strong>شناسه:</strong> {selectedClient.identifierCode}
-                            </p>
-                            <p>
-                                <strong>سرویس:</strong> {selectedClient.serviceName}
-                            </p>
+                            {/*<p>*/}
+                            {/*    <strong>شناسه:</strong> {selectedClient.identifierCode}*/}
+                            {/*</p>*/}
+                            {/*<p>*/}
+                            {/*    <strong>سرویس:</strong> {selectedClient.serviceName}*/}
+                            {/*</p>*/}
                             <p>
                                 <strong>واحد:</strong> {selectedClient.unitName}
                             </p>

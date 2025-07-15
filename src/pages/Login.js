@@ -14,6 +14,8 @@ function Login() {
             const res = await login(values);
             loginContext(res.data.token);
             localStorage.setItem("role", res.data.role);
+            localStorage.setItem("identifierCode", res.data.identifierCode);
+            localStorage.setItem("username", res.data.username);
             message.success("ورود موفق");
             navigate("/");
         } catch {

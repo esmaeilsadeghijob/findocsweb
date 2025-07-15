@@ -1,22 +1,48 @@
 import {useEffect, useState} from "react";
-import {Button, Input, message, Popconfirm, Select, Space, Table, Tag, Typography,} from "antd";
-import {CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined,} from "@ant-design/icons";
-import {approveUser, deleteUser, getPendingUsers, getUsers, updateDefaultAccess, updateUser,} from "../api/api";
+import {
+    Button,
+    Input,
+    message,
+    Popconfirm,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Typography
+} from "antd";
+import {
+    CheckOutlined,
+    CloseOutlined,
+    DeleteOutlined,
+    EditOutlined
+} from "@ant-design/icons";
+import {
+    approveUser,
+    deleteUser,
+    getPendingUsers,
+    getUsers,
+    updateDefaultAccess,
+    updateUser,
+    getIdentifiers
+} from "../api/api";
 
-const { Title } = Typography;
+const {Title} = Typography;
+
 const accessOptions = [
-    { label: "عدم دسترسی", value: "NONE" },
-    { label: "گزارش‌گیری", value: "READ" },
-    { label: "ورود اطلاعات", value: "CREATE" },
-    { label: "ویرایش / حذف", value: "EDIT" },
-    { label: "ارسال اکسل", value: "EXPORT" },
-    { label: "مدیریتی", value: "ADMIN" },
-    { label: "مدیر اصلی", value: "OWNER" },
+    {label: "عدم دسترسی", value: "NONE"},
+    {label: "گزارش‌گیری", value: "READ"},
+    {label: "ورود اطلاعات", value: "CREATE"},
+    {label: "ویرایش / حذف", value: "EDIT"},
+    {label: "دانلود", value: "DOWNLOAD"},
+    {label: "برگشت از وضعیت قطعی", value: "REVERT"},
+    {label: "مدیریتی", value: "ADMIN"},
+    {label: "مدیر اصلی", value: "OWNER"}
 ];
 
 function UsersApproval() {
     const [pendingUsers, setPendingUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+    const [identifiers, setIdentifiers] = useState([]);
     const [editingUserId, setEditingUserId] = useState(null);
     const [editValues, setEditValues] = useState({});
 
@@ -35,10 +61,11 @@ function UsersApproval() {
                             ...u,
                             firstName,
                             lastName,
-                            defaultAccess: u.defaultAccessLevel ?? "NONE",
+                            identifierId: u.role?.name === "ROLE_ADMIN" ? null : u.identifier?.id ?? null, // ✅ اصلاح شده
+                            defaultAccess: u.role?.name === "ROLE_ADMIN" ? "OWNER" : u.defaultAccessLevel ?? "NONE"
                         };
                     })
-                    .sort((a, b) => a.username.localeCompare(b.username)); // ✅ ترتیب ثابت
+                    .sort((a, b) => a.username.localeCompare(b.username));
                 setAllUsers(normalized);
             })
             .catch(() => setAllUsers([]));
@@ -46,6 +73,9 @@ function UsersApproval() {
 
     useEffect(() => {
         fetchData();
+        getIdentifiers()
+            .then((res) => setIdentifiers(res.data))
+            .catch(() => setIdentifiers([]));
     }, []);
 
     const handleApprove = async (id) => {
@@ -73,10 +103,20 @@ function UsersApproval() {
             await updateDefaultAccess(id, level);
             message.success("سطح دسترسی بروزرسانی شد");
             setAllUsers((prev) =>
-                prev.map((u) => (u.id === id ? { ...u, defaultAccess: level } : u))
+                prev.map((u) => (u.id === id ? {...u, defaultAccess: level} : u))
             );
         } catch {
             message.error("خطا در بروزرسانی سطح دسترسی");
+        }
+    };
+
+    const handleIdentifierChange = async (id, identifierId) => {
+        try {
+            await updateUser(id, {identifierId});
+            message.success("شناسه بروزرسانی شد");
+            fetchData();
+        } catch {
+            message.error("خطا در بروزرسانی شناسه");
         }
     };
 
@@ -86,7 +126,7 @@ function UsersApproval() {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
-            newPassword: "",
+            newPassword: ""
         });
     };
 
@@ -107,13 +147,13 @@ function UsersApproval() {
     };
 
     const pendingColumns = [
-        { title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag> },
-        { title: "نام کاربری", dataIndex: "username" },
-        { title: "نام", dataIndex: "firstName" },
-        { title: "نام خانوادگی", dataIndex: "lastName" },
+        {title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag>},
+        {title: "نام کاربری", dataIndex: "username"},
+        {title: "نام", dataIndex: "firstName"},
+        {title: "نام خانوادگی", dataIndex: "lastName"},
         {
             title: "نقش",
-            render: (_, r) => <Tag color="blue">{r.role?.name || "نامشخص"}</Tag>,
+            render: (_, r) => <Tag color="blue">{r.role?.name || "نامشخص"}</Tag>
         },
         {
             title: "عملیات",
@@ -121,12 +161,12 @@ function UsersApproval() {
                 <Button type="primary" size="small" onClick={() => handleApprove(r.id)}>
                     تأیید
                 </Button>
-            ),
-        },
+            )
+        }
     ];
 
     const allColumns = [
-        { title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag> },
+        {title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag>},
         {
             title: "نام کاربری",
             render: (_, r) =>
@@ -134,12 +174,12 @@ function UsersApproval() {
                     <Input
                         value={editValues.username}
                         onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, username: e.target.value }))
+                            setEditValues((prev) => ({...prev, username: e.target.value}))
                         }
                     />
                 ) : (
                     r.username
-                ),
+                )
         },
         {
             title: "نام",
@@ -148,12 +188,12 @@ function UsersApproval() {
                     <Input
                         value={editValues.firstName}
                         onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, firstName: e.target.value }))
+                            setEditValues((prev) => ({...prev, firstName: e.target.value}))
                         }
                     />
                 ) : (
                     r.firstName
-                ),
+                )
         },
         {
             title: "نام خانوادگی",
@@ -162,12 +202,12 @@ function UsersApproval() {
                     <Input
                         value={editValues.lastName}
                         onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, lastName: e.target.value }))
+                            setEditValues((prev) => ({...prev, lastName: e.target.value}))
                         }
                     />
                 ) : (
                     r.lastName
-                ),
+                )
         },
         {
             title: "تغییر گذرواژه",
@@ -176,30 +216,43 @@ function UsersApproval() {
                     <Input.Password
                         value={editValues.newPassword}
                         onChange={(e) =>
-                            setEditValues((prev) => ({
-                                ...prev,
-                                newPassword: e.target.value,
-                            }))
+                            setEditValues((prev) => ({...prev, newPassword: e.target.value}))
                         }
                     />
                 ) : (
                     "-"
-                ),
+                )
         },
         {
             title: "نقش",
-            render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>,
+            render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>
         },
         {
-            title: "سطح دسترسی بایگانی",
+            title: "شناسه",
             render: (_, r) => (
                 <Select
-                    style={{ width: 140 }}
-                    value={r.defaultAccess}
+                    style={{width: 160}}
+                    value={r.identifierId}
+                    onChange={(val) => handleIdentifierChange(r.id, val)}
+                    options={identifiers.map((i) => ({
+                        label: i.name || i.code,
+                        value: i.id
+                    }))}
+                    disabled={r.role?.name === "ROLE_ADMIN"} // ✅ غیرفعال برای ادمین
+                />
+            )
+        },
+        {
+            title: "سطح دسترسی",
+            render: (_, r) => (
+                <Select
+                    style={{width: 140}}
+                    value={r.role?.name === "ROLE_ADMIN" ? "OWNER" : r.defaultAccess}
                     onChange={(val) => handleAccessChange(r.id, val)}
                     options={accessOptions}
+                    disabled={r.role?.name === "ROLE_ADMIN"} // ✅ غیرفعال برای ادمین
                 />
-            ),
+            )
         },
         {
             title: "عملیات",
@@ -208,54 +261,32 @@ function UsersApproval() {
                     <Space>
                         <Button
                             type="primary"
-                            icon={<CheckOutlined />}
+                            icon={<CheckOutlined/>}
                             size="small"
                             onClick={() => saveEdit(r.id)}
                         />
-                        <Button
-                            icon={<CloseOutlined />}
-                            size="small"
-                            onClick={cancelEdit}
-                        />
+                        <Button icon={<CloseOutlined/>} size="small" onClick={cancelEdit}/>
                     </Space>
                 ) : (
                     <Space>
-                        <Button
-                            icon={<EditOutlined />}
-                            size="small"
-                            onClick={() => startEdit(r)}
-                        />
+                        <Button icon={<EditOutlined/>} size="small" onClick={() => startEdit(r)}/>
                         <Popconfirm
                             title="آیا از حذف مطمئن هستید؟"
                             onConfirm={() => handleDelete(r.id)}
                         >
-                            <Button danger icon={<DeleteOutlined />} size="small" />
-                        </Popconfirm>
-                    </Space>
-                ),
-        },
-    ];
+                            <Button danger icon={<DeleteOutlined/>} size="small"/> </Popconfirm> </Space>)
+        }];
 
     return (
         <>
             <Title level={4}>کاربران تازه‌وارد (در انتظار تأیید)</Title>
-            <Table
-                rowKey="id"
-                dataSource={pendingUsers}
-                columns={pendingColumns}
-                pagination={false}
-                size="small"
-                style={{ marginBottom: "2rem" }}
-            />
-
+            <Table rowKey="id" dataSource={pendingUsers}
+                   columns={pendingColumns}
+                   pagination={false} size="small"
+                   style={{marginBottom: "2rem"}}/>
             <Title level={4}>همه کاربران سیستم</Title>
-            <Table
-                rowKey="id"
-                dataSource={allUsers}
-                columns={allColumns}
-                pagination={false}
-                size="small"
-            />
+            <Table rowKey="id" dataSource={allUsers} columns={allColumns}
+                   pagination={false} size="small"/>
         </>
     );
 }
