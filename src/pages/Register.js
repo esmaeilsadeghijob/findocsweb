@@ -1,6 +1,6 @@
-import { Button, Form, Input, message } from "antd";
-import { register } from "../api/api";
-import { useNavigate } from "react-router-dom";
+import {Button, Form, Input, message} from "antd";
+import {register} from "../api/api";
+import {useNavigate} from "react-router-dom";
 import "./AuthPage.css";
 
 function Register() {

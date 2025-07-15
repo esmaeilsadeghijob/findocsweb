@@ -1,5 +1,5 @@
-import { useParams } from "react-router-dom";
-import { Button } from "antd";
+import {useParams} from "react-router-dom";
+import {Button} from "antd";
 
 function AttachmentViewer() {
     const { documentId, fileId } = useParams();

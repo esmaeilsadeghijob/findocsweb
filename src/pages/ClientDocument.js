@@ -1,202 +1,146 @@
-import { useEffect, useState } from "react";
-import {
-    Table,
-    Button,
-    message,
-    Input,
-    Row,
-    Col,
-    Spin,
-    Popconfirm,
-} from "antd";
-import {
-    UserAddOutlined,
-    FileAddOutlined,
-    SearchOutlined,
-    DeleteOutlined,
-    EditOutlined,
-} from "@ant-design/icons";
-import {
-    getClients,
-    deleteClient,
-} from "../api/api";
-import ClientCreateModal from "../components/ClientCreateModal";
-import AddDocumentModal from "../components/AddDocumentModal";
-import DocumentTable from "../components/DocumentTable";
+import React, {useEffect, useMemo, useState} from "react";
+import {Input, message, Spin, Typography} from "antd";
+import {SearchOutlined} from "@ant-design/icons";
+import {getClients} from "../api/api";
+import DocumentGrid from "../components/DocumentGrid";
+
+const {Title} = Typography;
 
 function ClientDocument() {
-    const [clients, setClients] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showClientModal, setShowClientModal] = useState(false);
-    const [selectedClientForDoc, setSelectedClientForDoc] = useState(null);
-    const [selectedClientForEdit, setSelectedClientForEdit] = useState(null);
     const [searchText, setSearchText] = useState("");
-
-    const fetchClients = () => {
-        setLoading(true);
-        getClients()
-            .then((res) => {
-                const activeClients = res.data.filter((c) => c.active !== false);
-                setClients(activeClients);
-            })
-            .catch(() => {
-                setClients([]);
-                message.error("خطا در دریافت مشتری‌ها");
-            })
-            .finally(() => setLoading(false));
-    };
+    const [selectedClient, setSelectedClient] = useState(null);
+    const [clients, setClients] = useState([]);
+    const [loadingClients, setLoadingClients] = useState(true);
 
     useEffect(() => {
+        const fetchClients = async () => {
+            setLoadingClients(true);
+            try {
+                const response = await getClients();
+                const activeClients = response.data.filter((c) => c.active !== false);
+                setClients(activeClients);
+            } catch {
+                message.error("خطا در دریافت مشتری‌ها");
+                setClients([]);
+            } finally {
+                setLoadingClients(false);
+            }
+        };
+
         fetchClients();
     }, []);
 
-    const handleDelete = (id) => {
-        deleteClient(id)
-            .then(() => {
-                message.success("مشتری غیرفعال شد");
-                fetchClients();
-            })
-            .catch(() => {
-                message.error("حذف مشتری با خطا مواجه شد");
-            });
-    };
-
-    const handleEdit = (record) => {
-        setSelectedClientForEdit(record);
-    };
-
-    const filteredClients = clients.filter((client) =>
-        Object.values(client).some((val) =>
-            typeof val === "string"
-                ? val.toLowerCase().includes(searchText.toLowerCase())
-                : false
-        )
-    );
-
-    const columns = [
-        {
-            title: "شناسه مشتری",
-            dataIndex: "identifierCode",
-        },
-        {
-            title: "سرویس",
-            dataIndex: "serviceName",
-        },
-        {
-            title: "واحد",
-            dataIndex: "unitName",
-        },
-        {
-            title: "عملیات",
-            render: (_, record) => (
-                <div style={{ display: "flex", gap: "8px" }}>
-                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
-                    <Popconfirm
-                        title="آیا از غیرفعالسازی مطمئنی؟"
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="بله"
-                        cancelText="لغو"
-                    >
-                        <Button danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                    <Button
-                        icon={<FileAddOutlined />}
-                        onClick={() => setSelectedClientForDoc(record)}
-                    >
-                        سند جدید
-                    </Button>
-                </div>
-            ),
-        },
-    ];
+    const filteredClients = useMemo(() => {
+        if (!searchText) return clients;
+        return clients.filter((c) =>
+            Object.values(c).some(
+                (val) =>
+                    typeof val === "string" &&
+                    val.toLowerCase().includes(searchText.toLowerCase())
+            )
+        );
+    }, [searchText, clients]);
 
     return (
-        <>
-            <Row
-                align="middle"
-                style={{ marginBottom: "1rem" }}
-                gutter={[16, 16]}
-                justify="space-between"
-            >
-                <Col>
-                    <Button
-                        type="primary"
-                        icon={<UserAddOutlined />}
-                        onClick={() => setShowClientModal(true)}
+        <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
+            {/* ستون مشتری‌ها سمت راست */}
+            <div style={{width: 520}}>
+                <Title level={5}>لیست مشتری‌ها</Title>
+                <Input
+                    allowClear
+                    prefix={<SearchOutlined/>}
+                    placeholder="جست‌وجو مشتری"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    style={{marginBottom: "1rem"}}
+                />
+
+                <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
+                    <div
                         style={{
-                            borderStyle: "dashed",
-                            paddingInline: 28,
+                            display: "flex",
                             fontWeight: "bold",
-                            color: "#222222",
-                            borderColor: "#222222",
-                            height: 48,
-                            fontSize: "1rem",
-                            backgroundColor: "#f9f9f9",
+                            paddingBottom: "4px",
+                            borderBottom: "1px solid #ccc",
                         }}
                     >
-                        افزودن مشتری
-                    </Button>
-                </Col>
+                        <div style={{width: "50%"}}>شناسه</div>
+                        <div style={{width: "25%"}}>سرویس</div>
+                        <div style={{width: "25%"}}>واحد</div>
+                    </div>
 
-                <Col flex="1" style={{ textAlign: "center" }}>
-                    <Input
-                        placeholder="جست‌وجو در مشتری‌ها..."
-                        prefix={<SearchOutlined />}
-                        allowClear
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        style={{
-                            width: 400,
-                            height: 45,
-                            fontSize: "1rem",
-                            paddingInline: 12,
-                        }}
-                    />
-                </Col>
-            </Row>
+                    {loadingClients ? (
+                        <Spin/>
+                    ) : filteredClients.length === 0 ? (
+                        <div style={{color: "#999", marginTop: "1rem"}}>
+                            موردی یافت نشد
+                        </div>
+                    ) : (
+                        filteredClients.map((client) => (
+                            <div
+                                key={client.id}
+                                onClick={() => setSelectedClient(client)}
+                                style={{
+                                    display: "flex",
+                                    padding: "6px 0",
+                                    borderBottom: "1px dashed #eee",
+                                    backgroundColor:
+                                        selectedClient?.id === client.id
+                                            ? "#f0faff"
+                                            : "transparent",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        width: "50%",
+                                        fontSize: "1rem",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    {client.identifierCode}
+                                </div>
+                                <div style={{width: "25%"}}>{client.serviceName}</div>
+                                <div style={{width: "25%"}}>{client.unitName}</div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
 
-            {loading ? (
-                <Spin />
-            ) : (
-                <Table
-                    rowKey="id"
-                    dataSource={filteredClients}
-                    columns={columns}
-                    expandable={{
-                        expandedRowRender: (record) => (
-                            <DocumentTable clientId={record.id} />
-                        ),
-                    }}
-                    pagination={false}
-                />
-            )}
+            {/* ستون اطلاعات سمت چپ */}
+            <div style={{flex: 1}}>
+                {selectedClient ? (
+                    <>
+                        <div
+                            style={{
+                                border: "1px solid #ddd",
+                                borderRadius: 8,
+                                padding: "1rem",
+                                marginBottom: "1rem",
+                            }}
+                        >
+                            <Title level={5}>اطلاعات مشتری انتخاب‌شده</Title>
+                            <p>
+                                <strong>شناسه:</strong> {selectedClient.identifierCode}
+                            </p>
+                            <p>
+                                <strong>سرویس:</strong> {selectedClient.serviceName}
+                            </p>
+                            <p>
+                                <strong>واحد:</strong> {selectedClient.unitName}
+                            </p>
+                        </div>
 
-            {(showClientModal || selectedClientForEdit) && (
-                <ClientCreateModal
-                    onClose={() => {
-                        setShowClientModal(false);
-                        setSelectedClientForEdit(null);
-                    }}
-                    onSuccess={() => {
-                        setShowClientModal(false);
-                        setSelectedClientForEdit(null);
-                        fetchClients();
-                    }}
-                    initialData={selectedClientForEdit}
-                />
-            )}
-
-            {selectedClientForDoc && (
-                <AddDocumentModal
-                    clientId={selectedClientForDoc.id}
-                    onCancel={() => setSelectedClientForDoc(null)}
-                    onSuccess={() => {
-                        setSelectedClientForDoc(null);
-                        fetchClients();
-                    }}
-                />
-            )}
-        </>
+                        <DocumentGrid clientId={selectedClient.id}/>
+                    </>
+                ) : (
+                    <div style={{color: "#999"}}>
+                        لطفاً یک مشتری را از لیست سمت راست انتخاب کنید...
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
 

@@ -1,21 +1,7 @@
-import { useEffect, useState } from "react";
-import {
-    Table,
-    Button,
-    Tag,
-    Tooltip,
-    message,
-} from "antd";
-import {
-    FileAddOutlined,
-    DeleteOutlined,
-    UploadOutlined,
-} from "@ant-design/icons";
-import {
-    getDocuments,
-    deleteDocument,
-    advanceDocumentStatus,
-} from "../api/api";
+import {useEffect, useState} from "react";
+import {Button, message, Space, Table, Tag, Tooltip,} from "antd";
+import {DeleteOutlined, FileAddOutlined, FileExcelOutlined, UploadOutlined,} from "@ant-design/icons";
+import {advanceDocumentStatus, deleteDocument, getDocuments,} from "../api/api";
 import AddDocumentModal from "./AddDocumentModal";
 import UploadModal from "./UploadModal";
 import AttachmentPanel from "./AttachmentPanel";
@@ -29,7 +15,10 @@ function DocumentTable({ clientId }) {
     const fetchDocs = () => {
         getDocuments()
             .then((res) => {
-                const filtered = res.data.filter((doc) => doc.clientId === clientId);
+                const filtered = res.data
+                    .filter((doc) =>
+                        doc.clientId === clientId && doc.accessLevel !== "NONE"
+                    );
                 setDocuments(filtered);
             })
             .catch(() => {
@@ -65,56 +54,45 @@ function DocumentTable({ clientId }) {
         }
     };
 
+    const exportToExcel = async (id) => {
+        try {
+            // باید به API مربوطه وصل شود
+            message.success(`سند ${id} به اکسل ارسال شد`);
+        } catch {
+            message.error("خطا در ارسال به اکسل");
+        }
+    };
+
     const columns = [
         { title: "شماره", dataIndex: "documentNumber" },
-        {
-            title: "سال مالی",
-            render: (_, record) => record.periodFiscalYear || "—",
-        },
-        {
-            title: "واحد",
-            render: (_, record) => record.unitName || "—",
-        },
-        {
-            title: "سرویس",
-            render: (_, record) => record.serviceName || "—",
-        },
-        {
-            title: "شرح",
-            dataIndex: "description",
-        },
+        { title: "سال مالی", render: (_, r) => r.periodFiscalYear || "—" },
+        { title: "واحد", render: (_, r) => r.unitName || "—" },
+        { title: "سرویس", render: (_, r) => r.serviceName || "—" },
+        { title: "شرح", dataIndex: "description" },
         {
             title: "وضعیت",
-            dataIndex: "status",
-            render: (status, record) => {
+            render: (_, record) => {
+                const status = record.status;
                 const color =
-                    status === "DRAFT"
-                        ? "default"
-                        : status === "SUBMITTED"
-                            ? "orange"
+                    status === "DRAFT" ? "default"
+                        : status === "SUBMITTED" ? "orange"
                             : "green";
 
                 const label =
-                    status === "DRAFT"
-                        ? "پیش‌نویس"
-                        : status === "SUBMITTED"
-                            ? "ثبت‌شده"
+                    status === "DRAFT" ? "پیش‌نویس"
+                        : status === "SUBMITTED" ? "ثبت‌شده"
                             : "قطعی";
 
                 const next =
-                    status === "DRAFT"
-                        ? "ثبت‌شده"
-                        : status === "SUBMITTED"
-                            ? "قطعی"
+                    status === "DRAFT" ? "ثبت‌شده"
+                        : status === "SUBMITTED" ? "قطعی"
                             : null;
 
                 return (
                     <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
                         <Tag
                             color={color}
-                            style={{
-                                cursor: status === "FINALIZED" ? "not-allowed" : "pointer",
-                            }}
+                            style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
                             onClick={() => {
                                 if (status !== "FINALIZED") handleStatusChange(record.id);
                             }}
@@ -125,19 +103,45 @@ function DocumentTable({ clientId }) {
                 );
             },
         },
-        // {
-        //     title: "پیوست",
-        //     render: (_, record) =>
-        //         record.status !== "FINALIZED" && (
-        //             <Button
-        //                 type="link"
-        //                 icon={<UploadOutlined />}
-        //                 onClick={() => setSelectedDoc(record.id)}
-        //             >
-        //                 فایل
-        //             </Button>
-        //         ),
-        // },
+        {
+            title: "سطح دسترسی",
+            render: (_, r) => <Tag color="blue">{r.accessLevel}</Tag>,
+        },
+        {
+            title: "عملیات",
+            render: (_, record) => {
+                const access = record.accessLevel;
+                const disabled = access === "NONE";
+
+                return (
+                    <Space>
+                        {["CREATE", "EDIT", "ADMIN", "OWNER"].includes(access) && record.status !== "FINALIZED" && (
+                            <Button
+                                icon={<UploadOutlined />}
+                                onClick={() => setSelectedDoc(record.id)}
+                            >
+                                فایل
+                            </Button>
+                        )}
+
+                        {["EDIT", "OWNER"].includes(access) && record.status !== "FINALIZED" && (
+                            <Button
+                                icon={<DeleteOutlined />}
+                                danger
+                                onClick={() => handleDelete(record.id)}
+                            />
+                        )}
+
+                        {["EXPORT", "ADMIN", "OWNER"].includes(access) && (
+                            <Button
+                                icon={<FileExcelOutlined />}
+                                onClick={() => exportToExcel(record.id)}
+                            />
+                        )}
+                    </Space>
+                );
+            },
+        },
         {
             title: "پیوست‌ها",
             align: "center",
@@ -153,25 +157,16 @@ function DocumentTable({ clientId }) {
                 </Tooltip>
             ),
         },
-        {
-            title: "حذف",
-            render: (_, record) =>
-                record.status !== "FINALIZED" && (
-                    <Button
-                        icon={<DeleteOutlined />}
-                        danger
-                        onClick={() => handleDelete(record.id)}
-                    />
-                ),
-        },
     ];
 
     return (
         <>
             <div style={{ marginBottom: 12 }}>
-                <Button icon={<FileAddOutlined />} onClick={() => setShowModal(true)}>
-                    افزودن سند
-                </Button>
+                {["CREATE", "ADMIN", "OWNER"].includes(documents[0]?.accessLevel) && (
+                    <Button icon={<FileAddOutlined />} onClick={() => setShowModal(true)}>
+                        افزودن سند
+                    </Button>
+                )}
             </div>
 
             <Table
@@ -183,7 +178,7 @@ function DocumentTable({ clientId }) {
                     expandedRowRender: (record) => (
                         <AttachmentPanel
                             documentId={record.id}
-                            status={record.status} // ✅ اضافه شده
+                            status={record.status}
                         />
                     ),
                     expandedRowKeys: expandedId ? [expandedId] : [],

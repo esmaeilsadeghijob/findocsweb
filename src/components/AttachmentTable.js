@@ -1,21 +1,7 @@
-import {
-    Table,
-    Popconfirm,
-    message,
-    Button,
-    Tooltip,
-} from "antd";
-import { EyeOutlined, CloseOutlined } from "@ant-design/icons";
-import React, {
-    useEffect,
-    useState,
-    forwardRef,
-    useImperativeHandle,
-} from "react";
-import {
-    getAttachments,
-    deleteAttachment,
-} from "../api/api";
+import {Button, message, Popconfirm, Table, Tooltip,} from "antd";
+import {CloseOutlined, EyeOutlined} from "@ant-design/icons";
+import React, {forwardRef, useEffect, useImperativeHandle, useState,} from "react";
+import {deleteAttachment, getAttachments,} from "../api/api";
 
 const AttachmentTable = forwardRef(({ documentId, status, onPreview }, ref) => {
     const [attachments, setAttachments] = useState([]);

@@ -1,19 +1,6 @@
-import {
-    Modal,
-    Form,
-    Button,
-    Space,
-    Select,
-    message,
-} from "antd";
-import { useEffect, useState } from "react";
-import {
-    createClient,
-    updateClient,
-    getServices,
-    getUnits,
-    getIdentifiers,
-} from "../api/api";
+import {Button, Form, message, Modal, Select, Space,} from "antd";
+import {useEffect, useState} from "react";
+import {createClient, getIdentifiers, getServices, getUnits, updateClient,} from "../api/api";
 
 function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
     const [form] = Form.useForm();

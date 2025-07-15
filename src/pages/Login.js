@@ -1,8 +1,8 @@
-import { Form, Input, Button, message } from "antd";
-import { useContext } from "react";
-import { login } from "../api/api";
-import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import {Button, Form, Input, message} from "antd";
+import {useContext} from "react";
+import {login} from "../api/api";
+import {AuthContext} from "../context/AuthContext";
+import {useNavigate} from "react-router-dom";
 import "./AuthPage.css";
 
 function Login() {

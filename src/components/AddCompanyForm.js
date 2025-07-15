@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Form, Input, Button, message, Divider } from "antd";
-import { createCompany } from "../api/api";
+import {useState} from "react";
+import {Button, Divider, Form, Input, message} from "antd";
+import {createCompany} from "../api/api";
 import "../pages/AuthPage.css";
 
 function AddCompanyForm({ onSuccess = () => {} }) {

@@ -1,12 +1,7 @@
-import { Card, Table, Button, Modal, Input, message } from "antd";
-import {EditOutlined, DeleteOutlined, RightOutlined, LeftOutlined} from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import {
-    getUnits,
-    createUnit,
-    updateUnit,
-    deleteUnit,
-} from "../api/api";
+import {Button, Card, Input, message, Modal, Table} from "antd";
+import {DeleteOutlined, EditOutlined, LeftOutlined, RightOutlined} from "@ant-design/icons";
+import {useEffect, useState} from "react";
+import {createUnit, deleteUnit, getUnits, updateUnit,} from "../api/api";
 
 function UnitManager() {
     const [units, setUnits] = useState([]);

@@ -85,3 +85,16 @@ export const deleteCompany = (id) => API.delete(`/api/companies/${id}`);
 
 export const updateCompany = (id, data) =>
     API.put(`/api/companies/${id}`, data);
+
+export const getPermissions = () => API.get("/api/permissions");
+export const grantPermission = (data) => API.post("/api/permissions", data);
+export const revokePermission = (data) => API.delete("/api/permissions", { data });
+
+export const updateDefaultAccess = (userId, accessLevel) =>
+    API.put(`/api/users/${userId}/access`, { accessLevel });
+
+export const updateUser = (id, data) =>
+    API.put(`/api/users/${id}`, data);
+
+export const getDocumentsByClientId = (clientId) =>
+    API.get(`/api/documents/client/${clientId}`);

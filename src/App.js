@@ -1,12 +1,11 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, {useContext} from "react";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-
-import { useContext } from "react";
-import { AuthContext } from "./context/AuthContext";
+import {AuthContext} from "./context/AuthContext";
 import AttachmentViewer from "./components/AttachmentViewer";
+import AdminAccessPanel from "./components/AdminAccessPanel";
 
 function App() {
     const { token } = useContext(AuthContext);
@@ -24,6 +23,7 @@ function App() {
                     path="/attachments/view/:documentId/:fileId"
                     element={<AttachmentViewer />}
                 />
+                <Route path="/admin/access" element={<AdminAccessPanel />} />
             </Routes>
         </BrowserRouter>
     );
