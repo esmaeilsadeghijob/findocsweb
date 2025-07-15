@@ -3,6 +3,9 @@ import {Input, message, Spin, Typography} from "antd";
 import {SearchOutlined} from "@ant-design/icons";
 import {getClients} from "../api/api";
 import DocumentGrid from "../components/DocumentGrid";
+import { Button } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import ClientCreateModal from "../components/ClientCreateModal";
 
 const {Title} = Typography;
 
@@ -11,6 +14,7 @@ function ClientDocument() {
     const [selectedClient, setSelectedClient] = useState(null);
     const [clients, setClients] = useState([]);
     const [loadingClients, setLoadingClients] = useState(true);
+    const [showClientModal, setShowClientModal] = useState(false);
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -45,8 +49,25 @@ function ClientDocument() {
         <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
             {/* ستون مشتری‌ها سمت راست */}
             <div style={{width: 200}}>
+                <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    style={{
+                        fontSize: "1rem",
+                        // fontFamily: "FarBaseet",
+                        padding: "0 6px",
+                        marginBottom: "0.5rem",
+                        color: "#1890ff",
+                        width: "100%",
+                        textAlign: "center",
+                    }}
+                    onClick={() => setShowClientModal(true)}
+                >
+                    افزودن مشتری جدید
+                </Button>
+
                 <Title level={5}>لیست مشتری‌ها</Title>
-                <Input
+                               <Input
                     allowClear
                     prefix={<SearchOutlined/>}
                     placeholder="جست‌وجو مشتری"
@@ -116,18 +137,16 @@ function ClientDocument() {
                             style={{
                                 border: "1px solid #ddd",
                                 borderRadius: 8,
-                                padding: "1rem",
-                                marginBottom: "1rem",
+                                padding: "1rem",           // ⬅️ کاهش ظریف در فضای داخلی
+                                marginBottom: "0.75rem",      // ⬅️ کاهش فضای بیرونی کارت
+                                lineHeight: "1.2rem",         // ⬅️ حفظ خوانایی
                             }}
                         >
-                            <Title level={5}>اطلاعات مشتری انتخاب‌شده</Title>
-                            {/*<p>*/}
-                            {/*    <strong>شناسه:</strong> {selectedClient.identifierCode}*/}
-                            {/*</p>*/}
-                            {/*<p>*/}
-                            {/*    <strong>سرویس:</strong> {selectedClient.serviceName}*/}
-                            {/*</p>*/}
-                            <p>
+                            <Title level={5} style={{marginBottom: "0.4rem"}}>
+                                اطلاعات مشتری انتخاب‌شده
+                            </Title>
+
+                            <p style={{margin: 0}}>
                                 <strong>واحد:</strong> {selectedClient.unitName}
                             </p>
                         </div>
