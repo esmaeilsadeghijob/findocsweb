@@ -8,6 +8,8 @@ import {
     getAttachments,
     advanceDocumentStatus,
 } from "../../api/api";
+import {PlusOutlined} from "@ant-design/icons";
+import {Button} from "antd";
 
 const AccessLevels = {
     NONE: "NONE",
@@ -139,11 +141,27 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
             filter={true}
             actionElement={
                 canCreate && (
-                    <AppButton
-                        title="ثبت سند جدید"
-                        color="blue"
-                        onClick={() => console.log("ثبت سند")}
-                    />
+                    // <AppButton
+                    //     title="ثبت سند جدید"
+                    //     color="blue"
+                    //     onClick={() => console.log("ثبت سند")}
+                    // />
+                    <Button
+                        type="text"
+                        icon={<PlusOutlined/>}
+                        style={{
+                            fontSize: "1rem",
+                            // fontFamily: "FarBaseet",
+                            padding: "0 6px",
+                            marginBottom: "0.5rem",
+                            color: "#1890ff",
+                            // width: "100%",
+                            // textAlign: "right",
+                        }}
+                        // onClick={() => setShowClientModal(true)}
+                    >
+                        ثبت سند جدید
+                    </Button>
                 )
             }
         />
