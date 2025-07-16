@@ -2737,12 +2737,7 @@ ag-charts-types@12.0.2:
   resolved "https://registry.npmmirror.com/ag-charts-types/-/ag-charts-types-12.0.2.tgz#7796ac5d717f073145710e7318d22f7fafe6687a"
   integrity sha512-AWM1Y+XW+9VMmV3AbzdVEnreh/I2C9Pmqpc2iLmtId3Xbvmv7O56DqnuDb9EXjK5uPxmyUerTP+utL13UGcztw==
 
-ag-grid-community@31.3.4, ag-grid-community@^31.3.4:
-  version "31.3.4"
-  resolved "https://registry.npmmirror.com/ag-grid-community/-/ag-grid-community-31.3.4.tgz#d9397672d6941aebc633a37b2b32e3637aa05642"
-  integrity sha512-jOxQO86C6eLnk1GdP24HB6aqaouFzMWizgfUwNY5MnetiWzz9ZaAmOGSnW/XBvdjXvC5Fpk3gSbvVKKQ7h9kBw==
-
-ag-grid-community@34.0.2:
+ag-grid-community@34.0.2, ag-grid-community@^34.0.2:
   version "34.0.2"
   resolved "https://registry.npmmirror.com/ag-grid-community/-/ag-grid-community-34.0.2.tgz#7b1239cfda1bca2555611873eb845e0ba2c4ab3f"
   integrity sha512-hVJp5vrmwHRB10YjfSOVni5YJkO/v+asLjT72S4YnIFSx8lAgyPmByNJgtojk1aJ5h6Up93jTEmGDJeuKiWWLA==
@@ -2759,12 +2754,12 @@ ag-grid-enterprise@^34.0.1:
     ag-charts-community "12.0.2"
     ag-charts-enterprise "12.0.2"
 
-ag-grid-react@^31.3.4:
-  version "31.3.4"
-  resolved "https://registry.npmmirror.com/ag-grid-react/-/ag-grid-react-31.3.4.tgz#3e0659c455cbf0facb5af457f260fccb8eb87bea"
-  integrity sha512-WmPASHRFGSTxCMRStWG5bRtln0Ugsdqbb3+Y8sEyGHeLw4hXqfpqie3lT9kqCOl7wPWUjCpwmFdXzRnWPmyyeg==
+ag-grid-react@^34.0.2:
+  version "34.0.2"
+  resolved "https://registry.npmmirror.com/ag-grid-react/-/ag-grid-react-34.0.2.tgz#ae6f4da8175df50a0eeb4ef0aa82f5c77b089a41"
+  integrity sha512-1KBXkTvwtZiYVlSuDzBkiqfHjZgsATOmpLZdAtdmsCSOOOEWai0F9zHHgBuHfyciAE4nrbQWfojkx8IdnwsKFw==
   dependencies:
-    ag-grid-community "31.3.4"
+    ag-grid-community "34.0.2"
     prop-types "^15.8.1"
 
 agent-base@6:

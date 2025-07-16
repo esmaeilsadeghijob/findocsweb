@@ -4,6 +4,7 @@ import {SearchOutlined, PlusOutlined} from "@ant-design/icons";
 import {getClients} from "../api/api";
 import DocumentGrid from "../components/DocumentGrid";
 import ClientCreateModal from "../components/ClientCreateModal";
+import DocGrid from "../components/grid/DocGrid";
 
 const {Title} = Typography;
 
@@ -14,6 +15,9 @@ function ClientDocument() {
     const [loadingClients, setLoadingClients] = useState(true);
     const [showClientModal, setShowClientModal] = useState(false);
     const [userRole, setUserRole] = useState();
+    const [accessLevel, setAccessLevel] = useState();
+    const [roles, setRoles] = useState([]);
+
     const fetchClients = async () => {
         setLoadingClients(true);
         try {
@@ -29,8 +33,12 @@ function ClientDocument() {
     };
 
     useEffect(() => {
-        const roleFromStorage = localStorage.getItem("role");
+        const roleFromStorage = localStorage.getItem("role"); // مثلاً ROLE_ADMIN
+        const accessFromStorage = localStorage.getItem("access"); // مثلاً EDIT
+
         setUserRole(roleFromStorage);
+        setRoles([roleFromStorage]); // به صورت آرایه برای DocGrid
+        setAccessLevel(accessFromStorage);
         fetchClients();
     }, []);
 
@@ -139,7 +147,13 @@ function ClientDocument() {
                             </p>
                         </div>
 
-                        <DocumentGrid clientId={selectedClient.id}/>
+                        {/*<DocumentGrid clientId={selectedClient.id}/>*/}
+                        <DocGrid
+                            clientId={selectedClient.id}
+                            accessLevel={accessLevel}
+                            roles={roles}
+                        />
+
                     </>
                 ) : (
                     <div style={{color: "#999"}}>
