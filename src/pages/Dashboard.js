@@ -46,20 +46,23 @@ function Dashboard() {
         key: item.key, style: {
             minHeight: 160, display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
         }, label: (<div
-                style={{
-                    display: "flex", flexDirection: "column", alignItems: "center",
-                }}
-            >
-                {React.cloneElement(item.icon, {
-                    style: {fontSize: 40, color: "#333"},
-                })}
-                <div style={{fontSize: "0.9rem", marginTop: 8}}>{item.label}</div>
-            </div>),
+            style={{
+                display: "flex", flexDirection: "column", alignItems: "center",
+            }}
+        >
+            {React.cloneElement(item.icon, {
+                style: {fontSize: 40, color: "#333"},
+            })}
+            <div style={{fontSize: "0.9rem", marginTop: 8}}>{item.label}</div>
+        </div>),
     }));
 
     return (<Layout style={{minHeight: "100vh"}}>
         <Header
             style={{
+                position: "sticky",         // ✅ فعال‌سازی sticky
+                top: 0,                     // ✅ در بالای صفحه بچسبه
+                zIndex: 100,                // ✅ نمایش بالاتر از سایر بخش‌ها
                 background: "#fff",
                 padding: "0 1rem",
                 minHeight: "110px",
@@ -67,7 +70,7 @@ function Dashboard() {
                 alignItems: "center",
                 justifyContent: "space-between", // فاصله‌ی یکنواخت بین بخش‌ها
                 boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                zIndex: 1,
+                // zIndex: 1,
             }}
         >
             <div style={{flex: 1, textAlign: "center"}}>
@@ -120,7 +123,7 @@ function Dashboard() {
                     {/* ✅ آواتار و نام کاربری در ستون عمودی */}
                     <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                         <Avatar
-                            icon={<UserOutlined />}
+                            icon={<UserOutlined/>}
                             size={42}
                         />
 
@@ -134,7 +137,8 @@ function Dashboard() {
                                 lineHeight: "1rem",
                             }}
                         >
-                            {localStorage.getItem("username")}
+                            {localStorage.getItem("displayName")?.trim() ||
+                                localStorage.getItem("username")}
                         </div>
                     </div>
 
@@ -156,7 +160,7 @@ function Dashboard() {
 
         </Header>
 
-        <Layout>
+        <Layout style={{minHeight: "100vh", overflow: "auto"}}>
             <Sider
                 width={150}
                 style={{
@@ -184,9 +188,9 @@ function Dashboard() {
                 {currentKey === "users" && <UsersApproval/>}
                 {currentKey === "reference" && <ReferenceManagement/>}
                 {currentKey === "company" && <CompanyManagement/>}
-                </Content>
-            </Layout>
-        </Layout>);
+            </Content>
+        </Layout>
+    </Layout>);
 }
 
 export default Dashboard;

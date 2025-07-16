@@ -1,6 +1,6 @@
-import {Button, Form, message, Modal, Select, Space,} from "antd";
-import {useEffect, useState} from "react";
-import {createClient, getIdentifiers, getServices, getUnits, updateClient,} from "../api/api";
+import { Button, Form, message, Modal, Select, Space } from "antd";
+import { useEffect, useState } from "react";
+import { createClient, getIdentifiers, getServices, getUnits, updateClient } from "../api/api";
 
 function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
     const [form] = Form.useForm();
@@ -55,16 +55,21 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
     return (
         <Modal
             open
-            title={initialData ? "ویرایش مشتری" : "افزودن مشتری جدید"}
+            title={
+                <div style={{ fontFamily: "FarBaseet", fontSize: "1.6rem", textAlign: "center" }}>
+                    {initialData ? "ویرایش مشتری" : "افزودن مشتری جدید"}
+                </div>
+            }
             onCancel={onClose}
             footer={null}
             centered
+            style={{ fontFamily: "FarBaseet" }}
         >
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={handleSubmit}
-                style={{ marginTop: 12 }}
+                style={{ marginTop: 12, fontFamily: "FarBaseet" }}
             >
                 <Form.Item
                     name="identifierCode"
@@ -79,6 +84,7 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: i.code,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
@@ -95,6 +101,7 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: s.name,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
@@ -111,15 +118,17 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: u.name,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
-                <Space style={{ display: "flex", justifyContent: "end" }}>
+                {/* ✅ دکمه‌ها وسط فرم */}
+                <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem", gap: "1rem" }}>
                     <Button onClick={onClose}>انصراف</Button>
                     <Button type="primary" htmlType="submit">
                         ذخیره
                     </Button>
-                </Space>
+                </div>
             </Form>
         </Modal>
     );

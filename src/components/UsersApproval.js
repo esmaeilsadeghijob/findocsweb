@@ -139,6 +139,19 @@ function UsersApproval() {
         try {
             await updateUser(id, editValues);
             message.success("ویرایش انجام شد");
+
+            const currentUsername = localStorage.getItem("username");
+
+            // ✅ اگر کاربری که ویرایش شده همان کاربر لاگین‌کرده باشد
+            if (editValues.username === currentUsername) {
+                const displayName =
+                    editValues.firstName?.trim() ||
+                    `${editValues.firstName?.trim() ?? ""} ${editValues.lastName?.trim() ?? ""}`.trim() ||
+                    editValues.username;
+
+                localStorage.setItem("displayName", displayName);
+            }
+
             fetchData();
             cancelEdit();
         } catch {
@@ -228,29 +241,55 @@ function UsersApproval() {
             render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>
         },
         {
-            title: "شناسه",
+            title: "شرکت",
             render: (_, r) => (
                 <Select
-                    style={{width: 160}}
+                    style={{
+                        width: "100%",               // ✅ هم‌عرض با ستون Table
+                        // fontFamily: "FarBaseet",
+                        fontSize: "0.9rem",
+                        borderRadius: 6,
+                        backgroundColor: "#fcfcfc",
+                    }}
+                    placeholder="انتخاب شناسه"
                     value={r.identifierId}
                     onChange={(val) => handleIdentifierChange(r.id, val)}
+                    disabled={r.role?.name === "ROLE_ADMIN"}
+                    dropdownStyle={{
+                        // fontFamily: "FarBaseet",
+                        fontSize: "0.95rem",
+                        backgroundColor: "#fffefc"
+                    }}
+                    optionLabelProp="label"
                     options={identifiers.map((i) => ({
-                        label: i.name || i.code,
+                        label: `${i.name || "شناسه"} — ${i.code}`,
                         value: i.id
                     }))}
-                    disabled={r.role?.name === "ROLE_ADMIN"} // ✅ غیرفعال برای ادمین
-                />
+                >
+                </Select>
             )
         },
         {
             title: "سطح دسترسی",
             render: (_, r) => (
                 <Select
-                    style={{width: 140}}
+                    style={{
+                        width: "100%",               // ✅ تنظیم عرض هم‌خوان با ستون Table
+                        // fontFamily: "FarBaseet",
+                        fontSize: "0.9rem",
+                        borderRadius: 6,
+                        backgroundColor: "#fcfcfc",
+                    }}
+                    placeholder="انتخاب سطح دسترسی"
                     value={r.role?.name === "ROLE_ADMIN" ? "OWNER" : r.defaultAccess}
                     onChange={(val) => handleAccessChange(r.id, val)}
                     options={accessOptions}
-                    disabled={r.role?.name === "ROLE_ADMIN"} // ✅ غیرفعال برای ادمین
+                    disabled={r.role?.name === "ROLE_ADMIN"} // ⛔️ غیرفعال برای ROLE_ADMIN
+                    dropdownStyle={{
+                        // fontFamily: "FarBaseet",
+                        fontSize: "0.95rem",
+                        backgroundColor: "#fffefc"
+                    }}
                 />
             )
         },

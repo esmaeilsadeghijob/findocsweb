@@ -17,6 +17,7 @@ function Login() {
             localStorage.setItem("identifierCode", res.data.identifierCode);
             localStorage.setItem("username", res.data.username);
             localStorage.setItem("documentAccess", res.data.defaultAccessLevel);
+            localStorage.setItem("displayName", res.data.displayName);
             message.success("ورود موفق");
             navigate("/");
         } catch {
