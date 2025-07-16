@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Input, message, Spin, Typography, Button } from "antd";
-import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
-import { getClients } from "../api/api";
+import React, {useEffect, useMemo, useState} from "react";
+import {Input, message, Spin, Typography, Button} from "antd";
+import {SearchOutlined, PlusOutlined} from "@ant-design/icons";
+import {getClients} from "../api/api";
 import DocumentGrid from "../components/DocumentGrid";
 import ClientCreateModal from "../components/ClientCreateModal";
 
-const { Title } = Typography;
+const {Title} = Typography;
 
 function ClientDocument() {
     const [searchText, setSearchText] = useState("");
@@ -13,7 +13,7 @@ function ClientDocument() {
     const [clients, setClients] = useState([]);
     const [loadingClients, setLoadingClients] = useState(true);
     const [showClientModal, setShowClientModal] = useState(false);
-
+    const [userRole, setUserRole] = useState();
     const fetchClients = async () => {
         setLoadingClients(true);
         try {
@@ -29,6 +29,8 @@ function ClientDocument() {
     };
 
     useEffect(() => {
+        const roleFromStorage = localStorage.getItem("role");
+        setUserRole(roleFromStorage);
         fetchClients();
     }, []);
 
@@ -44,37 +46,39 @@ function ClientDocument() {
     }, [searchText, clients]);
 
     return (
-        <div style={{ display: "flex", gap: "2rem", padding: "2rem" }}>
+        <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
             {/* ستون مشتری‌ها سمت راست */}
-            <div style={{ width: 200 }}>
-                <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    style={{
-                        fontSize: "1rem",
-                        // fontFamily: "FarBaseet",
-                        padding: "0 6px",
-                        marginBottom: "0.5rem",
-                        color: "#1890ff",
-                        width: "100%",
-                        textAlign: "center",
-                    }}
-                    onClick={() => setShowClientModal(true)}
-                >
-                    افزودن مشتری جدید
-                </Button>
+            <div style={{width: 200}}>
+                {userRole === "ROLE_ADMIN" && (
+                    <Button
+                        type="text"
+                        icon={<PlusOutlined/>}
+                        style={{
+                            fontSize: "1rem",
+                            // fontFamily: "FarBaseet",
+                            padding: "0 6px",
+                            marginBottom: "0.5rem",
+                            color: "#1890ff",
+                            width: "100%",
+                            textAlign: "center",
+                        }}
+                        onClick={() => setShowClientModal(true)}
+                    >
+                        افزودن مشتری جدید
+                    </Button>
+                )}
 
                 <Title level={5}>لیست مشتری‌ها</Title>
                 <Input
                     allowClear
-                    prefix={<SearchOutlined />}
+                    prefix={<SearchOutlined/>}
                     placeholder="جست‌وجو مشتری"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    style={{ marginBottom: "1rem" }}
+                    style={{marginBottom: "1rem"}}
                 />
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
                     <div
                         style={{
                             display: "flex",
@@ -83,13 +87,13 @@ function ClientDocument() {
                             borderBottom: "1px solid #ccc",
                         }}
                     >
-                        <div style={{ width: "100%", textAlign: "center" }}>واحد</div>
+                        <div style={{width: "100%", textAlign: "center"}}>واحد</div>
                     </div>
 
                     {loadingClients ? (
-                        <Spin />
+                        <Spin/>
                     ) : filteredClients.length === 0 ? (
-                        <div style={{ color: "#999", marginTop: "1rem" }}>
+                        <div style={{color: "#999", marginTop: "1rem"}}>
                             موردی یافت نشد
                         </div>
                     ) : (
@@ -106,7 +110,7 @@ function ClientDocument() {
                                     cursor: "pointer",
                                 }}
                             >
-                                <div style={{ width: "100%" }}>{client.unitName}</div>
+                                <div style={{width: "100%"}}>{client.unitName}</div>
                             </div>
                         ))
                     )}
@@ -114,7 +118,7 @@ function ClientDocument() {
             </div>
 
             {/* ستون اطلاعات سمت چپ */}
-            <div style={{ flex: 1 }}>
+            <div style={{flex: 1}}>
                 {selectedClient ? (
                     <>
                         <div
@@ -126,19 +130,19 @@ function ClientDocument() {
                                 lineHeight: "1.2rem",
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: "0.4rem" }}>
+                            <Title level={5} style={{marginBottom: "0.4rem"}}>
                                 اطلاعات مشتری انتخاب‌شده
                             </Title>
 
-                            <p style={{ margin: 0 }}>
+                            <p style={{margin: 0}}>
                                 <strong>واحد:</strong> {selectedClient.unitName}
                             </p>
                         </div>
 
-                        <DocumentGrid clientId={selectedClient.id} />
+                        <DocumentGrid clientId={selectedClient.id}/>
                     </>
                 ) : (
-                    <div style={{ color: "#999" }}>
+                    <div style={{color: "#999"}}>
                         لطفاً یک مشتری را از لیست سمت راست انتخاب کنید...
                     </div>
                 )}
