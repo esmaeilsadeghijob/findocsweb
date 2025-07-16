@@ -150,10 +150,15 @@ function ClientDocument() {
                         {/*<DocumentGrid clientId={selectedClient.id}/>*/}
                         <DocGrid
                             clientId={selectedClient.id}
+                            unitId={selectedClient.unitId}
+                            unitName={selectedClient.unitName}
+                            serviceId={selectedClient.serviceId}
+                            serviceName={selectedClient.serviceName}
+                            periodId={selectedClient.periodId}
+                            fiscalYear={selectedClient.fiscalYear}
                             accessLevel={accessLevel}
                             roles={roles}
                         />
-
                     </>
                 ) : (
                     <div style={{color: "#999"}}>

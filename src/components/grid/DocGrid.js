@@ -1,19 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Tabel from "./Tabel";
 import TabelActionBtn from "./TabelActionBtn";
-import DocumentFormModal from "./DocumentFormModal"; // ✅ مودال جدید ثبت سند
+import DocumentFormModal from "./DocumentFormModal";
 import { PlusOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import {
     getDocumentsByClientId,
     deleteDocument,
     getAttachments,
     advanceDocumentStatus,
 } from "../../api/api";
-
-// اگر واحد و سرویس در مسیر بالا قابل دستیابی هستند، اینا رو از props یا context بگیر
-const currentServiceName = "سرویس مالیات";  // ⬅️ سرویس جاری
-const currentUnitName = "واحد مرکزی";       // ⬅️ واحد جاری
 
 const AccessLevels = {
     NONE: "NONE",
@@ -26,7 +22,17 @@ const AccessLevels = {
     REVERT: "REVERT",
 };
 
-const DocGrid = ({ clientId, accessLevel, roles }) => {
+const DocGrid = ({
+                     clientId,
+                     unitId,
+                     unitName,
+                     serviceId,
+                     serviceName,
+                     periodId,
+                     fiscalYear,
+                     accessLevel,
+                     roles,
+                 }) => {
     const [documents, setDocuments] = useState([]);
     const [showModal, setShowModal] = useState(false);
 
@@ -39,59 +45,62 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
     const canRevert = isAdmin || ["REVERT", "OWNER"].includes(accessLevel);
     const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
-    const fetchDocuments = () => {
+    const fetchDocuments = async () => {
         if (!clientId) return;
-        getDocumentsByClientId(clientId)
-            .then((res) => {
-                const cleanDocuments = res.data.map((doc) => ({
-                    ...doc,
-                    documentNumber: doc.documentNumber ? String(doc.documentNumber) : "",
-                    fiscalYear: doc.fiscalYear ? String(doc.fiscalYear) : "",
-                    serviceName: doc.serviceName || "",
-                    description: doc.description || "",
-                    status: doc.status || "",
-                }));
-                setDocuments(cleanDocuments);
-            })
-            .catch(() => setDocuments([]));
+        try {
+            const res = await getDocumentsByClientId(clientId);
+            const clean = res.data.map((doc) => ({
+                ...doc,
+                documentNumber: doc.documentNumber ? String(doc.documentNumber) : "",
+                fiscalYear: doc.fiscalYear ? String(doc.fiscalYear) : "",
+                serviceName: doc.serviceName || "",
+                description: doc.description || "",
+                status: doc.status || "",
+            }));
+            setDocuments(clean);
+        } catch {
+            message.error("❌ خطا در دریافت اسناد");
+            setDocuments([]);
+        }
     };
 
     useEffect(() => {
         fetchDocuments();
     }, [clientId]);
 
-    const handleEdit = (doc) => console.log("ویرایش سند:", doc);
     const handleDelete = async (id) => {
         try {
             await deleteDocument(id);
             setDocuments((prev) => prev.filter((d) => d.id !== id));
-        } catch (err) {
-            console.error("خطا در حذف سند:", err);
+        } catch {
+            message.error("❌ خطا در حذف سند");
         }
     };
+
     const handleDownload = async (doc) => {
         try {
             const res = await getAttachments(doc.id);
-            console.log("ضمیمه‌ها:", res.data);
-        } catch (err) {
-            console.error("خطا در دریافت ضمیمه‌ها:", err);
+            console.log("📎 ضمیمه‌ها:", res.data);
+        } catch {
+            message.error("❌ خطا در دریافت ضمیمه‌ها");
         }
     };
+
     const handleRevert = async (doc) => {
         try {
             await advanceDocumentStatus(doc.id);
             fetchDocuments();
-        } catch (err) {
-            console.error("خطا در بازگردانی:", err);
+        } catch {
+            message.error("❌ خطا در تغییر وضعیت سند");
         }
     };
 
     const columns = useMemo(() => [
-        { field: "documentNumber", headerName: "شماره سند", sortable: true, filter: "agTextColumnFilter" },
-        { field: "fiscalYear", headerName: "سال مالی", sortable: true, filter: "agTextColumnFilter" },
-        { field: "serviceName", headerName: "سرویس", sortable: true, filter: "agTextColumnFilter" },
-        { field: "description", headerName: "شرح", sortable: true, filter: "agTextColumnFilter" },
-        { field: "status", headerName: "وضعیت", sortable: true, filter: "agTextColumnFilter" },
+        { field: "documentNumber", headerName: "شماره سند", sortable: true },
+        { field: "fiscalYear", headerName: "سال مالی", sortable: true },
+        { field: "serviceName", headerName: "سرویس", sortable: true },
+        { field: "description", headerName: "شرح", sortable: true },
+        { field: "status", headerName: "وضعیت", sortable: true },
         {
             headerName: "عملیات",
             field: "actions",
@@ -103,7 +112,7 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
                         <TabelActionBtn
                             title="ویرایش"
                             type="edit"
-                            onClick={() => handleEdit(params.data)}
+                            onClick={() => console.log("ویرایش", params.data)}
                         />
                     )}
                     {canDownload && (
@@ -142,10 +151,10 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
                 columnDefs={columns}
                 rowData={documents}
                 sortCol
-                search={true}
-                excel={true}
-                csv={true}
-                filter={true}
+                search
+                excel
+                csv
+                filter
                 actionElement={
                     canCreate && (
                         <Button
@@ -157,7 +166,13 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
                                 marginBottom: "0.5rem",
                                 color: "#1890ff",
                             }}
-                            onClick={() => setShowModal(true)}
+                            onClick={() => {
+                                if (serviceId && unitId) {
+                                    setShowModal(true);
+                                } else {
+                                    message.warning("اطلاعات سرویس یا واحد کامل نیست");
+                                }
+                            }}
                         >
                             ثبت سند جدید
                         </Button>
@@ -167,10 +182,14 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
 
             {showModal && (
                 <DocumentFormModal
-                    visible={true}
+                    visible
                     clientId={clientId}
-                    defaultService={currentServiceName}
-                    defaultUnit={currentUnitName}
+                    unitId={unitId}
+                    unitName={unitName}
+                    serviceId={serviceId}
+                    serviceName={serviceName}
+                    periodId={periodId}
+                    defaultPeriodLabel={fiscalYear}
                     onCancel={() => setShowModal(false)}
                     onSuccess={() => {
                         setShowModal(false);

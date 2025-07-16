@@ -1,29 +1,60 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, DatePicker, Select, message } from "antd";
-import { getPeriods } from "../../api/api"; // فرض بر اینکه چنین API وجود داره
+import moment from "moment-jalaali";
+import { getPeriods, createDocument } from "../../api/api";
 
-const DocumentFormModal = ({ visible, clientId, defaultService, defaultUnit, onCancel, onSuccess }) => {
+moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
+
+const DocumentFormModal = ({
+                               visible,
+                               clientId,
+                               unitId,
+                               unitName,
+                               serviceId,
+                               serviceName,
+                               periodId,
+                               defaultPeriodLabel,
+                               onCancel,
+                               onSuccess,
+                           }) => {
     const [form] = Form.useForm();
-    const [years, setYears] = useState([]);
+    const [periods, setPeriods] = useState([]);
 
     useEffect(() => {
         getPeriods()
-            .then(res => setYears(res.data))
-            .catch(() => setYears([]));
+            .then((res) => setPeriods(res.data))
+            .catch(() => setPeriods([]));
     }, []);
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
 
-            // ⚙️ ارسال اطلاعات به API ثبت سند
-            // await createDocument({ ...values, clientId, serviceName: defaultService, unitName: defaultUnit });
+            const selectedPeriod = periods.find(p => p.fiscalYear === values.fiscalYear);
+            if (!selectedPeriod) {
+                message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
+                return;
+            }
 
-            message.success("سند با موفقیت ثبت شد");
+            const payload = {
+                clientId,
+                unitId,
+                serviceId,
+                periodId: selectedPeriod.id,
+                unitName,
+                serviceName,
+                fiscalYear: selectedPeriod.fiscalYear,
+                documentNumber: values.documentNumber,
+                documentDate: values.documentDate.format("YYYY-MM-DD"),
+                description: values.description || "",
+            };
+
+            await createDocument(payload);
+            message.success("✅ سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch {
-            message.error("لطفاً فیلدها را به‌درستی وارد کنید");
+            message.error("⚠️ خطا در ثبت سند");
         }
     };
 
@@ -38,11 +69,11 @@ const DocumentFormModal = ({ visible, clientId, defaultService, defaultUnit, onC
         >
             <Form form={form} layout="vertical">
                 <Form.Item label="سرویس">
-                    <Input value={defaultService} disabled />
+                    <Input value={serviceName || "—"} disabled />
                 </Form.Item>
 
                 <Form.Item label="واحد">
-                    <Input value={defaultUnit} disabled />
+                    <Input value={unitName || "—"} disabled />
                 </Form.Item>
 
                 <Form.Item
@@ -51,9 +82,9 @@ const DocumentFormModal = ({ visible, clientId, defaultService, defaultUnit, onC
                     rules={[{ required: true, message: "انتخاب سال مالی الزامی است" }]}
                 >
                     <Select placeholder="انتخاب سال مالی">
-                        {years.map((y) => (
-                            <Select.Option key={y.id} value={y.fiscalYear}>
-                                {y.fiscalYear}
+                        {periods.map(p => (
+                            <Select.Option key={p.id} value={p.fiscalYear}>
+                                {p.fiscalYear}
                             </Select.Option>
                         ))}
                     </Select>
@@ -72,7 +103,11 @@ const DocumentFormModal = ({ visible, clientId, defaultService, defaultUnit, onC
                     label="تاریخ سند"
                     rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
                 >
-                    <DatePicker style={{ width: "100%" }} />
+                    <DatePicker
+                        format="jYYYY/jMM/jDD"
+                        style={{ width: "100%" }}
+                        placeholder="مثلاً: 1403/05/22"
+                    />
                 </Form.Item>
 
                 <Form.Item name="description" label="شرح">
