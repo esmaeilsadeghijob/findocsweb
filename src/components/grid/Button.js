@@ -1,14 +1,13 @@
 import React from "react";
 
-const AppButton = ({ title, color = "blue", onClick, className = "" }) => {
-    const bg = color === "green" ? "#52c41a" : "#1890ff";
+const AppButton = ({ title, color = "blue", onClick }) => {
+    const background = color === "green" ? "#52c41a" : "#1890ff";
 
     return (
         <button
-            className={className}
             onClick={onClick}
             style={{
-                backgroundColor: bg,
+                backgroundColor: background,
                 color: "#fff",
                 padding: "6px 12px",
                 border: "none",

@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { AgGridReact } from "ag-grid-react";
+import { useEffect, useMemo, useState } from "react";
+import Tabel from "./Tabel";
+import TabelActionBtn from "./TabelActionBtn";
+import AppButton from "./Button";
 import {
     getDocumentsByClientId,
     deleteDocument,
     getAttachments,
     advanceDocumentStatus,
 } from "../../api/api";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
 
 const AccessLevels = {
     NONE: "NONE",
@@ -25,9 +25,7 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
 
-    const canRead =
-        isAdmin ||
-        ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
+    const canRead = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
     const canEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
     const canDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
     const canDownload = isAdmin || ["DOWNLOAD", "OWNER"].includes(accessLevel);
@@ -37,15 +35,31 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
     useEffect(() => {
         if (clientId) {
             getDocumentsByClientId(clientId)
-                .then((res) => setDocuments(res.data))
+                .then((res) => {
+                    // تبدیل مقادیر عددی به رشته برای سازگاری با فیلتر سریع
+                    const cleanDocuments = res.data.map(doc => ({
+                        ...doc,
+                        documentNumber: doc.documentNumber ? String(doc.documentNumber) : "",
+                        fiscalYear: doc.fiscalYear ? String(doc.fiscalYear) : "",
+                        serviceName: doc.serviceName || "",
+                        description: doc.description || "",
+                        status: doc.status || "",
+                    }));
+                    setDocuments(cleanDocuments);
+                })
                 .catch(() => setDocuments([]));
         }
     }, [clientId]);
 
-    const handleEdit = (doc) => {
-        console.log("ویرایش سند:", doc);
+    const handleEdit = (doc) => console.log("ویرایش سند:", doc);
+    const handleDelete = async (id) => {
+        try {
+            await deleteDocument(id);
+            setDocuments(prev => prev.filter(d => d.id !== id));
+        } catch (err) {
+            console.error("خطا در حذف سند:", err);
+        }
     };
-
     const handleDownload = async (doc) => {
         try {
             const res = await getAttachments(doc.id);
@@ -54,20 +68,10 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
             console.error("خطا در دریافت ضمیمه‌ها:", err);
         }
     };
-
-    const handleDelete = async (id) => {
-        try {
-            await deleteDocument(id);
-            setDocuments((prev) => prev.filter((d) => d.id !== id));
-        } catch (err) {
-            console.error("خطا در حذف سند:", err);
-        }
-    };
-
     const handleRevert = async (doc) => {
         try {
             await advanceDocumentStatus(doc.id);
-            console.log("بازگردانی انجام شد");
+            console.log("بازگردانی موفق");
         } catch (err) {
             console.error("خطا در بازگردانی:", err);
         }
@@ -75,52 +79,48 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
 
     const columns = useMemo(() => [
         {
-            headerName: "شماره سند",
             field: "documentNumber",
+            headerName: "شماره سند",
             sortable: true,
-            filter: true,
+            filter: "agTextColumnFilter",
         },
         {
-            headerName: "سال مالی",
             field: "fiscalYear",
+            headerName: "سال مالی",
             sortable: true,
-            filter: true,
+            filter: "agTextColumnFilter",
         },
         {
-            headerName: "سرویس",
             field: "serviceName",
+            headerName: "سرویس",
             sortable: true,
-            filter: true,
+            filter: "agTextColumnFilter",
         },
         {
-            headerName: "شرح",
             field: "description",
+            headerName: "شرح",
             sortable: true,
-            filter: true,
-            flex: 2,
+            filter: "agTextColumnFilter",
         },
         {
-            headerName: "وضعیت",
             field: "status",
+            headerName: "وضعیت",
             sortable: true,
-            filter: true,
+            filter: "agTextColumnFilter",
         },
         {
             headerName: "عملیات",
             field: "actions",
             pinned: "left",
             maxWidth: 160,
-            cellRenderer: (params) => {
-                const doc = params.data;
-                return (
-                    <div style={{ display: "flex", gap: "6px" }}>
-                        {canEdit && <button onClick={() => handleEdit(doc)}>✏️</button>}
-                        {canDownload && <button onClick={() => handleDownload(doc)}>📥</button>}
-                        {canDelete && <button onClick={() => handleDelete(doc.id)}>🗑️</button>}
-                        {canRevert && <button onClick={() => handleRevert(doc)}>🔄</button>}
-                    </div>
-                );
-            },
+            cellRenderer: (params) => (
+                <div style={{ display: "flex", gap: "6px" }}>
+                    {canEdit && <TabelActionBtn title="ویرایش" type="edit" onClick={() => handleEdit(params.data)} />}
+                    {canDownload && <TabelActionBtn title="دانلود" type="view" onClick={() => handleDownload(params.data)} />}
+                    {canDelete && <TabelActionBtn title="حذف" type="delete" onClick={() => handleDelete(params.data.id)} />}
+                    {canRevert && <TabelActionBtn title="بازگردانی" type="restore" onClick={() => handleRevert(params.data)} />}
+                </div>
+            ),
         },
     ], [canEdit, canDownload, canDelete, canRevert]);
 
@@ -129,35 +129,24 @@ const DocGrid = ({ clientId, accessLevel, roles }) => {
     }
 
     return (
-        <div style={{ width: "100%" }}>
-            {canCreate && (
-                <div style={{ marginBottom: "1rem" }}>
-                    <button
-                        style={{
-                            backgroundColor: "#1890ff",
-                            color: "#fff",
-                            padding: "6px 12px",
-                            border: "none",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                        }}
+        <Tabel
+            columnDefs={columns}
+            rowData={documents}
+            sortCol
+            search={true}
+            excel={true}
+            csv={true}
+            filter={true}
+            actionElement={
+                canCreate && (
+                    <AppButton
+                        title="ثبت سند جدید"
+                        color="blue"
                         onClick={() => console.log("ثبت سند")}
-                    >
-                        ثبت سند جدید
-                    </button>
-                </div>
-            )}
-
-            <div className="ag-theme-alpine" style={{ height: 500 }}>
-                <AgGridReact
-                    rowData={documents}
-                    columnDefs={columns}
-                    pagination={true}
-                    animateRows={true}
-                    domLayout="autoHeight"
-                />
-            </div>
-        </div>
+                    />
+                )
+            }
+        />
     );
 };
 

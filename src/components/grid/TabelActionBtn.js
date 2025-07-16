@@ -1,7 +1,7 @@
 import React from "react";
 
 const TabelActionBtn = ({ title, type, onClick }) => {
-    const styles = {
+    const colors = {
         edit: "#1890ff",
         delete: "#ff4d4f",
         view: "#52c41a",
@@ -12,7 +12,7 @@ const TabelActionBtn = ({ title, type, onClick }) => {
         <button
             onClick={onClick}
             style={{
-                backgroundColor: styles[type] || "#888",
+                backgroundColor: colors[type] || "#888",
                 color: "#fff",
                 padding: "4px 8px",
                 borderRadius: "4px",
