@@ -41,7 +41,6 @@ const DocGrid = ({
     const canRead = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
     const canEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
     const canDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
-    const canDownload = isAdmin || ["DOWNLOAD", "OWNER"].includes(accessLevel);
     const canRevert = isAdmin || ["REVERT", "OWNER"].includes(accessLevel);
     const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
@@ -49,7 +48,23 @@ const DocGrid = ({
         if (!clientId) return;
         try {
             const res = await getDocumentsByClientId(clientId);
-            const clean = res.data.map((doc) => ({
+            const documentList = res.data;
+
+            const enrichedDocs = await Promise.all(
+                documentList.map((doc) =>
+                    getAttachments(doc.id)
+                        .then((res) => ({
+                            ...doc,
+                            attachmentLinks: res.data || [],
+                        }))
+                        .catch(() => ({
+                            ...doc,
+                            attachmentLinks: [],
+                        }))
+                )
+            );
+
+            const clean = enrichedDocs.map((doc) => ({
                 ...doc,
                 documentNumber: doc.documentNumber ? String(doc.documentNumber) : "",
                 fiscalYear: doc.fiscalYear ? String(doc.fiscalYear) : "",
@@ -57,6 +72,7 @@ const DocGrid = ({
                 description: doc.description || "",
                 status: doc.status || "",
             }));
+
             setDocuments(clean);
         } catch {
             message.error("❌ خطا در دریافت اسناد");
@@ -77,15 +93,6 @@ const DocGrid = ({
         }
     };
 
-    const handleDownload = async (doc) => {
-        try {
-            const res = await getAttachments(doc.id);
-            console.log("📎 ضمیمه‌ها:", res.data);
-        } catch {
-            message.error("❌ خطا در دریافت ضمیمه‌ها");
-        }
-    };
-
     const handleRevert = async (doc) => {
         try {
             await advanceDocumentStatus(doc.id);
@@ -96,16 +103,14 @@ const DocGrid = ({
     };
 
     const columns = useMemo(() => [
-        { field: "documentNumber", headerName: "شماره سند", sortable: true },
-        { field: "fiscalYear", headerName: "سال مالی", sortable: true },
-        { field: "serviceName", headerName: "سرویس", sortable: true },
-        { field: "description", headerName: "شرح", sortable: true },
-        { field: "status", headerName: "وضعیت", sortable: true },
+        { field: "documentNumber", headerName: "شماره سند" },
+        { field: "fiscalYear", headerName: "سال مالی" },
+        { field: "serviceName", headerName: "سرویس" },
+        { field: "description", headerName: "شرح" },
+        { field: "status", headerName: "وضعیت" },
         {
-            headerName: "عملیات",
             field: "actions",
-            pinned: "left",
-            maxWidth: 160,
+            headerName: "عملیات",
             cellRenderer: (params) => (
                 <div style={{ display: "flex", gap: "6px" }}>
                     {canEdit && (
@@ -113,13 +118,6 @@ const DocGrid = ({
                             title="ویرایش"
                             type="edit"
                             onClick={() => console.log("ویرایش", params.data)}
-                        />
-                    )}
-                    {canDownload && (
-                        <TabelActionBtn
-                            title="دانلود"
-                            type="view"
-                            onClick={() => handleDownload(params.data)}
                         />
                     )}
                     {canDelete && (
@@ -139,7 +137,7 @@ const DocGrid = ({
                 </div>
             ),
         },
-    ], [canEdit, canDownload, canDelete, canRevert]);
+    ], [canEdit, canDelete, canRevert]);
 
     if (!canRead) {
         return <div style={{ color: "red" }}>⛔ شما مجاز به مشاهده اسناد نیستید!</div>;
