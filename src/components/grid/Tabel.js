@@ -21,6 +21,13 @@ const Tabel = ({
         sortable: sortCol,
         filter: filter,
         minWidth: 160,
+        cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center", // ✅ وسط‌چین افقی
+            height: "100%",           // ✅ پر کردن ارتفاع سلول
+        },
+        headerClass: "ag-center-cols-header", // ✅ وسط‌چین عنوان ستون‌ها
     }), [sortCol, filter]);
 
     // 🔍 فیلتر دیتا طبق متن سرچ
@@ -40,8 +47,9 @@ const Tabel = ({
     }, []);
 
     return (
-        <div className="w-full flex flex-col gap-3.5">
-            <div className="flex justify-between items-center gap-3 flex-col sm:flex-row">
+        <div className="w-full flex flex-col gap-6">
+            <div className="flex justify-between items-center gap-3 flex-col sm:flex-row"
+                 style={{marginBottom: "0.5rem"}}>
                 {actionElement}
                 {search && (
                     <input
@@ -53,7 +61,8 @@ const Tabel = ({
                             border: "1px solid #ccc",
                             borderRadius: "6px",
                             fontSize: "13px",
-                            width: "250px",
+                            width: "400px",
+                            marginRight: "1rem"
                         }}
                     />
                 )}
@@ -67,6 +76,7 @@ const Tabel = ({
                     pagination={true}
                     domLayout="autoHeight"
                     animateRows={true}
+                    headerHeight={48}
                 />
             </div>
         </div>
