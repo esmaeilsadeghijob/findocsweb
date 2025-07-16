@@ -1,9 +1,14 @@
-import React, { useState, useMemo, useCallback } from "react";
-import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { Button, Tooltip } from "antd";
-import { PlusSquareOutlined, MinusSquareOutlined, UploadOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+    PlusSquareOutlined,
+    MinusSquareOutlined,
+    UploadOutlined,
+    EyeOutlined,
+    DeleteOutlined,
+} from "@ant-design/icons";
+import UploadModal from "./UploadModal";
+import { getAttachments } from "../../api/api";
 
 const Tabel = ({
                    columnDefs,
@@ -14,33 +19,67 @@ const Tabel = ({
                    excel = true,
                    csv = true,
                    filter = true,
+                   onRefreshRowData,
                }) => {
     const [searchText, setSearchText] = useState("");
     const [expandedRows, setExpandedRows] = useState({});
+    const [selectedRowId, setSelectedRowId] = useState(null);
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [internalRows, setInternalRows] = useState(rowData);
 
-    const defaultColDef = useMemo(() => ({
-        flex: 1,
-        resizable: true,
-        sortable: sortCol,
-        filter: filter,
-        minWidth: 160,
-        cellStyle: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-        },
-        headerClass: "ag-center-cols-header",
-    }), [sortCol, filter]);
+    // ⬅ بروزرسانی داده‌های داخلی وقتی rowData تغییر کنه
+    useEffect(() => {
+        setInternalRows(rowData);
+    }, [rowData]);
+
+    // ⬅ گسترش ردیف‌ها هنگام جستجو
+    useEffect(() => {
+        if (!searchText) {
+            setExpandedRows({});
+            return;
+        }
+
+        const autoExpanded = {};
+        rowData.forEach((row) => {
+            const matches = row.attachmentLinks?.some(
+                (file) =>
+                    typeof file.fileName === "string" &&
+                    file.fileName.toLowerCase().includes(searchText.toLowerCase())
+            );
+            if (matches) {
+                autoExpanded[row.id] = true;
+            }
+        });
+
+        setExpandedRows(autoExpanded);
+    }, [searchText, rowData]);
+
+    const defaultColDef = useMemo(
+        () => ({
+            flex: 1,
+            resizable: true,
+            sortable: sortCol,
+            filter: filter,
+            minWidth: 160,
+            cellStyle: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+            },
+            headerClass: "ag-center-cols-header",
+        }),
+        [sortCol, filter]
+    );
 
     const filteredRows = useMemo(() => {
-        if (!searchText) return rowData;
+        if (!searchText) return internalRows;
 
-        return rowData.filter((row) => {
+        return internalRows.filter((row) => {
             const textContent = [
                 ...Object.values(row),
                 ...(Array.isArray(row.attachmentLinks)
-                    ? row.attachmentLinks.map(f => f.fileName)
+                    ? row.attachmentLinks.map((f) => f.fileName)
                     : []),
             ]
                 .filter((val) => typeof val === "string")
@@ -49,7 +88,7 @@ const Tabel = ({
 
             return textContent.includes(searchText.toLowerCase());
         });
-    }, [searchText, rowData]);
+    }, [searchText, internalRows]);
 
     const toggleExpand = (id) => {
         setExpandedRows((prev) => ({
@@ -61,6 +100,36 @@ const Tabel = ({
     const handleSearchInput = useCallback((e) => {
         setSearchText(e.target.value);
     }, []);
+
+    const handleDeleteFile = (docId, fileId) => {
+        console.log("❌ حذف فایل", fileId, "از سند", docId);
+        // ⬅ اضافه کردن منطق حذف و سپس fetch ضمیمه‌ها
+    };
+
+    const handleUploadSuccess = async () => {
+        console.log("✅ فایل جدید بارگذاری شد");
+        setShowUploadModal(false);
+
+        try {
+            const res = await getAttachments(selectedRowId);
+            const updatedAttachments = res.data || [];
+
+            const updated = internalRows.map((row) =>
+                row.id === selectedRowId
+                    ? { ...row, attachmentLinks: updatedAttachments }
+                    : row
+            );
+
+            setInternalRows(updated);
+        } catch {
+            console.warn("❌ خطا در دریافت ضمیمه‌های جدید");
+        }
+
+        // اگر خواستی کل سندها رفرش بشن:
+        if (typeof onRefreshRowData === "function") {
+            onRefreshRowData();
+        }
+    };
 
     return (
         <div className="w-full flex flex-col gap-6">
@@ -89,7 +158,14 @@ const Tabel = ({
             <div className="ag-theme-alpine" style={{ width: "100%" }}>
                 {filteredRows.map((row) => (
                     <div key={row.id} style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingInline: 12 }}>
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                paddingInline: 12,
+                            }}
+                        >
                             <Button
                                 type="text"
                                 icon={
@@ -110,7 +186,10 @@ const Tabel = ({
                                     <Button
                                         type="dashed"
                                         icon={<UploadOutlined />}
-                                        onClick={() => console.log("📤 آپلود فایل جدید برای سند:", row.id)}
+                                        onClick={() => {
+                                            setSelectedRowId(row.id);
+                                            setShowUploadModal(true);
+                                        }}
                                     >
                                         بارگذاری فایل جدید
                                     </Button>
@@ -122,7 +201,11 @@ const Tabel = ({
                                         <tr style={{ background: "#f0f0f0", textAlign: "center" }}>
                                             <th>نام فایل</th>
                                             <th>فرمت</th>
+                                            <th>شرح فایل</th>
+                                            <th>تاریخ بارگذاری</th>
+                                            <th>آپلودکننده</th>
                                             <th>پیش‌نمایش</th>
+                                            <th>حذف</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -130,6 +213,16 @@ const Tabel = ({
                                             <tr key={file.id} style={{ textAlign: "center" }}>
                                                 <td>{file.fileName}</td>
                                                 <td>{file.extension}</td>
+                                                <td>{file.description || "—"}</td>
+                                                <td>
+                                                    {file.uploadedAt
+                                                        ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
+                                                            dateStyle: "medium",
+                                                            timeStyle: "short",
+                                                        })
+                                                        : "—"}
+                                                </td>
+                                                <td>{file.uploadedBy || "—"}</td>
                                                 <td>
                                                     <Tooltip title="مشاهده فایل">
                                                         <Button
@@ -140,11 +233,21 @@ const Tabel = ({
                                                         />
                                                     </Tooltip>
                                                 </td>
+                                                <td>
+                                                    <Tooltip title="حذف فایل">
+                                                        <Button
+                                                            danger
+                                                            type="text"
+                                                            icon={<DeleteOutlined />}
+                                                            onClick={() => handleDeleteFile(row.id, file.id)}
+                                                        />
+                                                    </Tooltip>
+                                                </td>
                                             </tr>
                                         ))}
                                         {row.attachmentLinks?.length === 0 && (
                                             <tr>
-                                                <td colSpan={3} style={{ textAlign: "center", color: "#999" }}>
+                                                <td colSpan={7} style={{ textAlign: "center", color: "#999" }}>
                                                     هیچ فایلی ثبت نشده است
                                                 </td>
                                             </tr>
@@ -157,6 +260,15 @@ const Tabel = ({
                     </div>
                 ))}
             </div>
+
+            {showUploadModal && selectedRowId && (
+                <UploadModal
+                    documentId={selectedRowId}
+                    visible={showUploadModal}
+                    onClose={() => setShowUploadModal(false)}
+                    onSuccess={handleUploadSuccess}
+                />
+            )}
         </div>
     );
 };

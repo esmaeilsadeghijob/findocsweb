@@ -1,10 +1,12 @@
 import { Table, Button, Tooltip } from "antd";
 import { EyeOutlined, UploadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { getAttachments, uploadAttachment } from "../../api/api"; // فرضی
+import { getAttachments } from "../../api/api";
+import UploadModal from "./UploadModal";
 
 function AttachmentRow({ data }) {
     const [attachments, setAttachments] = useState([]);
+    const [showUploadModal, setShowUploadModal] = useState(false);
 
     const fetchAttachments = async () => {
         try {
@@ -53,11 +55,23 @@ function AttachmentRow({ data }) {
                 <Button
                     type="dashed"
                     icon={<UploadOutlined />}
-                    onClick={() => console.log("بارگذاری فایل جدید برای", data.id)}
+                    onClick={() => setShowUploadModal(true)}
                 >
                     بارگذاری فایل جدید
                 </Button>
             </div>
+
+            {showUploadModal && (
+                <UploadModal
+                    documentId={data.id}
+                    visible
+                    onClose={() => setShowUploadModal(false)}
+                    onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchAttachments(); // 🔁 ریفرش لیست فایل‌ها پس از آپلود موفق
+                    }}
+                />
+            )}
         </div>
     );
 }

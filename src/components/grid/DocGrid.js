@@ -55,7 +55,7 @@ const DocGrid = ({
                     getAttachments(doc.id)
                         .then((res) => ({
                             ...doc,
-                            attachmentLinks: res.data || [],
+                            attachmentLinks: Array.isArray(res.data) ? res.data : [],
                         }))
                         .catch(() => ({
                             ...doc,
@@ -66,11 +66,11 @@ const DocGrid = ({
 
             const clean = enrichedDocs.map((doc) => ({
                 ...doc,
-                documentNumber: doc.documentNumber ? String(doc.documentNumber) : "",
-                fiscalYear: doc.fiscalYear ? String(doc.fiscalYear) : "",
-                serviceName: doc.serviceName || "",
-                description: doc.description || "",
-                status: doc.status || "",
+                documentNumber: doc.documentNumber || "—",
+                fiscalYear: doc.fiscalYear || "—",
+                serviceName: doc.serviceName || "—",
+                description: doc.description || "—",
+                status: doc.status || "—",
             }));
 
             setDocuments(clean);
@@ -102,42 +102,46 @@ const DocGrid = ({
         }
     };
 
-    const columns = useMemo(() => [
-        { field: "documentNumber", headerName: "شماره سند" },
-        { field: "fiscalYear", headerName: "سال مالی" },
-        { field: "serviceName", headerName: "سرویس" },
-        { field: "description", headerName: "شرح" },
-        { field: "status", headerName: "وضعیت" },
-        {
-            field: "actions",
-            headerName: "عملیات",
-            cellRenderer: (params) => (
-                <div style={{ display: "flex", gap: "6px" }}>
-                    {canEdit && (
-                        <TabelActionBtn
-                            title="ویرایش"
-                            type="edit"
-                            onClick={() => console.log("ویرایش", params.data)}
-                        />
-                    )}
-                    {canDelete && (
-                        <TabelActionBtn
-                            title="حذف"
-                            type="delete"
-                            onClick={() => handleDelete(params.data.id)}
-                        />
-                    )}
-                    {canRevert && (
-                        <TabelActionBtn
-                            title="بازگردانی"
-                            type="restore"
-                            onClick={() => handleRevert(params.data)}
-                        />
-                    )}
-                </div>
-            ),
-        },
-    ], [canEdit, canDelete, canRevert]);
+    const columns = useMemo(
+        () => [
+            { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
+            { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
+            { field: "serviceName", headerName: "سرویس", minWidth: 140 },
+            { field: "description", headerName: "شرح", minWidth: 180 },
+            { field: "status", headerName: "وضعیت", minWidth: 120 },
+            {
+                field: "actions",
+                headerName: "عملیات",
+                minWidth: 160,
+                cellRenderer: (params) => (
+                    <div style={{ display: "flex", gap: "6px" }}>
+                        {canEdit && (
+                            <TabelActionBtn
+                                title="ویرایش"
+                                type="edit"
+                                onClick={() => console.log("ویرایش", params.data)}
+                            />
+                        )}
+                        {canDelete && (
+                            <TabelActionBtn
+                                title="حذف"
+                                type="delete"
+                                onClick={() => handleDelete(params.data.id)}
+                            />
+                        )}
+                        {canRevert && (
+                            <TabelActionBtn
+                                title="بازگردانی"
+                                type="restore"
+                                onClick={() => handleRevert(params.data)}
+                            />
+                        )}
+                    </div>
+                ),
+            },
+        ],
+        [canEdit, canDelete, canRevert]
+    );
 
     if (!canRead) {
         return <div style={{ color: "red" }}>⛔ شما مجاز به مشاهده اسناد نیستید!</div>;
