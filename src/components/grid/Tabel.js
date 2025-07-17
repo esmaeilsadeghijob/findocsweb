@@ -228,7 +228,9 @@ const Tabel = ({
                                                         <Button
                                                             type="link"
                                                             icon={<EyeOutlined />}
-                                                            href={`/api/attachments/${row.id}/preview/${file.id}`}
+                                                            // href={`/api/attachments/${row.id}/preview/${file.id}`}
+                                                            // href={`http://localhost:8080/api/attachments/public/${documentId}/file/${file.id}`}
+                                                            href={`http://localhost:8080/api/attachments/public/${row.id}/file/${file.id}`}
                                                             target="_blank"
                                                         />
                                                     </Tooltip>
@@ -240,6 +242,7 @@ const Tabel = ({
                                                             type="text"
                                                             icon={<DeleteOutlined />}
                                                             onClick={() => handleDeleteFile(row.id, file.id)}
+                                                            target="_blank"
                                                         />
                                                     </Tooltip>
                                                 </td>

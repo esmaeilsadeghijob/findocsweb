@@ -9,6 +9,7 @@ import {
     Divider,
     Space,
     Button,
+    Progress,
 } from "antd";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import { uploadFile, getCompanies } from "../../api/api";
@@ -20,6 +21,8 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [files, setFiles] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [uploading, setUploading] = useState(false); // ✅ حالت لودینگ
+    const [progress, setProgress] = useState(0); // ✅ مقدار پیشرفت
 
     useEffect(() => {
         getCompanies()
@@ -62,15 +65,24 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             return;
         }
 
+        setUploading(true);
+        setProgress(0);
+
         try {
-            for (let f of files) {
+            for (let i = 0; i < files.length; i++) {
+                const f = files[i];
                 const formData = new FormData();
                 formData.append("files", f.file);
                 formData.append("description", f.description || "");
                 formData.append("companyId", f.companyId || "");
 
                 await uploadFile(documentId, formData);
+
+                const percent = Math.round(((i + 1) / files.length) * 100);
+                setProgress(percent);
             }
+
+            await new Promise((resolve) => setTimeout(resolve, 600));
 
             message.success("✅ فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
@@ -79,6 +91,9 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             onClose();
         } catch {
             message.error("❌ خطا در بارگذاری فایل‌ها");
+        } finally {
+            setUploading(false);
+            setProgress(0);
         }
     };
 
@@ -91,6 +106,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             okText="بارگذاری"
             cancelText="انصراف"
             width={700}
+            okButtonProps={{ disabled: uploading }}
         >
             <Form layout="vertical" form={form}>
                 <Form.Item label="انتخاب فایل‌ها">
@@ -104,6 +120,12 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                         </p>
                     </Dragger>
                 </Form.Item>
+
+                {uploading && (
+                    <div style={{ marginBottom: 16 }}>
+                        <Progress percent={progress} status={progress === 100 ? "success" : "active"} />
+                    </div>
+                )}
 
                 {files.length > 0 && (
                     <>

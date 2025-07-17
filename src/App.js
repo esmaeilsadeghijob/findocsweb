@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import {AuthContext} from "./context/AuthContext";
 import AttachmentViewer from "./components/AttachmentViewer";
 import AdminAccessPanel from "./components/AdminAccessPanel";
+import AttachmentRow from "./components/grid/AttachmentRow";
 
 function App() {
     const { token } = useContext(AuthContext);
@@ -19,11 +20,6 @@ function App() {
                     path="/*"
                     element={token ? <Dashboard /> : <Navigate to="/login" />}
                 />
-                <Route
-                    path="/attachments/view/:documentId/:fileId"
-                    element={<AttachmentViewer />}
-                />
-                <Route path="/admin/access" element={<AdminAccessPanel />} />
             </Routes>
         </BrowserRouter>
     );
