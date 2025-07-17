@@ -124,7 +124,7 @@ const DocGrid = ({
             minWidth: 120,
             cellRenderer: (params) => {
                 const status = params.data.status;
-                const color = status === "DRAFT" ? "default" : status === "SUBMITTED" ? "orange" : "green";
+                const color = status === "DRAFT" ? "default" : status === "SUBMITTED" ? "orange" : "red";
                 const label = status === "DRAFT" ? "پیش‌نویس" : status === "SUBMITTED" ? "ثبت‌شده" : "قطعی";
                 const next = status === "DRAFT" ? "ثبت‌شده" : status === "SUBMITTED" ? "قطعی" : null;
 
@@ -134,10 +134,9 @@ const DocGrid = ({
                     <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
                         <Tag
                             color={color}
-                            style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
+                            style={{ cursor: isAdmin || status !== "FINALIZED" ? "pointer" : "not-allowed" }}
                             onClick={() =>
-                                status !== "FINALIZED" &&
-                                ["EDIT", "OWNER", "REVERT"].includes(params.data.accessLevel) &&
+                                (isAdmin || status !== "FINALIZED") &&
                                 handleStatusChange(params.data.id)
                             }
                         >
@@ -177,21 +176,23 @@ const DocGrid = ({
                                         setShowEditModal(true);
                                     }}
                                     disabled={isFinalized}
-                                    style={isFinalized ? { cursor: "not-allowed", color: "#ccc" } : {}}
+                                    style={isFinalized ? { cursor: "not-allowed" } : {}}
                                 />
+
                                 <Button
                                     type="text"
                                     icon={
                                         <CloseOutlined
-                                            style={{ fontSize: 16, color: isFinalized ? "#ccc" : "red" }}
+                                            style={{
+                                                fontSize: 16,
+                                                color: isFinalized ? "#ccc" : "red"
+                                            }}
                                         />
                                     }
                                     title="حذف سند"
                                     onClick={() => handleDelete(params.data.id)}
-                                    disabled={isFinalized || !allowDelete}
-                                    style={
-                                        isFinalized || !allowDelete ? { cursor: "not-allowed" } : {}
-                                    }
+                                    disabled={isFinalized}
+                                    style={isFinalized ? { cursor: "not-allowed" } : {}}
                                 />
                             </>
                         )}
