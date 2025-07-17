@@ -284,8 +284,9 @@ const Tabel = ({
                                                             <Button
                                                                 danger
                                                                 type="text"
-                                                                icon={<CloseOutlined/>}
+                                                                icon={<CloseOutlined />}
                                                                 onClick={() => handleDeleteFile(row.id, file.id)}
+                                                                disabled={isFinalized}
                                                             />
                                                         </Tooltip>
                                                     </td>

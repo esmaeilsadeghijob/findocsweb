@@ -147,7 +147,8 @@ const DocGrid = ({
             headerName: "عملیات",
             minWidth: 160,
             cellRenderer: (params) => {
-                const isFinalized = params.data.status === "FINALIZED";
+                const isFinalized = params.data.status === "FINALIZED"; // ✅ تشخیص وضعیت سند
+
                 return (
                     <div style={{ display: "flex", gap: "6px" }}>
                         {canEdit && (
@@ -160,14 +161,15 @@ const DocGrid = ({
                                         setEditDocument(params.data);
                                         setShowEditModal(true);
                                     }}
-                                    disabled={isFinalized}
+                                    disabled={isFinalized} // ✅ غیرفعال در حالت قطعی
                                 />
                                 <Button
                                     type="text"
-                                    icon={<CloseOutlined style={{ color: "red", fontSize: 16 }} />}
+                                    icon={<CloseOutlined style={{ fontSize: 16, color: isFinalized ? "#ccc" : "red" }} />}
                                     title="حذف سند"
                                     onClick={() => handleDelete(params.data.id)}
                                     disabled={isFinalized}
+                                    style={isFinalized ? { cursor: "not-allowed" } : {}}
                                 />
                             </>
                         )}
