@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Tabel from "./Tabel";
-import TabelActionBtn from "./TabelActionBtn";
 import DocumentFormModal from "./DocumentFormModal";
-import {CloseOutlined, PlusOutlined} from "@ant-design/icons";
-import {Button, message, Tag, Tooltip} from "antd";
-import { EditOutlined } from "@ant-design/icons";
 import EditDocumentModal from "./EditDocumentModal";
+import { Button, Tag, Tooltip, message } from "antd";
+import { CloseOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
     getDocumentsByClientId,
     deleteDocument,
@@ -37,16 +35,13 @@ const DocGrid = ({
                  }) => {
     const [documents, setDocuments] = useState([]);
     const [showModal, setShowModal] = useState(false);
-
-    const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
-
-    const canRead = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
-    const canEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
-    const canDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
-    const canRevert = isAdmin || ["REVERT", "OWNER"].includes(accessLevel);
-    const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
     const [editDocument, setEditDocument] = useState(null);
     const [showEditModal, setShowEditModal] = useState(false);
+
+    const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
+    const canRead = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
+    const canEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
+    const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
     const fetchDocuments = async () => {
         if (!clientId) return;
@@ -54,7 +49,7 @@ const DocGrid = ({
             const res = await getDocumentsByClientId(clientId);
             const documentList = res.data;
 
-            const enrichedDocs = await Promise.all(
+            const enriched = await Promise.all(
                 documentList.map((doc) =>
                     getAttachments(doc.id)
                         .then((res) => ({
@@ -68,17 +63,18 @@ const DocGrid = ({
                 )
             );
 
-            const clean = enrichedDocs.map((doc) => ({
+            const clean = enriched.map((doc) => ({
                 ...doc,
                 title: doc.title?.trim() || "—",
                 documentNumber: doc.documentNumber || "—",
-                fiscalYear: doc.periodFiscalYear  || "—",
+                fiscalYear: doc.periodFiscalYear || "—",
                 serviceName: doc.serviceName || "—",
                 description: doc.description || "—",
-                status: doc.status || "—",
+                status: doc.status || "DRAFT", // پیش‌فرض امن
             }));
 
             setDocuments(clean);
+            clean.sort((a, b) => a.documentNumber.localeCompare(b.documentNumber));
         } catch {
             message.error("❌ خطا در دریافت اسناد");
             setDocuments([]);
@@ -92,116 +88,94 @@ const DocGrid = ({
     const handleDelete = async (id) => {
         try {
             await deleteDocument(id);
-            setDocuments((prev) => prev.filter((d) => d.id !== id));
+            setDocuments((prev) => prev.filter((doc) => doc.id !== id));
         } catch {
             message.error("❌ خطا در حذف سند");
         }
     };
 
-    const handleRevert = async (doc) => {
-        try {
-            await advanceDocumentStatus(doc.id);
-            fetchDocuments();
-        } catch {
-            message.error("❌ خطا در تغییر وضعیت سند");
-        }
-    };
-
     const handleStatusChange = async (id) => {
         try {
-            const res = await advanceDocumentStatus(id);
-            const updated = res.data;
-            setDocuments((prev) =>
-                prev.map((doc) => (doc.id === updated.id ? updated : doc))
-            );
+            await advanceDocumentStatus(id);
+            fetchDocuments(); // ✅ واکشی مجدد برای وضعیت جدید
         } catch {
             message.error("خطا در تغییر وضعیت سند");
         }
     };
 
-    const columns = useMemo(
-        () => [
-            { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
-            { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
-            { field: "description", headerName: "شرح", minWidth: 180 },
-            {
-                headerName: "وضعیت",
-                field: "status",
-                width: 120,
-                cellRenderer: (params) => {
-                    const status = params.value;
-                    const color =
-                        status === "DRAFT"
-                            ? "default"
-                            : status === "SUBMITTED"
-                                ? "orange"
-                                : "green";
-                    const label =
-                        status === "DRAFT"
-                            ? "پیش‌نویس"
-                            : status === "SUBMITTED"
-                                ? "ثبت‌شده"
-                                : "قطعی";
-                    const next =
-                        status === "DRAFT"
-                            ? "ثبت‌شده"
-                            : status === "SUBMITTED"
-                                ? "قطعی"
-                                : null;
+    const columns = useMemo(() => [
+        { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
+        { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
+        { field: "serviceName", headerName: "سرویس", minWidth: 140 },
+        { field: "description", headerName: "شرح", minWidth: 180 },
+        {
+            field: "status",
+            headerName: "وضعیت",
+            minWidth: 120,
+            cellRenderer: (params) => {
+                const status = params.data.status; // ⬅ استفاده از data مستقیم
+                const color =
+                    status === "DRAFT" ? "default" :
+                        status === "SUBMITTED" ? "orange" :
+                            "green";
+                const label =
+                    status === "DRAFT" ? "پیش‌نویس" :
+                        status === "SUBMITTED" ? "ثبت‌شده" :
+                            "قطعی";
+                const next =
+                    status === "DRAFT" ? "ثبت‌شده" :
+                        status === "SUBMITTED" ? "قطعی" :
+                            null;
 
-                    return (
-                        <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
-                            <Tag
-                                color={color}
-                                style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
-                                onClick={() =>
-                                    status !== "FINALIZED" && handleStatusChange(params.data.id)
-                                }
-                            >
-                                {label}
-                            </Tag>
-                        </Tooltip>
-                    );
-                },
+                return (
+                    <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
+                        <Tag
+                            color={color}
+                            style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
+                            onClick={() =>
+                                status !== "FINALIZED" && handleStatusChange(params.data.id)
+                            }
+                        >
+                            {label}
+                        </Tag>
+                    </Tooltip>
+                );
             },
-            // فقط داخل cellRenderer ستون actions این رو جایگزین کن 👇
-            {
-                field: "actions",
-                headerName: "عملیات",
-                minWidth: 160,
-                cellRenderer: (params) => {
-                    const isFinalized = params.data.status === "FINALIZED";
-
-                    return (
-                        <div style={{ display: "flex", gap: "6px" }}>
-                            {canEdit && (
-                                <>
-                                    <Button
-                                        type="text"
-                                        icon={<EditOutlined />}
-                                        title="ویرایش سند"
-                                        onClick={() => {
-                                            setEditDocument(params.data);
-                                            setShowEditModal(true);
-                                        }}
-                                        disabled={isFinalized} // ❌ غیرفعال اگر سند قطعی شده
-                                    />
-                                    <Button
-                                        type="text"
-                                        icon={<CloseOutlined style={{ color: "red", fontSize: 16 }} />}
-                                        title="حذف سند"
-                                        onClick={() => handleDelete(params.data.id)}
-                                        disabled={isFinalized} // ❌ غیرفعال اگر قطعی
-                                    />
-                                </>
-                            )}
-                        </div>
-                    );
-                }
+        },
+        {
+            field: "actions",
+            headerName: "عملیات",
+            minWidth: 160,
+            cellRenderer: (params) => {
+                const isFinalized = params.data.status === "FINALIZED";
+                return (
+                    <div style={{ display: "flex", gap: "6px" }}>
+                        {canEdit && (
+                            <>
+                                <Button
+                                    type="text"
+                                    icon={<EditOutlined />}
+                                    title="ویرایش سند"
+                                    onClick={() => {
+                                        setEditDocument(params.data);
+                                        setShowEditModal(true);
+                                    }}
+                                    disabled={isFinalized}
+                                />
+                                <Button
+                                    type="text"
+                                    icon={<CloseOutlined style={{ color: "red", fontSize: 16 }} />}
+                                    title="حذف سند"
+                                    onClick={() => handleDelete(params.data.id)}
+                                    disabled={isFinalized}
+                                />
+                            </>
+                        )}
+                    </div>
+                );
             },
-        ],
-        [canEdit, canDelete, canRevert]
-    );
+        },
+    ], [canEdit, documents.map(d => d.status).join(",")]); // ✅ وابسته به تغییرات داده‌ها
 
     if (!canRead) {
         return <div style={{ color: "red" }}>⛔ شما مجاز به مشاهده اسناد نیستید!</div>;
@@ -275,7 +249,6 @@ const DocGrid = ({
                     }}
                 />
             )}
-
         </>
     );
 };

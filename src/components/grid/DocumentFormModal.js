@@ -47,6 +47,7 @@ const DocumentFormModal = ({
                 documentNumber: values.documentNumber,
                 documentDate: values.documentDate.format("YYYY-MM-DD"),
                 description: values.description || "",
+                status: "DRAFT",
             };
 
             await createDocument(payload);

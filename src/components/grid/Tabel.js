@@ -9,7 +9,8 @@ import {
     MinusSquareOutlined,
     UploadOutlined,
     EyeOutlined,
-    DeleteOutlined, CloseOutlined,
+    DeleteOutlined,
+    CloseOutlined,
 } from "@ant-design/icons";
 import UploadModal from "./UploadModal";
 import {getAttachments, deleteAttachment} from "../../api/api";
@@ -29,7 +30,7 @@ const Tabel = ({
     const [expandedRows, setExpandedRows] = useState({});
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
-    const [internalRows, setInternalRows] = useState(rowData);
+    const [internalRows, setInternalRows] = useState([]);
 
     useEffect(() => {
         setInternalRows(rowData);
@@ -59,6 +60,7 @@ const Tabel = ({
 
     const filteredRows = useMemo(() => {
         if (!searchText) return internalRows;
+
         const normalizedSearch = searchText.toLowerCase();
 
         return internalRows.filter((row) => {
@@ -84,7 +86,7 @@ const Tabel = ({
                 )
                 : [];
 
-            const allText = `${baseText} ${attachmentText.join(" ")}`.toLowerCase();
+            const allText = `${baseText} ${attachmentText.join(" ")}`;
             return allText.includes(normalizedSearch);
         });
     }, [searchText, internalRows]);
@@ -103,20 +105,17 @@ const Tabel = ({
     const handleDeleteFile = async (docId, fileId) => {
         try {
             await deleteAttachment(docId, fileId);
-            message.success(" فایل حذف شد");
+            message.success("فایل حذف شد");
 
             const res = await getAttachments(docId);
             const updatedAttachments = res.data || [];
 
             const updatedRows = internalRows.map((row) =>
-                row.id === docId
-                    ? {...row, attachmentLinks: updatedAttachments}
-                    : row
+                row.id === docId ? {...row, attachmentLinks: updatedAttachments} : row
             );
 
             setInternalRows(updatedRows);
-        } catch (err) {
-            console.error("❌ خطا در حذف فایل:", err);
+        } catch {
             message.error("خطا در حذف فایل");
         }
     };
@@ -129,14 +128,12 @@ const Tabel = ({
             const updatedAttachments = res.data || [];
 
             const updated = internalRows.map((row) =>
-                row.id === selectedRowId
-                    ? {...row, attachmentLinks: updatedAttachments}
-                    : row
+                row.id === selectedRowId ? {...row, attachmentLinks: updatedAttachments} : row
             );
 
             setInternalRows(updated);
         } catch {
-            console.warn("❌ خطا در دریافت ضمیمه‌های جدید");
+            console.warn("خطا در دریافت ضمیمه‌های جدید");
         }
 
         if (typeof onRefreshRowData === "function") {
@@ -168,7 +165,7 @@ const Tabel = ({
                 )}
             </div>
 
-            {/* 👇 عنوان ستون‌ها */}
+            {/* ستون‌ها */}
             <div
                 style={{
                     display: "flex",
@@ -181,29 +178,24 @@ const Tabel = ({
                 }}
             >
                 <div style={{width: 36}}/>
-                {columnDefs.map((col, index) => (
-                    <div key={index} style={{minWidth: col.minWidth || 120}}>
+                {columnDefs.map((col) => (
+                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
                         {col.headerName ?? col.field}
                     </div>
                 ))}
             </div>
 
-            {/* 👇 ردیف‌های جدول */}
-            <div className="ag-theme-alpine" style={{width: "100%"}}>
+            {/* ردیف‌ها */}
+            <div style={{width: "100%"}}>
                 {filteredRows.map((row) => {
                     const isFinalized = row.status === "FINALIZED";
                     const normalizedSearch = searchText.toLowerCase();
-                    const matchesSearch = searchText?.trim().length > 0;
 
-                    const matchingFiles = matchesSearch
-                        ? (row.attachmentLinks ?? []).filter((file) =>
-                            Object.values(file)
-                                .filter((val) => typeof val === "string")
-                                .some((text) =>
-                                    text.toLowerCase().includes(normalizedSearch)
-                                )
-                        )
-                        : row.attachmentLinks ?? [];
+                    const matchingFiles = (row.attachmentLinks ?? []).filter((file) =>
+                        Object.values(file)
+                            .filter((val) => typeof val === "string")
+                            .some((text) => text.toLowerCase().includes(normalizedSearch))
+                    );
 
                     return (
                         <div key={row.id} style={{borderBottom: "1px solid #eee", padding: "8px 0"}}>
@@ -218,13 +210,15 @@ const Tabel = ({
                                 <Button
                                     type="text"
                                     icon={
-                                        expandedRows[row.id] ? <MinusSquareOutlined/> : <PlusSquareOutlined/>
+                                        expandedRows[row.id]
+                                            ? <MinusSquareOutlined/>
+                                            : <PlusSquareOutlined/>
                                     }
                                     onClick={() => toggleExpand(row.id)}
                                 />
 
-                                {columnDefs.map((col, index) => (
-                                    <div key={index} style={{minWidth: col.minWidth || 120}}>
+                                {columnDefs.map((col) => (
+                                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
                                         {typeof col.cellRenderer === "function"
                                             ? col.cellRenderer({data: row})
                                             : row[col.field]?.toString().trim() || "—"}
@@ -232,7 +226,7 @@ const Tabel = ({
                                 ))}
                             </div>
 
-                            {/* 👇 ضمایم در حالت باز */}
+                            {/* ضمایم */}
                             {expandedRows[row.id] && (
                                 <div style={{padding: "12px 40px", background: "#f7f7f7"}}>
                                     <div style={{marginBottom: 8}}>
@@ -243,7 +237,7 @@ const Tabel = ({
                                                 setSelectedRowId(row.id);
                                                 setShowUploadModal(true);
                                             }}
-                                            disabled={isFinalized} // ❌ غیر فعال اگر قطعی
+                                            disabled={isFinalized}
                                         >
                                             بارگذاری فایل جدید
                                         </Button>
@@ -270,14 +264,10 @@ const Tabel = ({
                                                     <td>{file.extension || "—"}</td>
                                                     <td>{file.description?.trim() || "—"}</td>
                                                     <td>{file.companyName || "—"}</td>
-                                                    <td>
-                                                        {file.uploadedAt
-                                                            ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
-                                                                dateStyle: "medium",
-                                                                timeStyle: "short",
-                                                            })
-                                                            : "—"}
-                                                    </td>
+                                                    <td> {file.uploadedAt ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
+                                                        dateStyle: "medium",
+                                                        timeStyle: "short",
+                                                    }) : "—"} </td>
                                                     <td>{file.uploadedBy || "—"}</td>
                                                     <td>
                                                         <Tooltip title="مشاهده فایل">
