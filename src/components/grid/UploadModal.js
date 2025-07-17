@@ -21,8 +21,8 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [files, setFiles] = useState([]);
     const [companies, setCompanies] = useState([]);
-    const [uploading, setUploading] = useState(false); // ✅ حالت لودینگ
-    const [progress, setProgress] = useState(0); // ✅ مقدار پیشرفت
+    const [uploading, setUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     useEffect(() => {
         getCompanies()
@@ -76,6 +76,9 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                 formData.append("descriptions", f.description || "");
                 formData.append("companyId", f.companyId || "");
 
+                const company = companies.find((c) => c.id === f.companyId);
+                formData.append("companyNames", company?.name || ""); // ✅ ارسال نام شرکت
+
                 await uploadFile(documentId, formData);
 
                 const percent = Math.round(((i + 1) / files.length) * 100);
@@ -83,8 +86,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             }
 
             await new Promise((resolve) => setTimeout(resolve, 600));
-
-            message.success(" فایل‌ها با موفقیت بارگذاری شدند");
+            message.success("✅ فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
             form.resetFields();
             onSuccess();
@@ -116,14 +118,17 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                         </p>
                         <p>فایل‌ها را اینجا بکشید یا کلیک کنید برای انتخاب</p>
                         <p style={{ fontSize: "12px", color: "#999" }}>
-                            فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip
+                            فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip، rar
                         </p>
                     </Dragger>
                 </Form.Item>
 
                 {uploading && (
                     <div style={{ marginBottom: 16 }}>
-                        <Progress percent={progress} status={progress === 100 ? "success" : "active"} />
+                        <Progress
+                            percent={progress}
+                            status={progress === 100 ? "success" : "active"}
+                        />
                     </div>
                 )}
 
@@ -142,7 +147,9 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                                     width: "100%",
                                 }}
                             >
-                                <div style={{ fontWeight: "bold", marginBottom: 8 }}>{f.file.name}</div>
+                                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                                    {f.file.name}
+                                </div>
                                 <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
                                     <Input.TextArea
                                         rows={2}
@@ -156,7 +163,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                                 <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
                                     <Select
                                         showSearch
-                                        placeholder="انتخاب کنید"
+                                        placeholder="انتخاب شرکت"
                                         value={f.companyId}
                                         onChange={(value) =>
                                             handleFieldChange(i, "companyId", value)

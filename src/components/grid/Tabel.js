@@ -269,7 +269,7 @@ const Tabel = ({
                                                     <td>{file.fileName || "—"}</td>
                                                     <td>{file.extension || "—"}</td>
                                                     <td>{file.description?.trim() || "—"}</td>
-                                                    <td>{file.companyName || file.company?.name || "—"}</td>
+                                                    <td>{file.companyName || "—"}</td>
                                                     <td>
                                                         {file.uploadedAt
                                                             ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
@@ -278,7 +278,6 @@ const Tabel = ({
                                                             })
                                                             : "—"}
                                                     </td>
-                                                    <td>{file.companyName || file.company?.name || "—"}</td>
                                                     <td>{file.uploadedBy || "—"}</td>
                                                     <td>
                                                         <Tooltip title="مشاهده فایل">
