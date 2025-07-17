@@ -4,10 +4,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import {AuthContext} from "./context/AuthContext";
-import AttachmentViewer from "./components/AttachmentViewer";
-import AdminAccessPanel from "./components/AdminAccessPanel";
-import AttachmentRow from "./components/grid/AttachmentRow";
-
 function App() {
     const { token } = useContext(AuthContext);
 

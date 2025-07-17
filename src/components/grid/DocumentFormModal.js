@@ -52,7 +52,7 @@ const DocumentFormModal = ({
             };
 
             await createDocument(payload);
-            message.success("✅ سند با موفقیت ثبت شد");
+            message.success(" سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch {

@@ -9,6 +9,7 @@ import {
     deleteDocument,
     getAttachments,
     advanceDocumentStatus,
+    getPermissions
 } from "../../api/api";
 
 import moment from "moment-jalaali";
@@ -22,7 +23,7 @@ const AccessLevels = {
     DOWNLOAD: "DOWNLOAD",
     ADMIN: "ADMIN",
     OWNER: "OWNER",
-    REVERT: "REVERT",
+    REVERT: "REVERT"
 };
 
 const DocGrid = ({
@@ -35,6 +36,7 @@ const DocGrid = ({
                      fiscalYear,
                      accessLevel,
                      roles,
+                     currentUser // ✅ شناسه کاربر جاری (برای تعیین دسترسی روی سندها)
                  }) => {
     const [documents, setDocuments] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -42,43 +44,38 @@ const DocGrid = ({
     const [showEditModal, setShowEditModal] = useState(false);
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
-    const canRead = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
-    const canEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
+    const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
     const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
     const fetchDocuments = async () => {
         if (!clientId) return;
         try {
-            const res = await getDocumentsByClientId(clientId);
-            const documentList = res.data;
+            const [resDocs, resPerm] = await Promise.all([
+                getDocumentsByClientId(clientId),
+                getPermissions()
+            ]);
+
+            const permissions = Array.isArray(resPerm.data) ? resPerm.data : [];
 
             const enriched = await Promise.all(
-                documentList.map((doc) =>
-                    getAttachments(doc.id)
-                        .then((res) => ({
-                            ...doc,
-                            attachmentLinks: Array.isArray(res.data) ? res.data : [],
-                        }))
-                        .catch(() => ({
-                            ...doc,
-                            attachmentLinks: [],
-                        }))
-                )
+                resDocs.data.map(async (doc) => {
+                    const perm = permissions.find(p => p.documentId === doc.id && p.userId === currentUser?.id);
+                    const attachments = await getAttachments(doc.id).then((res) => res.data).catch(() => []);
+                    return {
+                        ...doc,
+                        attachmentLinks: attachments,
+                        title: doc.title?.trim() || "—",
+                        documentNumber: doc.documentNumber || "—",
+                        fiscalYear: doc.periodFiscalYear || "—",
+                        serviceName: doc.serviceName || "—",
+                        description: doc.description || "—",
+                        status: doc.status || "DRAFT",
+                        accessLevel: perm?.accessLevel || "NONE"
+                    };
+                })
             );
 
-            const clean = enriched
-                .map((doc) => ({
-                    ...doc,
-                    title: doc.title?.trim() || "—",
-                    documentNumber: doc.documentNumber || "—",
-                    fiscalYear: doc.periodFiscalYear || "—",
-                    serviceName: doc.serviceName || "—",
-                    description: doc.description || "—",
-                    status: doc.status || "DRAFT",
-                }))
-                .sort((a, b) => a.documentNumber.localeCompare(b.documentNumber));
-
-            setDocuments(clean);
+            setDocuments(enriched.sort((a, b) => a.documentNumber.localeCompare(b.documentNumber)));
         } catch {
             message.error("❌ خطا در دریافت اسناد");
             setDocuments([]);
@@ -101,7 +98,7 @@ const DocGrid = ({
     const handleStatusChange = async (id) => {
         try {
             await advanceDocumentStatus(id);
-            fetchDocuments(); // ✅ واکشی مجدد برای وضعیت جدید
+            fetchDocuments();
         } catch {
             message.error("خطا در تغییر وضعیت سند");
         }
@@ -119,7 +116,7 @@ const DocGrid = ({
             cellRenderer: (params) => {
                 const date = moment(params.data.documentTimestamp);
                 return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
-            },
+            }
         },
         {
             field: "status",
@@ -127,18 +124,11 @@ const DocGrid = ({
             minWidth: 120,
             cellRenderer: (params) => {
                 const status = params.data.status;
-                const color =
-                    status === "DRAFT" ? "default" :
-                        status === "SUBMITTED" ? "orange" :
-                            "green";
-                const label =
-                    status === "DRAFT" ? "پیش‌نویس" :
-                        status === "SUBMITTED" ? "ثبت‌شده" :
-                            "قطعی";
-                const next =
-                    status === "DRAFT" ? "ثبت‌شده" :
-                        status === "SUBMITTED" ? "قطعی" :
-                            null;
+                const color = status === "DRAFT" ? "default" : status === "SUBMITTED" ? "orange" : "green";
+                const label = status === "DRAFT" ? "پیش‌نویس" : status === "SUBMITTED" ? "ثبت‌شده" : "قطعی";
+                const next = status === "DRAFT" ? "ثبت‌شده" : status === "SUBMITTED" ? "قطعی" : null;
+
+                const canRevert = ["REVERT", "OWNER"].includes(params.data.accessLevel);
 
                 return (
                     <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
@@ -146,54 +136,72 @@ const DocGrid = ({
                             color={color}
                             style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
                             onClick={() =>
-                                status !== "FINALIZED" && handleStatusChange(params.data.id)
+                                status !== "FINALIZED" &&
+                                ["EDIT", "OWNER", "REVERT"].includes(params.data.accessLevel) &&
+                                handleStatusChange(params.data.id)
                             }
                         >
                             {label}
                         </Tag>
                     </Tooltip>
                 );
-            },
+            }
         },
         {
             field: "actions",
             headerName: "عملیات",
             minWidth: 160,
             cellRenderer: (params) => {
-                const isFinalized = params.data.status === "FINALIZED";
+                const { accessLevel, status } = params.data;
+                const isFinalized = status === "FINALIZED";
+                const allowEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
+                const allowDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
 
                 return (
                     <div style={{ display: "flex", gap: "6px" }}>
-                        {canEdit && (
+                        {allowEdit && (
                             <>
                                 <Button
                                     type="text"
-                                    icon={<EditOutlined />}
+                                    icon={
+                                        <EditOutlined
+                                            style={{
+                                                fontSize: 16,
+                                                color: isFinalized ? "#ccc" : "#1890ff"
+                                            }}
+                                        />
+                                    }
                                     title="ویرایش سند"
                                     onClick={() => {
                                         setEditDocument(params.data);
                                         setShowEditModal(true);
                                     }}
                                     disabled={isFinalized}
-                                    style={isFinalized ? { color: "#ccc", cursor: "not-allowed" } : {}}
+                                    style={isFinalized ? { cursor: "not-allowed", color: "#ccc" } : {}}
                                 />
                                 <Button
                                     type="text"
-                                    icon={<CloseOutlined style={{ fontSize: 16, color: isFinalized ? "#ccc" : "red" }} />}
+                                    icon={
+                                        <CloseOutlined
+                                            style={{ fontSize: 16, color: isFinalized ? "#ccc" : "red" }}
+                                        />
+                                    }
                                     title="حذف سند"
                                     onClick={() => handleDelete(params.data.id)}
-                                    disabled={isFinalized}
-                                    style={isFinalized ? { cursor: "not-allowed" } : {}}
+                                    disabled={isFinalized || !allowDelete}
+                                    style={
+                                        isFinalized || !allowDelete ? { cursor: "not-allowed" } : {}
+                                    }
                                 />
                             </>
                         )}
                     </div>
                 );
-            },
-        },
-    ], [canEdit, documents.map(d => d.status).join(",")]);
+            }
+        }
+    ], [documents]);
 
-    if (!canRead) {
+    if (!canReadGlobal) {
         return <div style={{ color: "red" }}>⛔ شما مجاز به مشاهده اسناد نیستید!</div>;
     }
 
@@ -216,7 +224,7 @@ const DocGrid = ({
                                 fontSize: "1rem",
                                 padding: "0 6px",
                                 marginBottom: "0.5rem",
-                                color: "#1890ff",
+                                color: "#1890ff"
                             }}
                             onClick={() => {
                                 if (serviceId && unitId) {
