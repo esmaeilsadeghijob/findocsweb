@@ -11,6 +11,9 @@ import {
     advanceDocumentStatus,
 } from "../../api/api";
 
+import moment from "moment-jalaali";
+moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
+
 const AccessLevels = {
     NONE: "NONE",
     READ: "READ",
@@ -63,18 +66,19 @@ const DocGrid = ({
                 )
             );
 
-            const clean = enriched.map((doc) => ({
-                ...doc,
-                title: doc.title?.trim() || "—",
-                documentNumber: doc.documentNumber || "—",
-                fiscalYear: doc.periodFiscalYear || "—",
-                serviceName: doc.serviceName || "—",
-                description: doc.description || "—",
-                status: doc.status || "DRAFT", // پیش‌فرض امن
-            }));
+            const clean = enriched
+                .map((doc) => ({
+                    ...doc,
+                    title: doc.title?.trim() || "—",
+                    documentNumber: doc.documentNumber || "—",
+                    fiscalYear: doc.periodFiscalYear || "—",
+                    serviceName: doc.serviceName || "—",
+                    description: doc.description || "—",
+                    status: doc.status || "DRAFT",
+                }))
+                .sort((a, b) => a.documentNumber.localeCompare(b.documentNumber));
 
             setDocuments(clean);
-            clean.sort((a, b) => a.documentNumber.localeCompare(b.documentNumber));
         } catch {
             message.error("❌ خطا در دریافت اسناد");
             setDocuments([]);
@@ -109,11 +113,20 @@ const DocGrid = ({
         { field: "serviceName", headerName: "سرویس", minWidth: 140 },
         { field: "description", headerName: "شرح", minWidth: 180 },
         {
+            field: "documentTimestamp",
+            headerName: "تاریخ سند",
+            minWidth: 140,
+            cellRenderer: (params) => {
+                const date = moment(params.data.documentTimestamp);
+                return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
+            },
+        },
+        {
             field: "status",
             headerName: "وضعیت",
             minWidth: 120,
             cellRenderer: (params) => {
-                const status = params.data.status; // ⬅ استفاده از data مستقیم
+                const status = params.data.status;
                 const color =
                     status === "DRAFT" ? "default" :
                         status === "SUBMITTED" ? "orange" :
@@ -147,7 +160,7 @@ const DocGrid = ({
             headerName: "عملیات",
             minWidth: 160,
             cellRenderer: (params) => {
-                const isFinalized = params.data.status === "FINALIZED"; // ✅ تشخیص وضعیت سند
+                const isFinalized = params.data.status === "FINALIZED";
 
                 return (
                     <div style={{ display: "flex", gap: "6px" }}>
@@ -161,7 +174,8 @@ const DocGrid = ({
                                         setEditDocument(params.data);
                                         setShowEditModal(true);
                                     }}
-                                    disabled={isFinalized} // ✅ غیرفعال در حالت قطعی
+                                    disabled={isFinalized}
+                                    style={isFinalized ? { color: "#ccc", cursor: "not-allowed" } : {}}
                                 />
                                 <Button
                                     type="text"
@@ -177,7 +191,7 @@ const DocGrid = ({
                 );
             },
         },
-    ], [canEdit, documents.map(d => d.status).join(",")]); // ✅ وابسته به تغییرات داده‌ها
+    ], [canEdit, documents.map(d => d.status).join(",")]);
 
     if (!canRead) {
         return <div style={{ color: "red" }}>⛔ شما مجاز به مشاهده اسناد نیستید!</div>;

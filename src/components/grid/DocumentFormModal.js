@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, DatePicker, Select, message } from "antd";
+import { Modal, Form, Input, Select, message } from "antd";
+import DatePicker from "react-datepicker2";
 import moment from "moment-jalaali";
 import { getPeriods, createDocument } from "../../api/api";
 
-moment.loadPersian({ dialect: "persian-modern", usePersianDigits: true });
+moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
 
 const DocumentFormModal = ({
                                visible,
@@ -45,17 +46,17 @@ const DocumentFormModal = ({
                 serviceName,
                 fiscalYear: selectedPeriod.fiscalYear,
                 documentNumber: values.documentNumber,
-                documentDate: values.documentDate.format("YYYY-MM-DD"),
+                documentTimestamp: values.documentDate?.valueOf(), // ✅ ارسال timestamp
                 description: values.description || "",
                 status: "DRAFT",
             };
 
             await createDocument(payload);
-            message.success(" سند با موفقیت ثبت شد");
+            message.success("✅ سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch {
-            message.error(" خطا در ثبت سند");
+            message.error("❌ خطا در ثبت سند");
         }
     };
 
@@ -105,8 +106,11 @@ const DocumentFormModal = ({
                     rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
                 >
                     <DatePicker
-                        format="jYYYY/jMM/jDD"
-                        style={{ width: "100%" }}
+                        isGregorian={false}
+                        timePicker={false}
+                        inputFormat="jYYYY/jMM/jDD"
+                        value={form.getFieldValue("documentDate") || moment()}
+                        onChange={(value) => form.setFieldsValue({ documentDate: value })}
                         placeholder="مثلاً: 1403/05/22"
                     />
                 </Form.Item>
