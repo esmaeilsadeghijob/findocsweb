@@ -50,11 +50,11 @@ const DocumentFormModal = ({
             };
 
             await createDocument(payload);
-            message.success("✅ سند با موفقیت ثبت شد");
+            message.success(" سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch {
-            message.error("⚠️ خطا در ثبت سند");
+            message.error(" خطا در ثبت سند");
         }
     };
 

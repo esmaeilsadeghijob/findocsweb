@@ -84,7 +84,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
 
             await new Promise((resolve) => setTimeout(resolve, 600));
 
-            message.success("✅ فایل‌ها با موفقیت بارگذاری شدند");
+            message.success(" فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
             form.resetFields();
             onSuccess();

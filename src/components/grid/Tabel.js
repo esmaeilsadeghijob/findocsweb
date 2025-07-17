@@ -8,7 +8,8 @@ import {
     DeleteOutlined,
 } from "@ant-design/icons";
 import UploadModal from "./UploadModal";
-import { getAttachments } from "../../api/api";
+import { deleteAttachment, getAttachments } from "../../api/api"
+import { message } from "antd";
 
 const Tabel = ({
                    columnDefs,
@@ -101,13 +102,29 @@ const Tabel = ({
         setSearchText(e.target.value);
     }, []);
 
-    const handleDeleteFile = (docId, fileId) => {
-        console.log("❌ حذف فایل", fileId, "از سند", docId);
-        // ⬅ اضافه کردن منطق حذف و سپس fetch ضمیمه‌ها
+    const handleDeleteFile = async (docId, fileId) => {
+        try {
+            await deleteAttachment(docId, fileId);
+            message.success(" فایل حذف شد");
+
+            const res = await getAttachments(docId);
+            const updatedAttachments = res.data || [];
+
+            const updatedRows = internalRows.map((row) =>
+                row.id === docId
+                    ? { ...row, attachmentLinks: updatedAttachments }
+                    : row
+            );
+
+            setInternalRows(updatedRows);
+        } catch (err) {
+            console.error(" خطا در حذف فایل:", err);
+            message.error("خطا در حذف فایل");
+        }
     };
 
     const handleUploadSuccess = async () => {
-        console.log("✅ فایل جدید بارگذاری شد");
+        console.log(" فایل جدید بارگذاری شد");
         setShowUploadModal(false);
 
         try {
@@ -242,8 +259,8 @@ const Tabel = ({
                                                             type="text"
                                                             icon={<DeleteOutlined />}
                                                             onClick={() => handleDeleteFile(row.id, file.id)}
-                                                            target="_blank"
                                                         />
+
                                                     </Tooltip>
                                                 </td>
                                             </tr>
