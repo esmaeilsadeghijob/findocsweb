@@ -46,6 +46,8 @@ const DocGrid = ({
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
     const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
+    const allowEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
+    const allowDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
 
     const fetchDocuments = async () => {
         if (!clientId) return;
@@ -176,7 +178,7 @@ const DocGrid = ({
                                         setShowEditModal(true);
                                     }}
                                     disabled={isFinalized}
-                                    style={isFinalized ? { cursor: "not-allowed" } : {}}
+                                    style={isFinalized ? { cursor: "not-allowed", color: "#ccc" } : {}}
                                 />
 
                                 <Button
