@@ -73,7 +73,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                 const f = files[i];
                 const formData = new FormData();
                 formData.append("files", f.file);
-                formData.append("description", f.description || "");
+                formData.append("descriptions", f.description || "");
                 formData.append("companyId", f.companyId || "");
 
                 await uploadFile(documentId, formData);
