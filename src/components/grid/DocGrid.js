@@ -66,6 +66,7 @@ const DocGrid = ({
 
             const clean = enrichedDocs.map((doc) => ({
                 ...doc,
+                title: doc.title?.trim() || "—",
                 documentNumber: doc.documentNumber || "—",
                 fiscalYear: doc.fiscalYear || "—",
                 serviceName: doc.serviceName || "—",
@@ -104,6 +105,7 @@ const DocGrid = ({
 
     const columns = useMemo(
         () => [
+            { field: "title", headerName: "عنوان سند", minWidth: 220 },
             { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
             { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
             { field: "serviceName", headerName: "سرویس", minWidth: 140 },

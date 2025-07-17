@@ -49,7 +49,6 @@ const Tabel = ({
                     .filter((val) => typeof val === "string")
                     .some((text) => text.toLowerCase().includes(normalizedSearch))
             );
-
             if (fileMatch) {
                 autoExpanded[row.id] = true;
             }
@@ -170,6 +169,26 @@ const Tabel = ({
             </div>
 
             <div className="ag-theme-alpine" style={{width: "100%"}}>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        paddingInline: 12,
+                        background: "#f5f5f5",
+                        fontWeight: "bold",
+                        borderBottom: "1px solid #ddd",
+                    }}
+                >
+                    <div style={{width: 36}}/>
+                    {/* جای دکمه expand */}
+                    {columnDefs.map((col, index) => (
+                        <div key={index} style={{minWidth: col.minWidth || 120}}>
+                            {col.headerName ?? col.field}
+                        </div>
+                    ))}
+                </div>
+
                 {filteredRows.map((row) => {
                     const normalizedSearch = searchText.toLowerCase();
                     const matchesSearch = searchText?.trim().length > 0;
@@ -203,13 +222,13 @@ const Tabel = ({
                                 />
                                 {columnDefs.map((col, index) => (
                                     <div key={index} style={{minWidth: col.minWidth || 120}}>
-                                        {row[col.field] ?? "—"}
+                                        {row[col.field]?.toString().trim() || "—"}
                                     </div>
                                 ))}
                             </div>
 
                             {expandedRows[row.id] && (
-                                <div style={{padding: "12px 40px", background: "#fafafa"}}>
+                                <div style={{padding: "12px 40px", background: "#f7f7f7"}}>
                                     <div style={{marginBottom: 8}}>
                                         <Button
                                             type="dashed"
