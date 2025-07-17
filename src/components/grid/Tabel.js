@@ -9,7 +9,7 @@ import {
     MinusSquareOutlined,
     UploadOutlined,
     EyeOutlined,
-    DeleteOutlined,
+    DeleteOutlined, CloseOutlined,
 } from "@ant-design/icons";
 import UploadModal from "./UploadModal";
 import {getAttachments, deleteAttachment} from "../../api/api";
@@ -103,7 +103,7 @@ const Tabel = ({
     const handleDeleteFile = async (docId, fileId) => {
         try {
             await deleteAttachment(docId, fileId);
-            message.success("✅ فایل حذف شد");
+            message.success(" فایل حذف شد");
 
             const res = await getAttachments(docId);
             const updatedAttachments = res.data || [];
@@ -168,28 +168,30 @@ const Tabel = ({
                 )}
             </div>
 
-            <div className="ag-theme-alpine" style={{width: "100%"}}>
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        paddingInline: 12,
-                        background: "#f5f5f5",
-                        fontWeight: "bold",
-                        borderBottom: "1px solid #ddd",
-                    }}
-                >
-                    <div style={{width: 36}}/>
-                    {/* جای دکمه expand */}
-                    {columnDefs.map((col, index) => (
-                        <div key={index} style={{minWidth: col.minWidth || 120}}>
-                            {col.headerName ?? col.field}
-                        </div>
-                    ))}
-                </div>
+            {/* 👇 عنوان ستون‌ها */}
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    paddingInline: 12,
+                    background: "#f5f5f5",
+                    fontWeight: "bold",
+                    borderBottom: "1px solid #ddd",
+                }}
+            >
+                <div style={{width: 36}}/>
+                {columnDefs.map((col, index) => (
+                    <div key={index} style={{minWidth: col.minWidth || 120}}>
+                        {col.headerName ?? col.field}
+                    </div>
+                ))}
+            </div>
 
+            {/* 👇 ردیف‌های جدول */}
+            <div className="ag-theme-alpine" style={{width: "100%"}}>
                 {filteredRows.map((row) => {
+                    const isFinalized = row.status === "FINALIZED";
                     const normalizedSearch = searchText.toLowerCase();
                     const matchesSearch = searchText?.trim().length > 0;
 
@@ -220,13 +222,17 @@ const Tabel = ({
                                     }
                                     onClick={() => toggleExpand(row.id)}
                                 />
+
                                 {columnDefs.map((col, index) => (
                                     <div key={index} style={{minWidth: col.minWidth || 120}}>
-                                        {row[col.field]?.toString().trim() || "—"}
+                                        {typeof col.cellRenderer === "function"
+                                            ? col.cellRenderer({data: row})
+                                            : row[col.field]?.toString().trim() || "—"}
                                     </div>
                                 ))}
                             </div>
 
+                            {/* 👇 ضمایم در حالت باز */}
                             {expandedRows[row.id] && (
                                 <div style={{padding: "12px 40px", background: "#f7f7f7"}}>
                                     <div style={{marginBottom: 8}}>
@@ -237,6 +243,7 @@ const Tabel = ({
                                                 setSelectedRowId(row.id);
                                                 setShowUploadModal(true);
                                             }}
+                                            disabled={isFinalized} // ❌ غیر فعال اگر قطعی
                                         >
                                             بارگذاری فایل جدید
                                         </Button>
@@ -249,6 +256,7 @@ const Tabel = ({
                                                 <th>نام فایل</th>
                                                 <th>فرمت</th>
                                                 <th>شرح فایل</th>
+                                                <th>شرکت / شخص</th>
                                                 <th>تاریخ بارگذاری</th>
                                                 <th>آپلودکننده</th>
                                                 <th>پیش‌نمایش</th>
@@ -260,7 +268,8 @@ const Tabel = ({
                                                 <tr key={file.id} style={{textAlign: "center"}}>
                                                     <td>{file.fileName || "—"}</td>
                                                     <td>{file.extension || "—"}</td>
-                                                    <td>{file.description?.trim() ? file.description : "—"}</td>
+                                                    <td>{file.description?.trim() || "—"}</td>
+                                                    <td>{file.companyName || file.company?.name || "—"}</td>
                                                     <td>
                                                         {file.uploadedAt
                                                             ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
@@ -269,6 +278,7 @@ const Tabel = ({
                                                             })
                                                             : "—"}
                                                     </td>
+                                                    <td>{file.companyName || file.company?.name || "—"}</td>
                                                     <td>{file.uploadedBy || "—"}</td>
                                                     <td>
                                                         <Tooltip title="مشاهده فایل">
@@ -285,16 +295,22 @@ const Tabel = ({
                                                             <Button
                                                                 danger
                                                                 type="text"
-                                                                icon={<DeleteOutlined/>}
+                                                                icon={<CloseOutlined/>}
                                                                 onClick={() => handleDeleteFile(row.id, file.id)}
                                                             />
                                                         </Tooltip>
                                                     </td>
-                                                </tr>))} {matchingFiles.length === 0 && (<tr>
-                                                <td colSpan={7} style={{textAlign: "center", color: "#999"}}> هیچ فایل
-                                                    مرتبطی با عبارت جست‌وجو یافت نشد
-                                                </td>
-                                            </tr>)} </tbody>
+                                                </tr>
+                                            ))}
+                                            {matchingFiles.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={7} style={{textAlign: "center", color: "#999"}}> هیچ
+                                                        فایل
+                                                        مرتبطی با عبارت جست‌وجو یافت نشد
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>)} </div>);

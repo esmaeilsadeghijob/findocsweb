@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import Tabel from "./Tabel";
 import TabelActionBtn from "./TabelActionBtn";
 import DocumentFormModal from "./DocumentFormModal";
-import { PlusOutlined } from "@ant-design/icons";
-import { Button, message } from "antd";
+import {CloseOutlined, PlusOutlined} from "@ant-design/icons";
+import {Button, message, Tag, Tooltip} from "antd";
+import { EditOutlined } from "@ant-design/icons";
+import EditDocumentModal from "./EditDocumentModal";
 import {
     getDocumentsByClientId,
     deleteDocument,
@@ -43,6 +45,8 @@ const DocGrid = ({
     const canDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
     const canRevert = isAdmin || ["REVERT", "OWNER"].includes(accessLevel);
     const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
+    const [editDocument, setEditDocument] = useState(null);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     const fetchDocuments = async () => {
         if (!clientId) return;
@@ -68,7 +72,7 @@ const DocGrid = ({
                 ...doc,
                 title: doc.title?.trim() || "—",
                 documentNumber: doc.documentNumber || "—",
-                fiscalYear: doc.fiscalYear || "—",
+                fiscalYear: doc.periodFiscalYear  || "—",
                 serviceName: doc.serviceName || "—",
                 description: doc.description || "—",
                 status: doc.status || "—",
@@ -103,43 +107,97 @@ const DocGrid = ({
         }
     };
 
+    const handleStatusChange = async (id) => {
+        try {
+            const res = await advanceDocumentStatus(id);
+            const updated = res.data;
+            setDocuments((prev) =>
+                prev.map((doc) => (doc.id === updated.id ? updated : doc))
+            );
+        } catch {
+            message.error("خطا در تغییر وضعیت سند");
+        }
+    };
+
     const columns = useMemo(
         () => [
-            { field: "title", headerName: "عنوان سند", minWidth: 220 },
             { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
             { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
-            { field: "serviceName", headerName: "سرویس", minWidth: 140 },
             { field: "description", headerName: "شرح", minWidth: 180 },
-            { field: "status", headerName: "وضعیت", minWidth: 120 },
+            {
+                headerName: "وضعیت",
+                field: "status",
+                width: 120,
+                cellRenderer: (params) => {
+                    const status = params.value;
+                    const color =
+                        status === "DRAFT"
+                            ? "default"
+                            : status === "SUBMITTED"
+                                ? "orange"
+                                : "green";
+                    const label =
+                        status === "DRAFT"
+                            ? "پیش‌نویس"
+                            : status === "SUBMITTED"
+                                ? "ثبت‌شده"
+                                : "قطعی";
+                    const next =
+                        status === "DRAFT"
+                            ? "ثبت‌شده"
+                            : status === "SUBMITTED"
+                                ? "قطعی"
+                                : null;
+
+                    return (
+                        <Tooltip title={next ? `تغییر به ${next}` : "نهایی‌شده"}>
+                            <Tag
+                                color={color}
+                                style={{ cursor: status === "FINALIZED" ? "not-allowed" : "pointer" }}
+                                onClick={() =>
+                                    status !== "FINALIZED" && handleStatusChange(params.data.id)
+                                }
+                            >
+                                {label}
+                            </Tag>
+                        </Tooltip>
+                    );
+                },
+            },
+            // فقط داخل cellRenderer ستون actions این رو جایگزین کن 👇
             {
                 field: "actions",
                 headerName: "عملیات",
                 minWidth: 160,
-                cellRenderer: (params) => (
-                    <div style={{ display: "flex", gap: "6px" }}>
-                        {canEdit && (
-                            <TabelActionBtn
-                                title="ویرایش"
-                                type="edit"
-                                onClick={() => console.log("ویرایش", params.data)}
-                            />
-                        )}
-                        {canDelete && (
-                            <TabelActionBtn
-                                title="حذف"
-                                type="delete"
-                                onClick={() => handleDelete(params.data.id)}
-                            />
-                        )}
-                        {canRevert && (
-                            <TabelActionBtn
-                                title="بازگردانی"
-                                type="restore"
-                                onClick={() => handleRevert(params.data)}
-                            />
-                        )}
-                    </div>
-                ),
+                cellRenderer: (params) => {
+                    const isFinalized = params.data.status === "FINALIZED";
+
+                    return (
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            {canEdit && (
+                                <>
+                                    <Button
+                                        type="text"
+                                        icon={<EditOutlined />}
+                                        title="ویرایش سند"
+                                        onClick={() => {
+                                            setEditDocument(params.data);
+                                            setShowEditModal(true);
+                                        }}
+                                        disabled={isFinalized} // ❌ غیرفعال اگر سند قطعی شده
+                                    />
+                                    <Button
+                                        type="text"
+                                        icon={<CloseOutlined style={{ color: "red", fontSize: 16 }} />}
+                                        title="حذف سند"
+                                        onClick={() => handleDelete(params.data.id)}
+                                        disabled={isFinalized} // ❌ غیرفعال اگر قطعی
+                                    />
+                                </>
+                            )}
+                        </div>
+                    );
+                }
             },
         ],
         [canEdit, canDelete, canRevert]
@@ -201,6 +259,23 @@ const DocGrid = ({
                     }}
                 />
             )}
+
+            {showEditModal && editDocument && (
+                <EditDocumentModal
+                    visible={showEditModal}
+                    editData={editDocument}
+                    onCancel={() => {
+                        setShowEditModal(false);
+                        setEditDocument(null);
+                    }}
+                    onSuccess={() => {
+                        setShowEditModal(false);
+                        setEditDocument(null);
+                        fetchDocuments();
+                    }}
+                />
+            )}
+
         </>
     );
 };

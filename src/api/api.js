@@ -98,3 +98,6 @@ export const updateUser = (id, data) =>
 
 export const getDocumentsByClientId = (clientId) =>
     API.get(`/api/documents/client/${clientId}`);
+
+export const updateDocument = (id, data) =>
+    API.put(`/api/documents/${id}`, data);
