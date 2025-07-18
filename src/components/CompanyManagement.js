@@ -83,6 +83,19 @@ function CompanyManagement() {
                 ),
         },
         {
+            title: "شماره ثبت",
+            dataIndex: "registrationNumber",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.registrationNumber}
+                        onChange={(e) => handleChange(e, "registrationNumber")}
+                    />
+                ) : (
+                    record.registrationNumber
+                ),
+        },
+        {
             title: "تلفن",
             dataIndex: "phone",
             render: (_, record) =>

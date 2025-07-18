@@ -54,6 +54,14 @@ function AddCompanyForm({ onSuccess = () => {} }) {
                     />
                 </Form.Item>
 
+                <Form.Item name="registrationNumber" label="شماره ثبت">
+                    <Input
+                        className="auth-input small-input"
+                        placeholder="مثلاً: ۱۰۳۲۲۲۳۰۰۹۰"
+                        style={{ textAlign: "right" }}
+                    />
+                </Form.Item>
+
                 <Form.Item name="phone" label="تلفن">
                     <Input
                         className="auth-input small-input"
