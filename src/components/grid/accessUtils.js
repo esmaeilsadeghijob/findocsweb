@@ -12,7 +12,7 @@ export function canRead(role, accessLevel) {
 // بررسی اجازه ساخت سند یا مشتری
 export function canCreate(role, accessLevel) {
     return role === "ROLE_ADMIN" || [
-        "CREATE",
+        // "CREATE",
         "ADMIN",
         "OWNER"
     ].includes(accessLevel);

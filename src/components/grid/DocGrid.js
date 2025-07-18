@@ -41,7 +41,7 @@ const DocGrid = ({
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal =
-        isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN"].includes(accessLevel);
+        isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
     const canCreate =
         isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
@@ -121,7 +121,7 @@ const DocGrid = ({
         }
     };
 
-    const isLimitedAccessGlobal = ["READ", "CREATE", "NONE"].includes(accessLevel) && !isAdmin;
+    const isLimitedAccessGlobal = ["READ", "CREATE", "NONE", "DOWNLOAD"].includes(accessLevel) && !isAdmin;
 
     const statusColumn = isLimitedAccessGlobal
         ? {
@@ -289,7 +289,7 @@ const DocGrid = ({
                 columnDefs={columns}
                 rowData={documents}
                 // canManageAttachments={!["READ", "CREATE", "NONE"].includes(accessLevel) && !isAdmin}
-                canManageAttachments={!["READ", "CREATE", "NONE"].includes(accessLevel)}
+                canManageAttachments={!["READ", "CREATE", "NONE", "DOWNLOAD"].includes(accessLevel)}
                 sortCol
                 search
                 excel
