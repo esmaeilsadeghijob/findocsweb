@@ -203,7 +203,7 @@ const DocGrid = ({
         const baseColumns = [
             { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
             { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
-            { field: "serviceName", headerName: "سرویس", minWidth: 140 },
+            // { field: "serviceName", headerName: "سرویس", minWidth: 140 },
             { field: "description", headerName: "شرح", minWidth: 180 },
             {
                 field: "documentTimestamp",
