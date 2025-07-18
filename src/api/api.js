@@ -101,3 +101,6 @@ export const getDocumentsByClientId = (clientId) =>
 
 export const updateDocument = (id, data) =>
     API.put(`/api/documents/${id}`, data);
+
+export const revertDocumentStatus = (id) =>
+    API.patch(`/api/documents/${id}/revert`);
