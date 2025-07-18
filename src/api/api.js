@@ -104,3 +104,11 @@ export const updateDocument = (id, data) =>
 
 export const revertDocumentStatus = (id) =>
     API.patch(`/api/documents/${id}/revert`);
+
+export const getDocumentsByUnit = (unitId) =>
+    API.get(`/api/documents/unit/${unitId}`);
+
+export const getDocumentsByFilter = (clientId, unitId, serviceId) =>
+    API.get("/api/documents/filter", {
+        params: { clientId, unitId, serviceId }
+    });

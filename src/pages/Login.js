@@ -15,9 +15,17 @@ function Login() {
             loginContext(res.data.token);
             localStorage.setItem("role", res.data.role);
             localStorage.setItem("identifierCode", res.data.identifierCode);
+            localStorage.setItem("userId", res.data.id);
             localStorage.setItem("username", res.data.username);
             localStorage.setItem("documentAccess", res.data.defaultAccessLevel);
             localStorage.setItem("displayName", res.data.displayName);
+
+            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+            console.log(res.data);
+            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+
             message.success("ورود موفق");
             navigate("/");
         } catch {

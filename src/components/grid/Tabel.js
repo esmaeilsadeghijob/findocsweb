@@ -25,6 +25,7 @@ const Tabel = ({
                    csv = true,
                    filter = true,
                    onRefreshRowData,
+                   canManageAttachments
                }) => {
     const [searchText, setSearchText] = useState("");
     const [expandedRows, setExpandedRows] = useState({});
@@ -254,7 +255,7 @@ const Tabel = ({
                                                 <th>تاریخ بارگذاری</th>
                                                 <th>آپلودکننده</th>
                                                 <th>پیش‌نمایش</th>
-                                                <th>حذف</th>
+                                                {canManageAttachments && <th>حذف</th>}
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -279,17 +280,19 @@ const Tabel = ({
                                                             />
                                                         </Tooltip>
                                                     </td>
-                                                    <td>
-                                                        <Tooltip title="حذف فایل">
-                                                            <Button
-                                                                danger
-                                                                type="text"
-                                                                icon={<CloseOutlined />}
-                                                                onClick={() => handleDeleteFile(row.id, file.id)}
-                                                                disabled={isFinalized}
-                                                            />
-                                                        </Tooltip>
-                                                    </td>
+                                                    {canManageAttachments && (
+                                                        <td>
+                                                            <Tooltip title="حذف فایل">
+                                                                <Button
+                                                                    danger
+                                                                    type="text"
+                                                                    icon={<CloseOutlined />}
+                                                                    onClick={() => handleDeleteFile(row.id, file.id)}
+                                                                    disabled={isFinalized}
+                                                                />
+                                                            </Tooltip>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             ))}
                                             {matchingFiles.length === 0 && (

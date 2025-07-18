@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     Input,
     message,
@@ -19,8 +19,9 @@ import {
 } from "../api/api";
 import ClientCreateModal from "../components/ClientCreateModal";
 import DocGrid from "../components/grid/DocGrid";
+import {canCreate} from "../components/grid/accessUtils";
 
-const { Title } = Typography;
+const {Title} = Typography;
 
 function ClientDocument() {
     const [searchText, setSearchText] = useState("");
@@ -33,6 +34,7 @@ function ClientDocument() {
     const [userRole, setUserRole] = useState();
     const [accessLevel, setAccessLevel] = useState();
     const [roles, setRoles] = useState([]);
+    const [userId, setUserId] = useState();
 
     const fetchClients = async () => {
         setLoadingClients(true);
@@ -49,11 +51,13 @@ function ClientDocument() {
     };
 
     useEffect(() => {
+        const userIdFromStorage = localStorage.getItem("userId");
         const roleFromStorage = localStorage.getItem("role");
-        const accessFromStorage = localStorage.getItem("access");
+        const accessFromStorage = localStorage.getItem("documentAccess");
         setUserRole(roleFromStorage);
         setAccessLevel(accessFromStorage);
         setRoles([roleFromStorage]);
+        setUserId(userIdFromStorage);
         fetchClients();
     }, []);
 
@@ -92,13 +96,13 @@ function ClientDocument() {
     };
 
     return (
-        <div style={{ display: "flex", gap: "2rem", padding: "2rem" }}>
+        <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
             {/* ستون مشتری‌ها سمت راست */}
-            <div style={{ width: 220 }}>
-                {userRole === "ROLE_ADMIN" && (
+            <div style={{width: 220}}>
+                {canCreate(userRole, accessLevel) && (
                     <Button
                         type="text"
-                        icon={<PlusOutlined />}
+                        icon={<PlusOutlined/>}
                         style={{
                             fontSize: "1rem",
                             padding: "0 6px",
@@ -116,14 +120,14 @@ function ClientDocument() {
                 <Title level={5}>لیست مشتری‌ها</Title>
                 <Input
                     allowClear
-                    prefix={<SearchOutlined />}
+                    prefix={<SearchOutlined/>}
                     placeholder="جست‌وجو مشتری"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    style={{ marginBottom: "1rem" }}
+                    style={{marginBottom: "1rem"}}
                 />
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{display: "flex", flexDirection: "column", gap: "8px"}}>
                     <div
                         style={{
                             display: "flex",
@@ -132,13 +136,13 @@ function ClientDocument() {
                             borderBottom: "1px solid #ccc"
                         }}
                     >
-                        <div style={{ width: "100%", textAlign: "center" }}>واحد</div>
+                        <div style={{width: "100%", textAlign: "center"}}>واحد</div>
                     </div>
 
                     {loadingClients ? (
-                        <Spin />
+                        <Spin/>
                     ) : filteredClients.length === 0 ? (
-                        <div style={{ color: "#999", marginTop: "1rem" }}>
+                        <div style={{color: "#999", marginTop: "1rem"}}>
                             موردی یافت نشد
                         </div>
                     ) : (
@@ -164,10 +168,10 @@ function ClientDocument() {
                                     cursor: "pointer"
                                 }}
                             >
-                                <div style={{ width: "100%" }}>{client.unitName}</div>
+                                <div style={{width: "100%"}}>{client.unitName}</div>
 
-                                {userRole === "ROLE_ADMIN" && (
-                                    <div style={{ display: "flex", gap: "6px" }}>
+                                {canCreate(userRole, accessLevel) && (
+                                    <div style={{display: "flex", gap: "6px"}}>
                                         <Button
                                             type="text"
                                             icon={
@@ -210,7 +214,7 @@ function ClientDocument() {
             </div>
 
             {/* ستون اطلاعات سمت چپ */}
-            <div style={{ flex: 1 }}>
+            <div style={{flex: 1}}>
                 {selectedClient ? (
                     <>
                         <div
@@ -222,10 +226,10 @@ function ClientDocument() {
                                 lineHeight: "1.2rem"
                             }}
                         >
-                            <Title level={5} style={{ marginBottom: "0.4rem" }}>
+                            <Title level={5} style={{marginBottom: "0.4rem"}}>
                                 اطلاعات مشتری انتخاب‌شده
                             </Title>
-                            <p style={{ margin: 0 }}>
+                            <p style={{margin: 0}}>
                                 <strong>واحد:</strong> {selectedClient.unitName}
                             </p>
                         </div>
@@ -240,10 +244,11 @@ function ClientDocument() {
                             fiscalYear={selectedClient.fiscalYear}
                             accessLevel={accessLevel}
                             roles={roles}
+                            currentUser={{ id: userId }}
                         />
                     </>
                 ) : (
-                    <div style={{ color: "#999" }}>
+                    <div style={{color: "#999"}}>
                         لطفاً یک مشتری را از لیست سمت راست انتخاب کنید...
                     </div>
                 )}
