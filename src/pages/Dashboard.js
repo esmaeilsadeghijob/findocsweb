@@ -112,7 +112,7 @@ function Dashboard() {
                             بایگانی اسناد
                         </h1>
 
-                        {identifierCode && (
+                        {role === "ROLE_ADMIN" ? (
                             <div
                                 style={{
                                     fontFamily: "FarBaseet",
@@ -121,9 +121,23 @@ function Dashboard() {
                                     color: "#555"
                                 }}
                             >
-                                {identifierCode}
+                                مدیر سیستم
                             </div>
+                        ) : (
+                            identifierCode && (
+                                <div
+                                    style={{
+                                        fontFamily: "FarBaseet",
+                                        fontSize: "1.5rem",
+                                        marginTop: "-6px",
+                                        color: "#555"
+                                    }}
+                                >
+                                    {identifierCode}
+                                </div>
+                            )
                         )}
+
 
                         {unitName && (
                             <div

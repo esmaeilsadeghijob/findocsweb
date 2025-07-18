@@ -41,7 +41,7 @@ const DocGrid = ({
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal =
-        isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT"].includes(accessLevel);
+        isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN"].includes(accessLevel);
     const canCreate =
         isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
