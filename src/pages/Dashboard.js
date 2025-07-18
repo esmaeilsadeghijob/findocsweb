@@ -1,4 +1,4 @@
-import { Avatar, Layout, Menu } from "antd";
+import {Avatar, Layout, Menu, Tooltip} from "antd";
 import {
     FileTextOutlined,
     LogoutOutlined,
@@ -6,13 +6,13 @@ import {
     TeamOutlined,
     UserOutlined
 } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import UsersApproval from "../components/UsersApproval";
 import ReferenceManagement from "./ReferenceManagement";
 import CompanyManagement from "../components/CompanyManagement";
 import ClientDocument from "./ClientDocument";
 
-const { Header, Sider, Content } = Layout;
+const {Header, Sider, Content} = Layout;
 
 function Dashboard() {
     const [currentKey, setCurrentKey] = useState("documents");
@@ -21,6 +21,7 @@ function Dashboard() {
 
     const role = localStorage.getItem("role");
     const accessLevel = localStorage.getItem("documentAccess")?.toUpperCase();
+    const [hovered, setHovered] = useState(false);
 
     useEffect(() => {
         const code = localStorage.getItem("identifierCode");
@@ -40,21 +41,21 @@ function Dashboard() {
     };
 
     const rawMenuItems = [
-        { key: "documents", icon: <FileTextOutlined />, label: "اسناد" },
+        {key: "documents", icon: <FileTextOutlined/>, label: "اسناد"},
 
         ...(role === "ROLE_ADMIN"
             ? [
-                { key: "users", icon: <TeamOutlined />, label: "مدیریت کاربران" },
-                { key: "reference", icon: <SettingOutlined />, label: "داده‌های پایه" }
+                {key: "users", icon: <TeamOutlined/>, label: "مدیریت کاربران"},
+                {key: "reference", icon: <SettingOutlined/>, label: "داده‌های پایه"}
             ]
             : []),
 
         // فقط اگر نقش ≠ ROLE_USER با سطح NONE باشد، منوی شرکت اضافه شود
         ...(!(role === "ROLE_USER" && accessLevel === "NONE")
-            ? [{ key: "company", icon: <UserOutlined />, label: "شرکت (شخص)" }]
+            ? [{key: "company", icon: <UserOutlined/>, label: "شرکت (شخص)"}]
             : []),
 
-        { key: "logout", icon: <LogoutOutlined />, label: "خروج" }
+        {key: "logout", icon: <LogoutOutlined/>, label: "خروج"}
     ];
 
     const enhancedMenuItems = rawMenuItems.map((item) => ({
@@ -67,17 +68,17 @@ function Dashboard() {
             padding: 0
         },
         label: (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                 {React.cloneElement(item.icon, {
-                    style: { fontSize: 40, color: "#333" }
+                    style: {fontSize: 40, color: "#333"}
                 })}
-                <div style={{ fontSize: "0.9rem", marginTop: 8 }}>{item.label}</div>
+                <div style={{fontSize: "0.9rem", marginTop: 8}}>{item.label}</div>
             </div>
         )
     }));
 
     return (
-        <Layout style={{ minHeight: "100vh" }}>
+        <Layout style={{minHeight: "100vh"}}>
             <Header
                 style={{
                     position: "sticky",
@@ -92,12 +93,12 @@ function Dashboard() {
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
                 }}
             >
-                <div style={{ flex: 1 }}></div>
+                <div style={{flex: 1}}></div>
 
-                <div style={{ flex: 1 }}></div>
+                <div style={{flex: 1}}></div>
 
-                <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{flex: 1, textAlign: "center"}}>
+                    <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
                         <h1
                             style={{
                                 fontFamily: "Lalezar",
@@ -152,9 +153,9 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div style={{ flex: 1 }}></div>
+                <div style={{flex: 1}}></div>
 
-                <div style={{ flex: 1, textAlign: "center" }}>
+                <div style={{flex: 1, textAlign: "center"}}>
                     <div
                         style={{
                             display: "flex",
@@ -164,37 +165,55 @@ function Dashboard() {
                             gap: "10px"
                         }}
                     >
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            <Avatar icon={<UserOutlined />} size={42} />
+                        <Tooltip title="صفحه اسناد">
+                        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                            <Avatar
+                                icon={<UserOutlined/>}
+                                size={42}
+                                style={{cursor: "pointer"}}
+                                onClick={() => {
+                                    window.location.href = "/";
+                                }}
+                            />
                             <div
+                                onClick={() => (window.location.href = "/")}
                                 style={{
                                     fontSize: "1rem",
                                     fontWeight: "bold",
                                     color: "rgb(43,45,48)",
                                     marginTop: "7px",
-                                    lineHeight: "1rem"
+                                    lineHeight: "1rem",
+                                    cursor: "pointer",
+                                    userSelect: "none"
                                 }}
                             >
                                 {localStorage.getItem("displayName")?.trim() || localStorage.getItem("username")}
                             </div>
+
                         </div>
-                        <LogoutOutlined
-                            style={{
-                                fontSize: "18px",
-                                cursor: "pointer",
-                                color: "rgba(170,0,0,0.6)"
-                            }}
-                            onClick={() => {
-                                localStorage.clear();
-                                window.location = "/login";
-                            }}
-                        />
+                        </Tooltip>
+                        <Tooltip title="خروج">
+                            <LogoutOutlined
+                                style={{
+                                    fontSize: hovered ? "26px" : "18px",
+                                    color: hovered ? "rgba(220,0,0,0.8)" : "rgb(30,31,34)",
+                                    cursor: "pointer",
+                                    transition: "all 0.1s ease-out"
+                                }}
+                                onMouseEnter={() => setHovered(true)}
+                                onMouseLeave={() => setHovered(false)}
+                                onClick={() => {
+                                    localStorage.clear();
+                                    window.location = "/login";
+                                }}
+                            />
+                        </Tooltip>
                     </div>
                 </div>
             </Header>
 
-            <Layout style={{ minHeight: "100vh", overflow: "auto" }}>
-                <Sider width={150} style={{ background: "#fff", display: "flex", justifyContent: "center" }}>
+            <Layout style={{minHeight: "100vh", overflow: "auto"}}>
+                <Sider width={150} style={{background: "#fff", display: "flex", justifyContent: "center"}}>
                     <Menu
                         mode="vertical"
                         theme="light"
@@ -210,11 +229,11 @@ function Dashboard() {
                     />
                 </Sider>
 
-                <Content style={{ margin: "1rem", padding: "1rem", background: "#fff" }}>
-                    {currentKey === "documents" && <ClientDocument />}
-                    {currentKey === "users" && <UsersApproval />}
-                    {currentKey === "reference" && <ReferenceManagement />}
-                    {currentKey === "company" && <CompanyManagement />}
+                <Content style={{margin: "1rem", padding: "1rem", background: "#fff"}}>
+                    {currentKey === "documents" && <ClientDocument/>}
+                    {currentKey === "users" && <UsersApproval/>}
+                    {currentKey === "reference" && <ReferenceManagement/>}
+                    {currentKey === "company" && <CompanyManagement/>}
                 </Content>
             </Layout>
         </Layout>
