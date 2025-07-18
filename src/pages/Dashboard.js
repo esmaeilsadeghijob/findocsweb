@@ -17,15 +17,16 @@ const { Header, Sider, Content } = Layout;
 function Dashboard() {
     const [currentKey, setCurrentKey] = useState("documents");
     const [identifierCode, setIdentifierCode] = useState();
-    const [unitName, setUnitName] = useState(); // ✅ تعریف state جدید
+    const [unitName, setUnitName] = useState();
 
     const role = localStorage.getItem("role");
+    const accessLevel = localStorage.getItem("documentAccess")?.toUpperCase();
 
     useEffect(() => {
         const code = localStorage.getItem("identifierCode");
         setIdentifierCode(code);
 
-        const name = localStorage.getItem("unitName"); // ✅ خواندن نام واحد از localStorage
+        const name = localStorage.getItem("unitName");
         setUnitName(name);
     }, []);
 
@@ -40,21 +41,19 @@ function Dashboard() {
 
     const rawMenuItems = [
         { key: "documents", icon: <FileTextOutlined />, label: "اسناد" },
+
         ...(role === "ROLE_ADMIN"
             ? [
-                {
-                    key: "users",
-                    icon: <TeamOutlined />,
-                    label: "مدیریت کاربران"
-                },
-                {
-                    key: "reference",
-                    icon: <SettingOutlined />,
-                    label: "داده‌های پایه"
-                }
+                { key: "users", icon: <TeamOutlined />, label: "مدیریت کاربران" },
+                { key: "reference", icon: <SettingOutlined />, label: "داده‌های پایه" }
             ]
             : []),
-        { key: "company", icon: <UserOutlined />, label: "شرکت (شخص)" },
+
+        // فقط اگر نقش ≠ ROLE_USER با سطح NONE باشد، منوی شرکت اضافه شود
+        ...(!(role === "ROLE_USER" && accessLevel === "NONE")
+            ? [{ key: "company", icon: <UserOutlined />, label: "شرکت (شخص)" }]
+            : []),
+
         { key: "logout", icon: <LogoutOutlined />, label: "خروج" }
     ];
 
@@ -93,9 +92,9 @@ function Dashboard() {
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
                 }}
             >
-                <div style={{ flex: 1, textAlign: "center" }}></div>
+                <div style={{ flex: 1 }}></div>
 
-                <div style={{ flex: 1, textAlign: "center" }}></div>
+                <div style={{ flex: 1 }}></div>
 
                 <div style={{ flex: 1, textAlign: "center" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -138,7 +137,6 @@ function Dashboard() {
                             )
                         )}
 
-
                         {unitName && (
                             <div
                                 style={{
@@ -154,7 +152,7 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div style={{ flex: 1, textAlign: "center" }}></div>
+                <div style={{ flex: 1 }}></div>
 
                 <div style={{ flex: 1, textAlign: "center" }}>
                     <div
