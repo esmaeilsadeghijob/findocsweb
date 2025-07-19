@@ -41,12 +41,12 @@ function Dashboard() {
     };
 
     const rawMenuItems = [
-        {key: "documents", icon: <FileTextOutlined/>, label: "اسناد"},
+        {key: "documents", icon: <FileTextOutlined/>, label: "بایگانی"},
 
         ...(role === "ROLE_ADMIN"
             ? [
-                {key: "users", icon: <TeamOutlined/>, label: "مدیریت کاربران"},
-                {key: "reference", icon: <SettingOutlined/>, label: "داده‌های پایه"}
+                {key: "reference", icon: <SettingOutlined/>, label: "امکانات"},
+                {key: "users", icon: <TeamOutlined/>, label: "مدیریت کاربران"}
             ]
             : []),
 
