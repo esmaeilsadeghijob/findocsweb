@@ -70,6 +70,19 @@ function CompanyManagement() {
                 ),
         },
         {
+            title: "شماره شناسایی",
+            dataIndex: "identifierCode",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input
+                        value={editedRow.identifierCode}
+                        onChange={(e) => handleChange(e, "identifierCode")}
+                    />
+                ) : (
+                    record.identifierCode
+                ),
+        },
+        {
             title: "شناسه ملی",
             dataIndex: "nationalId",
             render: (_, record) =>
