@@ -4,7 +4,6 @@ import {login} from "../api/api";
 import {AuthContext} from "../context/AuthContext";
 import {useNavigate} from "react-router-dom";
 import "./AuthPage.css";
-import "./Login.css";
 
 function Login() {
     const navigate = useNavigate();

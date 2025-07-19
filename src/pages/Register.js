@@ -21,8 +21,8 @@ function Register() {
             {/* 📋 فرم ثبت‌نام سمت چپ */}
             <div className="auth-left">
                 <div className="form-wrapper">
-                    <h1 className="auth-title">بایگانی اسناد</h1>
-                    <p className="auth-subtitle">سامانه بایگانی اسناد</p>
+                    <h1 className="auth-title">بایگانی الکترونیکی</h1>
+                    <p className="auth-subtitle">اسناد و مدارک</p>
 
                     <Form layout="vertical" onFinish={onFinish} className="auth-form">
                         <Form.Item

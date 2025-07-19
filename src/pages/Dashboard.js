@@ -93,12 +93,10 @@ function Dashboard() {
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)"
                 }}
             >
-                <div style={{flex: 1}}></div>
+                <div style={{ flex: 1 }}></div>
 
-                <div style={{flex: 1}}></div>
-
-                <div style={{flex: 1, textAlign: "center"}}>
-                    <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <div style={{ flex: 3, textAlign: "center" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                         <h1
                             style={{
                                 fontFamily: "Lalezar",
@@ -109,7 +107,7 @@ function Dashboard() {
                                 color: "#222"
                             }}
                         >
-                            بایگانی اسناد
+                            بایگانی الکترونیکی اسناد و مدارک
                         </h1>
 
                         {role === "ROLE_ADMIN" ? (
@@ -153,9 +151,7 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div style={{flex: 1}}></div>
-
-                <div style={{flex: 1, textAlign: "center"}}>
+                <div style={{ flex: 1, textAlign: "center" }}>
                     <div
                         style={{
                             display: "flex",
@@ -166,31 +162,30 @@ function Dashboard() {
                         }}
                     >
                         <Tooltip title="صفحه اسناد">
-                        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-                            <Avatar
-                                icon={<UserOutlined/>}
-                                size={42}
-                                style={{cursor: "pointer"}}
-                                onClick={() => {
-                                    window.location.href = "/";
-                                }}
-                            />
-                            <div
-                                onClick={() => (window.location.href = "/")}
-                                style={{
-                                    fontSize: "1rem",
-                                    fontWeight: "bold",
-                                    color: "rgb(43,45,48)",
-                                    marginTop: "7px",
-                                    lineHeight: "1rem",
-                                    cursor: "pointer",
-                                    userSelect: "none"
-                                }}
-                            >
-                                {localStorage.getItem("displayName")?.trim() || localStorage.getItem("username")}
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                <Avatar
+                                    icon={<UserOutlined />}
+                                    size={42}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => {
+                                        window.location.href = "/";
+                                    }}
+                                />
+                                <div
+                                    onClick={() => (window.location.href = "/")}
+                                    style={{
+                                        fontSize: "1rem",
+                                        fontWeight: "bold",
+                                        color: "rgb(43,45,48)",
+                                        marginTop: "7px",
+                                        lineHeight: "1rem",
+                                        cursor: "pointer",
+                                        userSelect: "none"
+                                    }}
+                                >
+                                    {localStorage.getItem("displayName")?.trim() || localStorage.getItem("username")}
+                                </div>
                             </div>
-
-                        </div>
                         </Tooltip>
                         <Tooltip title="خروج">
                             <LogoutOutlined
