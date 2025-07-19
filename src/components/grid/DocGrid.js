@@ -286,6 +286,7 @@ const DocGrid = ({
     return (
         <>
             <Tabel
+                rowKey="id"
                 columnDefs={columns}
                 rowData={documents}
                 // canManageAttachments={!["READ", "CREATE", "NONE"].includes(accessLevel) && !isAdmin}

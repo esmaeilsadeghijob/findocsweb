@@ -4,6 +4,7 @@ import {login} from "../api/api";
 import {AuthContext} from "../context/AuthContext";
 import {useNavigate} from "react-router-dom";
 import "./AuthPage.css";
+import "./Login.css";
 
 function Login() {
     const navigate = useNavigate();
@@ -19,13 +20,6 @@ function Login() {
             localStorage.setItem("username", res.data.username);
             localStorage.setItem("documentAccess", res.data.defaultAccessLevel);
             localStorage.setItem("displayName", res.data.displayName);
-
-            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-            console.log(res.data);
-            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-            console.log("::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-
             message.success("ورود موفق");
             navigate("/");
         } catch {
@@ -38,8 +32,8 @@ function Login() {
             {/* 📝 فرم ورود سمت چپ */}
             <div className="auth-left">
                 <div className="form-wrapper">
-                    <h1 className="auth-title">بایگانی اسناد</h1>
-                    <p className="auth-subtitle">سامانه بایگانی اسناد</p>
+                    <h1 className="auth-title">بایگانی الکترونیکی</h1>
+                    <p className="auth-subtitle">اسناد و مدارک</p>
 
                     <Form layout="vertical" onFinish={onFinish} className="auth-form">
                         <Form.Item
@@ -60,7 +54,7 @@ function Login() {
                         >
                             <Input.Password
                                 className="auth-input small-input"
-                                style={{ textAlign: "left" }}
+                                style={{ direction: "ltr", textAlign: "left" }}
                             />
                         </Form.Item>
 

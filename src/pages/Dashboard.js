@@ -213,7 +213,15 @@ function Dashboard() {
             </Header>
 
             <Layout style={{minHeight: "100vh", overflow: "auto"}}>
-                <Sider width={150} style={{background: "#fff", display: "flex", justifyContent: "center"}}>
+                <Sider
+                    width={150}
+                    style={{
+                        background: "#fff",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between"
+                    }}
+                >
                     <Menu
                         mode="vertical"
                         theme="light"
@@ -223,10 +231,31 @@ function Dashboard() {
                             background: "#fff",
                             textAlign: "center",
                             border: "none",
-                            paddingTop: "1rem"
+                            paddingTop: "1rem",
+                            flexGrow: 1
                         }}
                         items={enhancedMenuItems}
                     />
+
+                    {/* لوگو نوشتاری با لینک فعال */}
+                    <a
+                        href="https://www.hushasoft.ir/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            width: "100%",
+                            display: "block",
+                            textAlign: "center",
+                            fontFamily: "Digikala",
+                            fontSize: "0.7rem",
+                            color: "#888",
+                            padding: "1rem",
+                            textDecoration: "none",
+                            cursor: "pointer"
+                        }}
+                    >
+                        شرکت دانشوران‌ سرمد
+                    </a>
                 </Sider>
 
                 <Content style={{margin: "1rem", padding: "1rem", background: "#fff"}}>

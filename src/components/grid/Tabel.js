@@ -1,19 +1,24 @@
-import React, {useCallback, useMemo, useState, useEffect} from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState
+} from "react";
 import {
     Button,
-    Tooltip,
     message,
+    Popconfirm
 } from "antd";
 import {
-    PlusSquareOutlined,
     MinusSquareOutlined,
-    UploadOutlined,
-    EyeOutlined,
-    DeleteOutlined,
-    CloseOutlined,
+    PlusSquareOutlined,
+    UploadOutlined
 } from "@ant-design/icons";
+import {
+    getAttachments,
+    deleteAttachment
+} from "../../api/api";
 import UploadModal from "./UploadModal";
-import {getAttachments, deleteAttachment} from "../../api/api";
 
 const Tabel = ({
                    columnDefs,
@@ -32,6 +37,13 @@ const Tabel = ({
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [internalRows, setInternalRows] = useState([]);
+
+    // ✅ برای حفظ ترتیب ردیف‌ها
+    const updateRowById = (updatedRow) => {
+        setInternalRows((prev) =>
+            prev.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+        );
+    };
 
     useEffect(() => {
         setInternalRows(rowData);
@@ -78,7 +90,7 @@ const Tabel = ({
                             : val instanceof Date
                                 ? val.toLocaleString("fa-IR", {
                                     dateStyle: "medium",
-                                    timeStyle: "short",
+                                    timeStyle: "short"
                                 })
                                 : typeof val === "number"
                                     ? val.toString()
@@ -95,7 +107,7 @@ const Tabel = ({
     const toggleExpand = (id) => {
         setExpandedRows((prev) => ({
             ...prev,
-            [id]: !prev[id],
+            [id]: !prev[id]
         }));
     };
 
@@ -111,11 +123,10 @@ const Tabel = ({
             const res = await getAttachments(docId);
             const updatedAttachments = res.data || [];
 
-            const updatedRows = internalRows.map((row) =>
-                row.id === docId ? {...row, attachmentLinks: updatedAttachments} : row
-            );
-
-            setInternalRows(updatedRows);
+            const updatedRow = internalRows.find((r) => r.id === docId);
+            if (updatedRow) {
+                updateRowById({ ...updatedRow, attachmentLinks: updatedAttachments });
+            }
         } catch {
             message.error("خطا در حذف فایل");
         }
@@ -128,11 +139,10 @@ const Tabel = ({
             const res = await getAttachments(selectedRowId);
             const updatedAttachments = res.data || [];
 
-            const updated = internalRows.map((row) =>
-                row.id === selectedRowId ? {...row, attachmentLinks: updatedAttachments} : row
-            );
-
-            setInternalRows(updated);
+            const updatedRow = internalRows.find((r) => r.id === selectedRowId);
+            if (updatedRow) {
+                updateRowById({ ...updatedRow, attachmentLinks: updatedAttachments });
+            }
         } catch {
             console.warn("خطا در دریافت ضمیمه‌های جدید");
         }
@@ -144,9 +154,10 @@ const Tabel = ({
 
     return (
         <div className="w-full flex flex-col gap-6">
+            {/* نوار بالا */}
             <div
                 className="flex justify-between items-center gap-3 flex-col sm:flex-row"
-                style={{marginBottom: "0.5rem"}}
+                style={{ marginBottom: "0.5rem" }}
             >
                 {actionElement}
                 {search && (
@@ -160,7 +171,7 @@ const Tabel = ({
                             borderRadius: "6px",
                             fontSize: "13px",
                             width: "400px",
-                            marginRight: "1rem",
+                            marginRight: "1rem"
                         }}
                     />
                 )}
@@ -175,19 +186,19 @@ const Tabel = ({
                     paddingInline: 12,
                     background: "#f5f5f5",
                     fontWeight: "bold",
-                    borderBottom: "1px solid #ddd",
+                    borderBottom: "1px solid #ddd"
                 }}
             >
-                <div style={{width: 36}}/>
+                <div style={{ width: 36 }} />
                 {columnDefs.map((col) => (
-                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
+                    <div key={col.field || col.headerName} style={{ minWidth: col.minWidth || 120 }}>
                         {col.headerName ?? col.field}
                     </div>
                 ))}
             </div>
 
             {/* ردیف‌ها */}
-            <div style={{width: "100%"}}>
+            <div style={{ width: "100%" }}>
                 {filteredRows.map((row) => {
                     const isFinalized = row.status === "FINALIZED";
                     const normalizedSearch = searchText.toLowerCase();
@@ -199,41 +210,40 @@ const Tabel = ({
                     );
 
                     return (
-                        <div key={row.id} style={{borderBottom: "1px solid #eee", padding: "8px 0"}}>
+                        <div key={row.id} style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>
                             <div
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
                                     gap: "12px",
-                                    paddingInline: 12,
+                                    paddingInline: 12
                                 }}
                             >
                                 <Button
                                     type="text"
                                     icon={
                                         expandedRows[row.id]
-                                            ? <MinusSquareOutlined/>
-                                            : <PlusSquareOutlined/>
+                                            ? <MinusSquareOutlined />
+                                            : <PlusSquareOutlined />
                                     }
                                     onClick={() => toggleExpand(row.id)}
                                 />
 
                                 {columnDefs.map((col) => (
-                                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
+                                    <div key={col.field || col.headerName} style={{ minWidth: col.minWidth || 120 }}>
                                         {typeof col.cellRenderer === "function"
-                                            ? col.cellRenderer({data: row})
+                                            ? col.cellRenderer({ data: row })
                                             : row[col.field]?.toString().trim() || "—"}
                                     </div>
                                 ))}
                             </div>
 
-                            {/* ضمایم */}
                             {expandedRows[row.id] && (
-                                <div style={{padding: "12px 40px", background: "#f7f7f7"}}>
-                                    <div style={{marginBottom: 8}}>
+                                <div style={{ padding: "12px 40px", background: "#f7f7f7" }}>
+                                    <div style={{ marginBottom: 8 }}>
                                         <Button
                                             type="dashed"
-                                            icon={<UploadOutlined/>}
+                                            icon={<UploadOutlined />}
                                             onClick={() => {
                                                 setSelectedRowId(row.id);
                                                 setShowUploadModal(true);
@@ -244,10 +254,10 @@ const Tabel = ({
                                         </Button>
                                     </div>
 
-                                    <div style={{border: "1px solid #ddd", borderRadius: 8, padding: "12px"}}>
-                                        <table style={{width: "100%", fontSize: "0.9rem"}}>
+                                    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "12px" }}>
+                                        <table style={{ width: "100%", fontSize: "0.9rem" }}>
                                             <thead>
-                                            <tr style={{background: "#f0f0f0", textAlign: "center"}}>
+                                            <tr style={{ background: "#f0f0f0", textAlign: "center" }}>
                                                 <th>نام فایل</th>
                                                 <th>فرمت</th>
                                                 <th>شرح فایل</th>
@@ -260,58 +270,61 @@ const Tabel = ({
                                             </thead>
                                             <tbody>
                                             {matchingFiles.map((file) => (
-                                                <tr key={file.id} style={{textAlign: "center"}}>
-                                                    <td>{file.fileName || "—"}</td>
-                                                    <td>{file.extension || "—"}</td>
-                                                    <td>{file.description?.trim() || "—"}</td>
+                                                <tr key={file.id} style={{ textAlign: "center" }}>
+                                                    <td>{file.name}</td>
+                                                    <td>{file.type}</td>
+                                                    <td>{file.description || "—"}</td>
                                                     <td>{file.companyName || "—"}</td>
-                                                    <td> {file.uploadedAt ? new Date(file.uploadedAt).toLocaleString("fa-IR", {
-                                                        dateStyle: "medium",
-                                                        timeStyle: "short",
-                                                    }) : "—"} </td>
-                                                    <td>{file.uploadedBy || "—"}</td>
+                                                    <td>{new Date(file.uploadedAt).toLocaleDateString("fa-IR")}</td>
+                                                    <td>{file.uploaderName || "—"}</td>
                                                     <td>
-                                                        <Tooltip title="مشاهده فایل">
-                                                            <Button
-                                                                type="link"
-                                                                icon={<EyeOutlined/>}
-                                                                href={`http://localhost:8080/api/attachments/public/${row.id}/file/${file.id}`}
-                                                                target="_blank"
-                                                            />
-                                                        </Tooltip>
+                                                        <a
+                                                            href={file.previewUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            مشاهده
+                                                        </a>
                                                     </td>
                                                     {canManageAttachments && (
                                                         <td>
-                                                            <Tooltip title="حذف فایل">
-                                                                <Button
-                                                                    danger
-                                                                    type="text"
-                                                                    icon={<CloseOutlined />}
-                                                                    onClick={() => handleDeleteFile(row.id, file.id)}
-                                                                    disabled={isFinalized}
-                                                                />
-                                                            </Tooltip>
+                                                            <Popconfirm
+                                                                title="آیا از حذف فایل مطمئن هستید؟"
+                                                                onConfirm={() =>
+                                                                    handleDeleteFile(row.id, file.id)
+                                                                }
+                                                                okText="بله"
+                                                                cancelText="خیر"
+                                                            >
+                                                                <Button type="text" danger>
+                                                                    حذف
+                                                                </Button>
+                                                            </Popconfirm>
                                                         </td>
                                                     )}
                                                 </tr>
                                             ))}
-                                            {matchingFiles.length === 0 && (
-                                                <tr>
-                                                    <td colSpan={7} style={{textAlign: "center", color: "#999"}}> هیچ
-                                                        فایل
-                                                        مرتبطی با عبارت جست‌وجو یافت نشد
-                                                    </td>
-                                                </tr>
-                                            )}
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>)} </div>);
-                })} </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
 
-            {showUploadModal && selectedRowId && (<UploadModal documentId={selectedRowId} visible={showUploadModal}
-                                                               onClose={() => setShowUploadModal(false)}
-                                                               onSuccess={handleUploadSuccess}/>)} </div>);
+            {/* مودال آپلود فایل */}
+            {showUploadModal && (
+                <UploadModal
+                    visible={showUploadModal}
+                    documentId={selectedRowId}
+                    onSuccess={handleUploadSuccess}
+                    onCancel={() => setShowUploadModal(false)}
+                />
+            )}
+        </div>
+    );
 };
 
 export default Tabel;

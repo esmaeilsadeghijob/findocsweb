@@ -16,7 +16,7 @@ const DocumentFormModal = ({
                                periodId,
                                defaultPeriodLabel,
                                onCancel,
-                               onSuccess,
+                               onSuccess
                            }) => {
     const [form] = Form.useForm();
     const [periods, setPeriods] = useState([]);
@@ -30,7 +30,6 @@ const DocumentFormModal = ({
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-
             const selectedPeriod = periods.find(p => p.fiscalYear === values.fiscalYear);
             if (!selectedPeriod) {
                 message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
@@ -46,13 +45,13 @@ const DocumentFormModal = ({
                 serviceName,
                 fiscalYear: selectedPeriod.fiscalYear,
                 documentNumber: values.documentNumber,
-                documentTimestamp: values.documentDate?.valueOf(), // ✅ ارسال timestamp
+                documentTimestamp: values.documentDate?.valueOf(),
                 description: values.description || "",
-                status: "DRAFT",
+                status: "DRAFT"
             };
 
             await createDocument(payload);
-            message.success(" سند با موفقیت ثبت شد");
+            message.success("✅ سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch {
@@ -68,8 +67,13 @@ const DocumentFormModal = ({
             onOk={handleSubmit}
             okText="ثبت"
             cancelText="انصراف"
+            style={{ overflow: "visible" }}
         >
-            <Form form={form} layout="vertical">
+            <Form
+                form={form}
+                layout="vertical"
+                initialValues={{ documentDate: moment() }}
+            >
                 <Form.Item label="سرویس">
                     <Input value={serviceName || "—"} disabled />
                 </Form.Item>
@@ -97,7 +101,7 @@ const DocumentFormModal = ({
                     label="شماره سند"
                     rules={[{ required: true, message: "شماره سند را وارد کنید" }]}
                 >
-                    <Input placeholder="مثلاً: 125" />
+                    <Input placeholder="مثلاً: ۱۲۵" />
                 </Form.Item>
 
                 <Form.Item
@@ -109,9 +113,9 @@ const DocumentFormModal = ({
                         isGregorian={false}
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
-                        value={form.getFieldValue("documentDate") || moment()}
                         onChange={(value) => form.setFieldsValue({ documentDate: value })}
-                        placeholder="مثلاً: 1403/05/22"
+                        inputProps={{ readOnly: true }} // ✅ غیرقابل تایپ دستی
+                        placeholder="انتخاب تاریخ سند"
                     />
                 </Form.Item>
 
