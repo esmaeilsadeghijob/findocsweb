@@ -1,13 +1,34 @@
-import {useEffect, useState} from "react";
-import {Button, Card, Input, message, Popconfirm, Space, Table,} from "antd";
-import {DeleteOutlined, EditOutlined, LeftOutlined, RightOutlined, SaveOutlined,} from "@ant-design/icons";
-import {deleteCompany, getCompanies, updateCompany,} from "../api/api";
+import { useEffect, useState } from "react";
+import {
+    Button,
+    Card,
+    Input,
+    message,
+    Popconfirm,
+    Space,
+    Table,
+} from "antd";
+import {
+    DeleteOutlined,
+    EditOutlined,
+    LeftOutlined,
+    RightOutlined,
+    SaveOutlined,
+} from "@ant-design/icons";
+import {
+    deleteCompany,
+    getCompanies,
+    updateCompany,
+} from "../api/api";
 import AddCompanyForm from "./AddCompanyForm";
 
 function CompanyManagement() {
     const [companies, setCompanies] = useState([]);
     const [editingKey, setEditingKey] = useState(null);
     const [editedRow, setEditedRow] = useState({});
+
+    const role = localStorage.getItem("role")?.trim();
+    const accessLevel = localStorage.getItem("documentAccess")?.trim().toUpperCase();
 
     const fetch = () => {
         getCompanies()
@@ -54,6 +75,8 @@ function CompanyManagement() {
             })
             .catch(() => message.error("خطا در حذف"));
     };
+
+    const canEdit = role === "ROLE_ADMIN" || (role === "ROLE_USER" && accessLevel === "OWNER");
 
     const columns = [
         {
@@ -134,55 +157,59 @@ function CompanyManagement() {
                     record.address
                 ),
         },
-        {
-            title: "عملیات",
-            render: (_, record) =>
-                isEditing(record) ? (
-                    <Space>
-                        <Button
-                            type="link"
-                            icon={<SaveOutlined />}
-                            onClick={() => handleSave(record.id)}
-                            title="ذخیره"
-                        />
-                        <Button type="text" danger onClick={handleCancel}>
-                            لغو
-                        </Button>
-                    </Space>
-                ) : (
-                    <Space>
-                        <Button
-                            type="text"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEdit(record)}
-                            title="ویرایش"
-                        />
-                        <Popconfirm
-                            title="آیا از حذف این مورد مطمئن هستید؟"
-                            onConfirm={() => handleDelete(record.id)}
-                            okText="بله"
-                            cancelText="خیر"
-                        >
-                            <Button
-                                type="text"
-                                danger
-                                icon={<DeleteOutlined />}
-                                title="حذف"
-                            />
-                        </Popconfirm>
-                    </Space>
-                ),
-        },
+
+        // ✅ فقط اگر مجاز باشد، ستون عملیات اضافه شود
+        ...(canEdit
+            ? [
+                {
+                    title: "عملیات",
+                    render: (_, record) =>
+                        isEditing(record) ? (
+                            <Space>
+                                <Button
+                                    type="link"
+                                    icon={<SaveOutlined />}
+                                    onClick={() => handleSave(record.id)}
+                                    title="ذخیره"
+                                />
+                                <Button type="text" danger onClick={handleCancel}>
+                                    لغو
+                                </Button>
+                            </Space>
+                        ) : (
+                            <Space>
+                                <Button
+                                    type="text"
+                                    icon={<EditOutlined />}
+                                    onClick={() => handleEdit(record)}
+                                    title="ویرایش"
+                                />
+                                <Popconfirm
+                                    title="آیا از حذف این مورد مطمئن هستید؟"
+                                    onConfirm={() => handleDelete(record.id)}
+                                    okText="بله"
+                                    cancelText="خیر"
+                                >
+                                    <Button
+                                        type="text"
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        title="حذف"
+                                    />
+                                </Popconfirm>
+                            </Space>
+                        ),
+                },
+            ]
+            : []),
     ];
 
     return (
         <div style={{ display: "flex", alignItems: "start", gap: 32 }}>
-            {/* فرم افزودن شرکت */}
             <div style={{ flex: "0 0 460px" }}>
                 <AddCompanyForm onSuccess={fetch} />
             </div>
 
-            {/* جدول شرکت‌ها */}
             <div style={{ flex: 1 }}>
                 <Card title="لیست شرکت‌ها">
                     <Table
