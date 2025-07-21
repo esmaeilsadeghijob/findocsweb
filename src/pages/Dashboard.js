@@ -51,9 +51,9 @@ function Dashboard() {
             : []),
 
         // فقط اگر نقش ≠ ROLE_USER با سطح NONE باشد، منوی شرکت اضافه شود
-        ...(!(role === "ROLE_USER" && accessLevel === "NONE")
-            ? [{key: "company", icon: <UserOutlined/>, label: "شرکت (شخص)"}]
-            : []),
+        // ...(!(role === "ROLE_USER" && accessLevel === "NONE")
+        //     ? [{key: "company", icon: <UserOutlined/>, label: "شرکت (شخص)"}]
+        //     : []),
 
         {key: "logout", icon: <LogoutOutlined/>, label: "خروج"}
     ];

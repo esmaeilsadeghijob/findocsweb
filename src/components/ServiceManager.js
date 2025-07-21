@@ -1,50 +1,76 @@
-import {Button, Card, Input, message, Modal, Table} from "antd";
-import {DeleteOutlined, EditOutlined, LeftOutlined, RightOutlined} from "@ant-design/icons";
-import {useEffect, useState} from "react";
-import {createService, deleteService, getServices, updateService,} from "../api/api";
+import { useEffect, useState } from "react";
+import {
+    Button,
+    Card,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Space,
+    Table,
+} from "antd";
+import {
+    EditOutlined,
+    DeleteOutlined,
+    PlusOutlined,
+    SaveOutlined,
+    CloseOutlined,
+    LeftOutlined,
+    RightOutlined,
+} from "@ant-design/icons";
+import {
+    getServices,
+    createService,
+    updateService,
+    deleteService,
+} from "../api/api";
+import "./Management.css"; // ✅ استایل مشترک
 
 function ServiceManager() {
     const [services, setServices] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
-    const [editing, setEditing] = useState(null);
-    const [name, setName] = useState("");
+    const [editingKey, setEditingKey] = useState(null);
+    const [editedRow, setEditedRow] = useState({});
+    const [newService, setNewService] = useState({ name: "" });
+    const [globalSearch, setGlobalSearch] = useState("");
+
+    useEffect(() => {
+        loadServices();
+    }, []);
 
     const loadServices = async () => {
         try {
             const res = await getServices();
             setServices(res.data);
         } catch {
-            message.error("خطا در بارگذاری سرویس‌ها");
+            message.error("خطا در دریافت لیست سرویس‌ها");
         }
     };
 
-    useEffect(() => {
-        loadServices();
-    }, []);
+    const isEditing = (record) => record.id === editingKey;
 
-    const showModal = (record = null) => {
-        setEditing(record);
-        setName(record?.name || "");
-        setModalOpen(true);
+    const handleEdit = (record) => {
+        setEditingKey(record.id);
+        setEditedRow({ ...record });
     };
 
-    const handleSubmit = async () => {
-        if (!name.trim()) return message.warning("نام سرویس الزامی است");
+    const handleChange = (e) => {
+        setEditedRow((prev) => ({ ...prev, name: e.target.value }));
+    };
 
+    const handleCancel = () => {
+        setEditingKey(null);
+        setEditedRow({});
+    };
+
+    const handleSave = async (id) => {
         try {
-            if (editing) {
-                await updateService(editing.id, { name });
-                message.success("سرویس ویرایش شد");
-            } else {
-                await createService({ name });
-                message.success("سرویس جدید اضافه شد");
-            }
-            setModalOpen(false);
-            setEditing(null);
-            setName("");
+            await updateService(id, editedRow);
+            message.success("ویرایش شد");
+            setEditingKey(null);
             loadServices();
         } catch {
-            message.error("خطا در ثبت سرویس");
+            message.error("خطا در ویرایش");
         }
     };
 
@@ -58,70 +84,122 @@ function ServiceManager() {
         }
     };
 
+    const handleCreate = async () => {
+        if (!newService.name.trim()) return message.warning("نام سرویس الزامی است");
+
+        try {
+            await createService(newService);
+            message.success("سرویس با موفقیت ثبت شد");
+            setModalOpen(false);
+            setNewService({ name: "" });
+            loadServices();
+        } catch {
+            message.error("خطا در ثبت سرویس");
+        }
+    };
+
+    const filtered = services.filter((s) =>
+        s.name.toLowerCase().includes(globalSearch.toLowerCase())
+    );
+
     const columns = [
-        { title: "ردیف", render: (_, __, i) => i + 1 },
-        { title: "نام سرویس", dataIndex: "name" },
         {
-            title: "ویرایش",
-            render: (_, record) => (
-                <Button
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={() => showModal(record)}
-                />
-            ),
+            title: "#",
+            align: "center",
+            width: 50,
+            render: (_, __, index) => index + 1,
         },
         {
-            title: "حذف",
-            render: (_, record) => (
-                <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDelete(record.id)}
-                />
-            ),
+            title: "نام سرویس",
+            dataIndex: "name",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Input value={editedRow.name} onChange={handleChange} />
+                ) : (
+                    record.name
+                ),
+        },
+        {
+            title: "عملیات",
+            key: "actions",
+            align: "center",
+            render: (_, record) =>
+                isEditing(record) ? (
+                    <Space>
+                        <Button icon={<SaveOutlined />} onClick={() => handleSave(record.id)} />
+                        <Button type="text" danger icon={<CloseOutlined />} onClick={handleCancel} />
+                    </Space>
+                ) : (
+                    <Space>
+                        <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                        <Popconfirm
+                            title="آیا از حذف این سرویس مطمئن هستید؟"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="بله"
+                            cancelText="خیر"
+                        >
+                            <Button danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    </Space>
+                ),
         },
     ];
 
     return (
         <>
-            <Card
-                title="مدیریت سرویس‌ها"
-                extra={
-                    <Button type="dashed" onClick={() => showModal()}>
-                        اضافه کردن sid
+            <Card className="company-card" bodyStyle={{ padding: 0, flex: 1 }}>
+                <div className="company-toolbar">
+                    <Button
+                        type="text"
+                        icon={<PlusOutlined />}
+                        className="add-company-btn"
+                        onClick={() => setModalOpen(true)}
+                    >
+                        افزودن سرویس
                     </Button>
-                }
-            >
-                <Table
-                    columns={columns}
-                    dataSource={services}
-                    rowKey="id"
-                    pagination={{
-                        pageSize: 4,
-                        showSizeChanger: false,
-                        position: ["bottomCenter"],
-                        prevIcon: <RightOutlined />,
-                        nextIcon: <LeftOutlined />,
-                    }}
-                    size="small"
-                />
+
+                    <Input
+                        allowClear
+                        placeholder="🔍 جستجو"
+                        value={globalSearch}
+                        onChange={(e) => setGlobalSearch(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+
+                <div className="company-table-wrapper">
+                    <Table
+                        columns={columns}
+                        dataSource={filtered}
+                        rowKey="id"
+                        pagination={{
+                            pageSize: 4,
+                            showSizeChanger: false,
+                            position: ["bottomCenter"],
+                            prevIcon: <RightOutlined />,
+                            nextIcon: <LeftOutlined />,
+                        }}
+                        size="small"
+                    />
+                </div>
             </Card>
 
             <Modal
                 open={modalOpen}
-                title={editing ? "ویرایش سرویس" : "افزودن سرویس جدید"}
+                title="افزودن سرویس جدید"
                 onCancel={() => setModalOpen(false)}
-                onOk={handleSubmit}
+                onOk={handleCreate}
                 okText="ثبت"
                 cancelText="انصراف"
+                className="add-company-modal"
             >
-                <Input
-                    placeholder="نام سرویس"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+                <Space direction="vertical" className="add-company-form">
+                    <Input
+                        placeholder="نام سرویس"
+                        value={newService.name}
+                        onChange={(e) => setNewService({ name: e.target.value })}
+                    />
+                </Space>
             </Modal>
         </>
     );

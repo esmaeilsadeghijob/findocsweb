@@ -112,3 +112,15 @@ export const getDocumentsByFilter = (clientId, unitId, serviceId) =>
     API.get("/api/documents/filter", {
         params: { clientId, unitId, serviceId }
     });
+
+export const updateIdentifier = (id, data) =>
+    API.put(`/api/identifiers/${id}`, data);
+
+export const getCategories = () => API.get("/api/categories");
+
+export const createCategory = (data) => API.post("/api/categories", data);
+
+export const updateCategory = (id, data) => API.put(`/api/categories/${id}`, data);
+
+export const deleteCategory = (id) => API.delete(`/api/categories/${id}`);
+

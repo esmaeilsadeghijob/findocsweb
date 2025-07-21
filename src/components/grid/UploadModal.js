@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Modal,
     Form,
@@ -7,17 +7,18 @@ import {
     Select,
     message,
     Divider,
-    Space,
     Button,
     Progress,
 } from "antd";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
-import { uploadFile, getCompanies } from "../../api/api";
+import {InboxOutlined, DeleteOutlined} from "@ant-design/icons";
+import {uploadFile, getCompanies} from "../../api/api";
+import FilePreviewBox from "./FilePreviewBox"; // مسیر دقیق جای فایل خودت
+import PreviewBox from "./PreviewBox"; // مسیر واقعی رو تنظیم کن
 
-const { Dragger } = Upload;
-const { Option } = Select;
+const {Dragger} = Upload;
+const {Option} = Select;
 
-const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
+const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
     const [form] = Form.useForm();
     const [files, setFiles] = useState([]);
     const [companies, setCompanies] = useState([]);
@@ -77,7 +78,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                 formData.append("companyId", f.companyId || "");
 
                 const company = companies.find((c) => c.id === f.companyId);
-                formData.append("companyNames", company?.name || ""); // ✅ ارسال نام شرکت
+                formData.append("companyNames", company?.name || "");
 
                 await uploadFile(documentId, formData);
 
@@ -86,7 +87,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             }
 
             await new Promise((resolve) => setTimeout(resolve, 600));
-            message.success(" فایل‌ها با موفقیت بارگذاری شدند");
+            message.success("فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
             form.resetFields();
             onSuccess();
@@ -108,23 +109,23 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             okText="بارگذاری"
             cancelText="انصراف"
             width={700}
-            okButtonProps={{ disabled: uploading }}
+            okButtonProps={{disabled: uploading}}
         >
             <Form layout="vertical" form={form}>
                 <Form.Item label="انتخاب فایل‌ها">
                     <Dragger {...props}>
                         <p className="ant-upload-drag-icon">
-                            <InboxOutlined />
+                            <InboxOutlined/>
                         </p>
                         <p>فایل‌ها را اینجا بکشید یا کلیک کنید برای انتخاب</p>
-                        <p style={{ fontSize: "12px", color: "#999" }}>
+                        <p style={{fontSize: "12px", color: "#999"}}>
                             فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip، rar
                         </p>
                     </Dragger>
                 </Form.Item>
 
                 {uploading && (
-                    <div style={{ marginBottom: 16 }}>
+                    <div style={{marginBottom: 16}}>
                         <Progress
                             percent={progress}
                             status={progress === 100 ? "success" : "active"}
@@ -132,43 +133,60 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                     </div>
                 )}
 
-                {files.length > 0 && (
-                    <>
-                        <Divider>مشخصات فایل‌ها</Divider>
-                        {files.map((f, i) => (
-                            <Space
-                                key={i}
-                                direction="vertical"
-                                style={{
-                                    border: "1px solid #eee",
-                                    padding: "10px",
-                                    marginBottom: "12px",
-                                    borderRadius: "8px",
-                                    width: "100%",
-                                }}
-                            >
-                                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                {files.map((f, i) => (
+                    <div
+                        key={i}
+                        style={{
+                            border: "1px solid #eee",
+                            padding: "10px",
+                            marginBottom: "12px",
+                            borderRadius: "8px",
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "12px",
+                        }}
+                    >
+                        {/* 🔹 محتوای دوتایی بالا: پیش‌نمایش + اطلاعات فایل */}
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "row-reverse",
+                                gap: "16px",
+                                alignItems: "flex-start",
+                            }}
+                        >
+                            <PreviewBox file={f.file}/>
+
+                            <div style={{flex: 1, display: "flex", flexDirection: "column", gap: 8}}>
+                                <div style={{fontWeight: "bold"}}>
                                     {f.file.name}
+                                    <a
+                                        href={URL.createObjectURL(f.file)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{marginRight: 12}}
+                                    >
+                                        مشاهده فایل
+                                    </a>
                                 </div>
-                                <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
+
+                                <Form.Item label="شرح فایل" style={{marginBottom: 4}}>
                                     <Input.TextArea
                                         rows={2}
                                         placeholder="توضیح اختیاری..."
                                         value={f.description}
-                                        onChange={(e) =>
-                                            handleFieldChange(i, "description", e.target.value)
-                                        }
+                                        onChange={(e) => handleFieldChange(i, "description", e.target.value)}
                                     />
                                 </Form.Item>
-                                <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
+
+                                <Form.Item label="شرکت / شخص" style={{marginBottom: 4}}>
                                     <Select
                                         showSearch
                                         placeholder="انتخاب شرکت"
                                         value={f.companyId}
-                                        onChange={(value) =>
-                                            handleFieldChange(i, "companyId", value)
-                                        }
-                                        style={{ width: "100%" }}
+                                        onChange={(value) => handleFieldChange(i, "companyId", value)}
+                                        style={{width: "100%"}}
                                         optionFilterProp="children"
                                     >
                                         {companies.map((c) => (
@@ -178,18 +196,21 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                                         ))}
                                     </Select>
                                 </Form.Item>
-                                <Button
-                                    type="text"
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleRemove(i)}
-                                    danger
-                                >
-                                    حذف فایل
-                                </Button>
-                            </Space>
-                        ))}
-                    </>
-                )}
+                            </div>
+                        </div>
+
+                        {/* 🔻 دکمه حذف مستقل و تمام‌عرض زیر دوتا بخش بالا */}
+                        <Button
+                            block
+                            type="text"
+                            icon={<DeleteOutlined/>}
+                            onClick={() => handleRemove(i)}
+                            danger
+                        >
+                            حذف فایل
+                        </Button>
+                    </div>
+                ))}
             </Form>
         </Modal>
     );
