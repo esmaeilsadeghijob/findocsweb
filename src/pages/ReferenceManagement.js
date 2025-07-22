@@ -1,5 +1,5 @@
-import React from "react";
-import { Tabs } from "antd";
+import React, {useEffect, useState} from "react";
+import {Tabs} from "antd";
 import ClientManager from "../components/ClientManager";
 import UnitManager from "../components/UnitManager";
 import PeriodManager from "../components/PeriodManager";
@@ -7,6 +7,8 @@ import ServiceManager from "../components/ServiceManager";
 import CompanyManagement from "../components/CompanyManagement"; // ✅ جایگزین شده
 import "./ReferenceManagement.css";
 import CategoryManager from "../components/CategoryManager";
+import {canCreate} from "../components/grid/accessUtils";
+import CustomerManager from "../components/CustomerManager";
 
 const tabStyle = {
     padding: 24,
@@ -17,50 +19,70 @@ const tabStyle = {
 };
 
 function ReferenceManagement() {
+    const [userRole, setUserRole] = useState();
+    const [accessLevel, setAccessLevel] = useState();
+
+    useEffect(() => {
+        const roleFromStorage = localStorage.getItem("role");
+        const accessFromStorage = localStorage.getItem("documentAccess");
+        setUserRole(roleFromStorage);
+        setAccessLevel(accessFromStorage);
+    }, []);
+
     return (
-        <div style={{ padding: 24, background: "#f5f5f5", minHeight: "100vh" }}>
+        <div style={{padding: 24, background: "#f5f5f5", minHeight: "100vh"}}>
             <Tabs
                 defaultActiveKey="1"
                 type="card"
                 tabPosition="top"
                 size="large"
-                style={{ background: "#fff", borderRadius: 8 }}
+                style={{background: "#fff", borderRadius: 8}}
             >
-                <Tabs.TabPane tab="مدیریت مشتری‌ها" key="1">
+                {canCreate(userRole, accessLevel) && (
+                    <Tabs.TabPane tab="مشتری‌" key="1">
+                        <div style={tabStyle}>
+                            <CustomerManager />
+                        </div>
+                    </Tabs.TabPane>
+                )}
+
+                <Tabs.TabPane tab=" واحد" key="2">
                     <div style={tabStyle}>
-                        <ClientManager />
+                        <UnitManager/>
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="مدیریت واحدها" key="2">
+                <Tabs.TabPane tab=" شناسه " key="3">
                     <div style={tabStyle}>
-                        <UnitManager />
+                        <ClientManager/>
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="مدیریت دوره‌های مالی" key="3">
+                <Tabs.TabPane tab=" دوره‌ مالی" key="4">
                     <div style={tabStyle}>
-                        <PeriodManager />
+                        <PeriodManager/>
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="مدیریت سرویس‌ها" key="4">
+                <Tabs.TabPane tab=" سرویس‌" key="5">
                     <div style={tabStyle}>
-                        <ServiceManager />
+                        <ServiceManager/>
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="مدیریت شرکت‌ها / اشخاص" key="5">
+                <Tabs.TabPane tab=" شرکت‌ / اشخاص" key="6">
                     <div style={tabStyle}>
-                        <CompanyManagement />
+                        <CompanyManagement/>
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="دسته بندی" key="6">
+                <Tabs.TabPane tab="دسته بندی" key="7">
                     <div style={tabStyle}>
-                        <CategoryManager />
+                        <CategoryManager/>
                     </div>
                 </Tabs.TabPane>
+
+
             </Tabs>
         </div>
     );

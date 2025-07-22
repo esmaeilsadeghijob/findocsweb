@@ -36,6 +36,12 @@ export const approveUser = (userId) =>
 export const deleteUser = (userId) =>
     API.delete(`/api/users/${userId}`);
 
+export const updateDefaultAccess = (userId, accessLevel) =>
+    API.put(`/api/users/${userId}/access`, { accessLevel });
+
+export const updateUser = (id, data) =>
+    API.put(`/api/users/${id}`, data);
+
 export const getClients = () => API.get("/api/clients");
 export const getProjects = () => API.get("/api/projects");
 export const createClient = (data) => API.post("/api/clients", data);
@@ -90,12 +96,6 @@ export const getPermissions = () => API.get("/api/permissions");
 export const grantPermission = (data) => API.post("/api/permissions", data);
 export const revokePermission = (data) => API.delete("/api/permissions", { data });
 
-export const updateDefaultAccess = (userId, accessLevel) =>
-    API.put(`/api/users/${userId}/access`, { accessLevel });
-
-export const updateUser = (id, data) =>
-    API.put(`/api/users/${id}`, data);
-
 export const getDocumentsByClientId = (clientId) =>
     API.get(`/api/documents/client/${clientId}`);
 
@@ -124,3 +124,5 @@ export const updateCategory = (id, data) => API.put(`/api/categories/${id}`, dat
 
 export const deleteCategory = (id) => API.delete(`/api/categories/${id}`);
 
+export const verifyPassword = (password) =>
+    API.post("/api/auth/verify-password", { password });

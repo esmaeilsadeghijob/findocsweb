@@ -50,6 +50,11 @@ function ClientManager() {
     const handleSubmit = async () => {
         if (!code.trim()) return message.warning("شناسه مشتری الزامی است");
 
+        if (identifiers.length >= 1) {
+            message.warning("افزودن شناسه‌های بیشتر امکان‌پذیر نیست. لطفاً با مدیر اصلی تماس حاصل فرمایید.");
+            return;
+        }
+
         try {
             await createIdentifier({ code });
             message.success("ثبت شد");
@@ -157,7 +162,13 @@ function ClientManager() {
                         type="text"
                         icon={<PlusOutlined />}
                         className="add-company-btn"
-                        onClick={() => setModalOpen(true)}
+                        onClick={() => {
+                            if (identifiers.length >= 1) {
+                                message.warning("افزودن شناسه‌های بیشتر امکان‌پذیر نیست. لطفاً با مدیر اصلی تماس حاصل فرمایید.");
+                                return;
+                            }
+                            setModalOpen(true);
+                        }}
                     >
                         افزودن شناسه مشتری
                     </Button>

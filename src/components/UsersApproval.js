@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import {
     Button,
     Input,
@@ -8,13 +8,13 @@ import {
     Space,
     Table,
     Tag,
-    Typography
+    Typography,
 } from "antd";
 import {
     CheckOutlined,
     CloseOutlined,
     DeleteOutlined,
-    EditOutlined
+    EditOutlined,
 } from "@ant-design/icons";
 import {
     approveUser,
@@ -23,26 +23,27 @@ import {
     getUsers,
     updateDefaultAccess,
     updateUser,
-    getIdentifiers
+    getClients,
 } from "../api/api";
 
-const {Title} = Typography;
+const { Title } = Typography;
 
 const accessOptions = [
-    {label: "عدم دسترسی", value: "NONE"},
-    {label: "گزارش‌گیری", value: "READ"},
-    {label: "ورود اطلاعات", value: "CREATE"},
-    {label: "ویرایش / حذف", value: "EDIT"},
-    {label: "دانلود", value: "DOWNLOAD"},
-    {label: "برگشت از وضعیت قطعی", value: "REVERT"},
-    {label: "مدیریتی", value: "ADMIN"},
-    {label: "مدیر اصلی", value: "OWNER"}
+    { label: "عدم دسترسی", value: "NONE" },
+    { label: "گزارش‌گیری", value: "READ" },
+    { label: "ورود اطلاعات", value: "CREATE" },
+    { label: "ویرایش / حذف", value: "EDIT" },
+    { label: "دانلود", value: "DOWNLOAD" },
+    { label: "برگشت از وضعیت قطعی", value: "REVERT" },
+    { label: "مدیریتی", value: "ADMIN" },
+    { label: "مدیر اصلی", value: "OWNER" },
 ];
 
 function UsersApproval() {
     const [pendingUsers, setPendingUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
-    const [identifiers, setIdentifiers] = useState([]);
+    const [clients, setClients] = useState([]);
+    const [units, setUnits] = useState([]);
     const [editingUserId, setEditingUserId] = useState(null);
     const [editValues, setEditValues] = useState({});
 
@@ -53,19 +54,22 @@ function UsersApproval() {
 
         getUsers()
             .then((res) => {
-                const normalized = res.data
-                    .map((u) => {
-                        const [firstName, ...rest] = (u.fullName || "").split(" ");
-                        const lastName = rest.join(" ");
-                        return {
-                            ...u,
-                            firstName,
-                            lastName,
-                            identifierId: u.role?.name === "ROLE_ADMIN" ? null : u.identifier?.id ?? null, // ✅ اصلاح شده
-                            defaultAccess: u.role?.name === "ROLE_ADMIN" ? "OWNER" : u.defaultAccessLevel ?? "NONE"
-                        };
-                    })
-                    .sort((a, b) => a.username.localeCompare(b.username));
+                const normalized = res.data.map((u) => {
+                    const [firstName, ...rest] = (u.fullName || "").split(" ");
+                    const lastName = rest.join(" ");
+
+                    return {
+                        ...u,
+                        firstName,
+                        lastName,
+                        units: u.units || [], // ✅ واحدها برای تگ‌گذاری
+                        unitIds: u.units?.map((unit) => unit.id) || [],
+                        defaultAccess:
+                            u.role?.name === "ROLE_ADMIN"
+                                ? "OWNER"
+                                : u.defaultAccessLevel ?? "NONE",
+                    };
+                });
                 setAllUsers(normalized);
             })
             .catch(() => setAllUsers([]));
@@ -73,9 +77,15 @@ function UsersApproval() {
 
     useEffect(() => {
         fetchData();
-        getIdentifiers()
-            .then((res) => setIdentifiers(res.data))
-            .catch(() => setIdentifiers([]));
+        getClients().then((res) => {
+            console.log("ساختار کامل اولین مشتری:", res.data[0]);
+            const extractedUnits = res.data.map((c) => ({
+                id: c.unitId,
+                unitName: c.unitName,
+            })).filter((u) => u.id && u.unitName);
+            console.log("extractedUnits:", extractedUnits);
+            setUnits(extractedUnits);
+        });
     }, []);
 
     const handleApprove = async (id) => {
@@ -103,20 +113,22 @@ function UsersApproval() {
             await updateDefaultAccess(id, level);
             message.success("سطح دسترسی بروزرسانی شد");
             setAllUsers((prev) =>
-                prev.map((u) => (u.id === id ? {...u, defaultAccess: level} : u))
+                prev.map((u) =>
+                    u.id === id ? { ...u, defaultAccess: level } : u
+                )
             );
         } catch {
             message.error("خطا در بروزرسانی سطح دسترسی");
         }
     };
 
-    const handleIdentifierChange = async (id, identifierId) => {
+    const handleUnitAssignment = async (userId, unitIds) => {
         try {
-            await updateUser(id, {identifierId});
-            message.success("شناسه بروزرسانی شد");
-            fetchData();
+            await updateUser(userId, { unitIds });
+            message.success("واحدها بروزرسانی شدند");
+            fetchData(); // ✅ رفرش کامل برای داشتن داده درست
         } catch {
-            message.error("خطا در بروزرسانی شناسه");
+            message.error("خطا در بروزرسانی واحدها");
         }
     };
 
@@ -126,7 +138,7 @@ function UsersApproval() {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
-            newPassword: ""
+            newPassword: "",
         });
     };
 
@@ -141,14 +153,11 @@ function UsersApproval() {
             message.success("ویرایش انجام شد");
 
             const currentUsername = localStorage.getItem("username");
-
-            // ✅ اگر کاربری که ویرایش شده همان کاربر لاگین‌کرده باشد
             if (editValues.username === currentUsername) {
                 const displayName =
                     editValues.firstName?.trim() ||
                     `${editValues.firstName?.trim() ?? ""} ${editValues.lastName?.trim() ?? ""}`.trim() ||
                     editValues.username;
-
                 localStorage.setItem("displayName", displayName);
             }
 
@@ -160,13 +169,13 @@ function UsersApproval() {
     };
 
     const pendingColumns = [
-        {title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag>},
-        {title: "نام کاربری", dataIndex: "username"},
-        {title: "نام", dataIndex: "firstName"},
-        {title: "نام خانوادگی", dataIndex: "lastName"},
+        { title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag> },
+        { title: "نام کاربری", dataIndex: "username" },
+        { title: "نام", dataIndex: "firstName" },
+        { title: "نام خانوادگی", dataIndex: "lastName" },
         {
             title: "نقش",
-            render: (_, r) => <Tag color="blue">{r.role?.name || "نامشخص"}</Tag>
+            render: (_, r) => <Tag color="blue">{r.role?.name || "نامشخص"}</Tag>,
         },
         {
             title: "عملیات",
@@ -174,25 +183,26 @@ function UsersApproval() {
                 <Button type="primary" size="small" onClick={() => handleApprove(r.id)}>
                     تأیید
                 </Button>
-            )
-        }
+            ),
+        },
     ];
 
     const allColumns = [
-        {title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag>},
+        { title: "ردیف", render: (_, __, index) => <Tag>{index + 1}</Tag> },
         {
             title: "نام کاربری",
             render: (_, r) =>
                 r.id === editingUserId ? (
                     <Input
                         value={editValues.username}
-                        onChange={(e) =>
-                            setEditValues((prev) => ({...prev, username: e.target.value}))
-                        }
+                        onChange={(e) => setEditValues((prev) => ({
+                            ...prev,
+                            username: e.target.value,
+                        }))}
                     />
                 ) : (
                     r.username
-                )
+                ),
         },
         {
             title: "نام",
@@ -200,13 +210,14 @@ function UsersApproval() {
                 r.id === editingUserId ? (
                     <Input
                         value={editValues.firstName}
-                        onChange={(e) =>
-                            setEditValues((prev) => ({...prev, firstName: e.target.value}))
-                        }
+                        onChange={(e) => setEditValues((prev) => ({
+                            ...prev,
+                            firstName: e.target.value,
+                        }))}
                     />
                 ) : (
                     r.firstName
-                )
+                ),
         },
         {
             title: "نام خانوادگی",
@@ -214,13 +225,14 @@ function UsersApproval() {
                 r.id === editingUserId ? (
                     <Input
                         value={editValues.lastName}
-                        onChange={(e) =>
-                            setEditValues((prev) => ({...prev, lastName: e.target.value}))
-                        }
+                        onChange={(e) => setEditValues((prev) => ({
+                            ...prev,
+                            lastName: e.target.value,
+                        }))}
                     />
                 ) : (
                     r.lastName
-                )
+                ),
         },
         {
             title: "تغییر گذرواژه",
@@ -228,70 +240,86 @@ function UsersApproval() {
                 r.id === editingUserId ? (
                     <Input.Password
                         value={editValues.newPassword}
-                        onChange={(e) =>
-                            setEditValues((prev) => ({...prev, newPassword: e.target.value}))
-                        }
+                        onChange={(e) => setEditValues((prev) => ({
+                            ...prev,
+                            newPassword: e.target.value,
+                        }))}
                     />
                 ) : (
                     "-"
-                )
+                ),
         },
         {
             title: "نقش",
-            render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>
+            render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>,
         },
         {
-            title: "شرکت",
+            title: "واحدهای مرتبط",
             render: (_, r) => (
-                <Select
-                    style={{
-                        width: "100%",               // ✅ هم‌عرض با ستون Table
-                        // fontFamily: "FarBaseet",
-                        fontSize: "0.9rem",
-                        borderRadius: 6,
-                        backgroundColor: "#fcfcfc",
-                    }}
-                    placeholder="انتخاب شناسه"
-                    value={r.identifierId}
-                    onChange={(val) => handleIdentifierChange(r.id, val)}
-                    disabled={r.role?.name === "ROLE_ADMIN"}
-                    dropdownStyle={{
-                        // fontFamily: "FarBaseet",
-                        fontSize: "0.95rem",
-                        backgroundColor: "#fffefc"
-                    }}
-                    optionLabelProp="label"
-                    options={identifiers.map((i) => ({
-                        label: `${i.name || "شناسه"} — ${i.code}`,
-                        value: i.id
-                    }))}
-                >
-                </Select>
-            )
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {(r.units || []).map((unit) => (
+                        <Tag
+                            key={unit.id}
+                            color="blue"
+                            closable={r.role?.name !== "ROLE_ADMIN"}
+                            onClose={() => {
+                                const updatedIds = r.unitIds.filter((id) => id !== unit.id);
+                                handleUnitAssignment(r.id, updatedIds);
+                            }}
+                            style={{ fontSize: "0.75rem", padding: "2px 6px" }}
+                        >
+                            {unit.name || "نامشخص"}
+                        </Tag>
+                    ))}
+                </div>
+            ),
+        },
+        {
+            title: "افزودن واحد",
+            render: (_, r) => {
+                const availableUnits = units.filter((unit) => !(r.unitIds || []).includes(unit.id));
+
+                return (
+                    <Select
+                        showSearch
+                        placeholder="افزودن واحد جدید"
+                        disabled={r.role?.name === "ROLE_ADMIN" || availableUnits.length === 0}
+                        style={{ width: "100%" }}
+                        value={undefined}
+                        onSelect={(selectedId) => {
+                            const updated = [...(r.unitIds || []), selectedId];
+                            handleUnitAssignment(r.id, Array.from(new Set(updated)));
+                        }}
+                        options={availableUnits.map((unit) => ({
+                            label: unit.unitName || "نام واحد نامشخص",
+                            value: unit.id,
+                        }))}
+                        notFoundContent="واحدی برای افزودن باقی نمانده"
+                    />
+                );
+            }
         },
         {
             title: "سطح دسترسی",
             render: (_, r) => (
                 <Select
                     style={{
-                        width: "100%",               // ✅ تنظیم عرض هم‌خوان با ستون Table
-                        // fontFamily: "FarBaseet",
+                        width: "100%",
                         fontSize: "0.9rem",
                         borderRadius: 6,
                         backgroundColor: "#fcfcfc",
                     }}
-                    placeholder="انتخاب سطح دسترسی"
+                    placeholder="سطح دسترسی"
                     value={r.role?.name === "ROLE_ADMIN" ? "OWNER" : r.defaultAccess}
                     onChange={(val) => handleAccessChange(r.id, val)}
                     options={accessOptions}
-                    disabled={r.role?.name === "ROLE_ADMIN"} // ⛔️ غیرفعال برای ROLE_ADMIN
+                    disabled={r.role?.name === "ROLE_ADMIN"}
                     dropdownStyle={{
-                        // fontFamily: "FarBaseet",
                         fontSize: "0.95rem",
-                        backgroundColor: "#fffefc"
+                        backgroundColor: "#fffefc",
                     }}
                 />
-            )
+            ),
         },
         {
             title: "عملیات",
@@ -300,32 +328,60 @@ function UsersApproval() {
                     <Space>
                         <Button
                             type="primary"
-                            icon={<CheckOutlined/>}
+                            icon={<CheckOutlined />}
                             size="small"
                             onClick={() => saveEdit(r.id)}
                         />
-                        <Button icon={<CloseOutlined/>} size="small" onClick={cancelEdit}/>
+                        <Button
+                            icon={<CloseOutlined />}
+                            size="small"
+                            onClick={cancelEdit}
+                        />
                     </Space>
                 ) : (
                     <Space>
-                        <Button icon={<EditOutlined/>} size="small" onClick={() => startEdit(r)}/>
+                        <Button
+                            icon={<EditOutlined />}
+                            size="small"
+                            onClick={() => startEdit(r)}
+                        />
                         <Popconfirm
                             title="آیا از حذف مطمئن هستید؟"
                             onConfirm={() => handleDelete(r.id)}
+                            okText="بله"
+                            cancelText="خیر"
                         >
-                            <Button danger icon={<DeleteOutlined/>} size="small"/> </Popconfirm> </Space>)
-        }];
+                            <Button
+                                danger
+                                icon={<DeleteOutlined />}
+                                size="small"
+                            />
+                        </Popconfirm>
+                    </Space>
+                ),
+        },
+    ];
 
     return (
         <>
             <Title level={4}>کاربران تازه‌وارد (در انتظار تأیید)</Title>
-            <Table rowKey="id" dataSource={pendingUsers}
-                   columns={pendingColumns}
-                   pagination={false} size="small"
-                   style={{marginBottom: "2rem"}}/>
+            <Table
+                rowKey="id"
+                dataSource={pendingUsers}
+                columns={pendingColumns}
+                pagination={false}
+                size="small"
+                style={{ marginBottom: "2rem" }}
+            />
+
             <Title level={4}>همه کاربران سیستم</Title>
-            <Table rowKey="id" dataSource={allUsers} columns={allColumns}
-                   pagination={false} size="small"/>
+            <Table
+                rowKey="id"
+                dataSource={allUsers}
+                columns={allColumns}
+                pagination={false}
+                size="small"
+            />
         </>
     );
 }

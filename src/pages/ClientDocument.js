@@ -99,23 +99,23 @@ function ClientDocument() {
         <div style={{display: "flex", gap: "2rem", padding: "2rem"}}>
             {/* ستون مشتری‌ها سمت راست */}
             <div style={{width: 220}}>
-                {canCreate(userRole, accessLevel) && (
-                    <Button
-                        type="text"
-                        icon={<PlusOutlined/>}
-                        style={{
-                            fontSize: "1rem",
-                            padding: "0 6px",
-                            marginBottom: "0.5rem",
-                            color: "#1890ff",
-                            width: "100%",
-                            textAlign: "center"
-                        }}
-                        onClick={() => setShowClientModal(true)}
-                    >
-                        افزودن مشتری جدید
-                    </Button>
-                )}
+                {/*{canCreate(userRole, accessLevel) && (*/}
+                {/*    <Button*/}
+                {/*        type="text"*/}
+                {/*        icon={<PlusOutlined/>}*/}
+                {/*        style={{*/}
+                {/*            fontSize: "1rem",*/}
+                {/*            padding: "0 6px",*/}
+                {/*            marginBottom: "0.5rem",*/}
+                {/*            color: "#1890ff",*/}
+                {/*            width: "100%",*/}
+                {/*            textAlign: "center"*/}
+                {/*        }}*/}
+                {/*        onClick={() => setShowClientModal(true)}*/}
+                {/*    >*/}
+                {/*        افزودن مشتری جدید*/}
+                {/*    </Button>*/}
+                {/*)}*/}
 
                 <Title level={5}>لیست مشتری‌ها</Title>
                 <Input
