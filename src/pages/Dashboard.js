@@ -254,9 +254,7 @@ function Dashboard() {
                 </Sider>
 
                 <Content style={{margin: "1rem", padding: "1rem", background: "#fff"}}>
-                    {/*{currentKey === "documents" && <ClientDocument/>}*/}
-                    {currentKey === "documents" && <ClientDoc accessLevel={accessLevel}
-                                                              roles={role}/>}
+                    {currentKey === "documents" && <ClientDoc accessLevel={accessLevel} roles={role}/>}
                     {currentKey === "users" && <UsersApproval/>}
                     {currentKey === "reference" && <ReferenceManagement/>}
                     {currentKey === "company" && <CompanyManagement/>}

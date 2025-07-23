@@ -90,7 +90,7 @@ const DocGrid = ({
     };
 
     useEffect(() => {
-        fetchDocuments();
+       fetchDocuments();
     }, [clientId]);
 
     const handleDelete = async (id) => {
@@ -301,6 +301,8 @@ const DocGrid = ({
     return (
         <>
             <Tabel
+                accessLevel={accessLevel}
+                roles={roles}
                 rowKey="id"
                 columnDefs={columns}
                 rowData={documents}

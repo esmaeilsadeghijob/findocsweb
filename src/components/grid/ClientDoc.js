@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Typography, Input, Spin, message } from "antd";
-import { getUser, getClients, getClientsByUnit } from "../../api/api";
-import { SearchOutlined } from "@ant-design/icons";
+import React, {useEffect, useState} from "react";
+import {Typography, Input, Spin, message} from "antd";
+import {getUser, getClients, getClientsByUnit} from "../../api/api";
+import {SearchOutlined} from "@ant-design/icons";
 import DocGrid from "./DocGrid";
 
-const { Title } = Typography;
+const {Title} = Typography;
 
-function ClientDoc({ accessLevel, roles }) {
+function ClientDoc({accessLevel, roles}) {
     const [units, setUnits] = useState([]);
     const [loadingUnits, setLoadingUnits] = useState(true);
     const [searchText, setSearchText] = useState("");
@@ -14,10 +14,16 @@ function ClientDoc({ accessLevel, roles }) {
     const userId = localStorage.getItem("userId");
     const role = localStorage.getItem("role");
 
+    const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
+    const canReadGlobal =
+        isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
+    const canCreate =
+        isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
+
     useEffect(() => {
 
         console.log(":::::::::::::::::::::")
-        console.log(accessLevel, roles )
+        console.log(accessLevel, roles)
         console.log(":::::::::::::::::::::")
 
         if (!userId || !role) return;
@@ -100,9 +106,9 @@ function ClientDoc({ accessLevel, roles }) {
                     paddingRight: "0.5rem"
                 }}
             >
-                <Title level={5} style={{marginBottom: "0.75rem", textAlign: "center"}}>
-                    لیست واحدها
-                </Title>
+                {/*<Title level={5} style={{marginBottom: "0.75rem", textAlign: "center"}}>*/}
+                {/*    لیست واحدها*/}
+                {/*</Title>*/}
 
                 <Input
                     allowClear
@@ -122,33 +128,36 @@ function ClientDoc({ accessLevel, roles }) {
                             textAlign: "center"
                         }}
                     >
-                        نام واحد
+                        لیست واحدها
                     </div>
 
-                    {loadingUnits ? (
-                        <Spin/>
-                    ) : filteredUnits.length === 0 ? (
-                        <div style={{color: "#999", marginTop: "1rem", textAlign: "center"}}>
-                            موردی یافت نشد
-                        </div>
-                    ) : (
-                        filteredUnits.map((unit) => (
-                            <div
-                                key={unit.id}
-                                onClick={() => handleUnitSelect(unit.id)}
-                                style={{
-                                    padding: "6px 0",
-                                    borderBottom: "1px dashed #eee",
-                                    cursor: "pointer",
-                                    textAlign: "center",
-                                    backgroundColor:
-                                        selectedClient?.unitId === unit.id ? "#e6f7ff" : "transparent",
-                                    borderRadius: 4
-                                }}
-                            >
-                                {unit.name}
+
+                    {canReadGlobal && (
+                        loadingUnits ? (
+                            <Spin/>
+                        ) : filteredUnits.length === 0 ? (
+                            <div style={{color: "#999", marginTop: "1rem", textAlign: "center"}}>
+                                موردی یافت نشد
                             </div>
-                        ))
+                        ) : (
+                            filteredUnits.map((unit) => (
+                                <div
+                                    key={unit.id}
+                                    onClick={() => handleUnitSelect(unit.id)}
+                                    style={{
+                                        padding: "6px 0",
+                                        borderBottom: "1px dashed #eee",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        backgroundColor:
+                                            selectedClient?.unitId === unit.id ? "#e6f7ff" : "transparent",
+                                        borderRadius: 4
+                                    }}
+                                >
+                                    {unit.name}
+                                </div>
+                            ))
+                        )
                     )}
                 </div>
             </div>
@@ -182,11 +191,11 @@ function ClientDoc({ accessLevel, roles }) {
                             fiscalYear={selectedClient.fiscalYear}
                             accessLevel={accessLevel}
                             roles={roles}
-                            currentUser={{ id: userId }}
+                            currentUser={{id: userId}}
                         />
                     </>
                 ) : (
-                    <div style={{ color: "#999" }}>
+                    <div style={{color: "#999"}}>
                         لطفاً یک واحد را از لیست سمت راست انتخاب کنید...
                     </div>
                 )}

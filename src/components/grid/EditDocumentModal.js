@@ -5,10 +5,7 @@ import {
     Input,
     Select,
     message,
-    Button,
-    DatePicker as AntDatePicker,
-    Row,
-    Col
+    Button
 } from "antd";
 import moment from "moment-jalaali";
 import { updateDocument, getPeriods } from "../../api/api";
@@ -37,13 +34,14 @@ const EditDocumentModal = ({
 
     useEffect(() => {
         if (editData) {
+            const docDate = moment(Number(editData.documentTimestamp));
             form.setFieldsValue({
                 documentNumber: editData.documentNumber ?? "",
-                documentDate: editData.documentDate ? moment(editData.documentDate) : null,
+                documentDate: docDate.isValid() ? docDate : null,
                 description: editData.description ?? "",
                 periodId: editData.periodId ?? null
             });
-            setArchiveDate(editData.archiveDate ? moment(editData.archiveDate) : moment());
+            setArchiveDate(editData.archiveDate ? moment(Number(editData.archiveDate)) : moment());
         }
     }, [editData]);
 
@@ -53,7 +51,7 @@ const EditDocumentModal = ({
             const payload = {
                 ...values,
                 archiveDate: archiveDate?.valueOf(),
-                documentDate: values.documentDate?.valueOf()
+                documentTimestamp: values.documentDate?.valueOf()
             };
 
             await updateDocument(editData.id, payload);
