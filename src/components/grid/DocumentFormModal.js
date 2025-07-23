@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Form, Input, Select, message } from "antd";
-import DatePicker from "react-datepicker2";
+import {
+    Modal,
+    Form,
+    Input,
+    Select,
+    message,
+    Button,
+    DatePicker as AntDatePicker,
+    Row,
+    Col
+} from "antd";
 import moment from "moment-jalaali";
 import { getPeriods, createDocument, getArchivePreview } from "../../api/api";
+import { FileAddOutlined } from "@ant-design/icons";
+import DatePicker from "react-datepicker2";
 
 moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
 
@@ -31,29 +42,20 @@ const DocumentFormModal = ({
 
     useEffect(() => {
         if (visible && unitId) {
-            console.log("📦 درخواست شماره بایگانی برای واحد:", unitId);
             getArchivePreview(unitId)
-                .then((res) => {
-                    console.log("📥 شماره دریافت‌شده:", res.data);
-                    setArchiveNumber(res.data);
-                })
-                .catch((err) => {
-                    console.warn("❌ خطا در دریافت شماره:", err);
-                    setArchiveNumber(null);
-                });
+                .then((res) => setArchiveNumber(res.data))
+                .catch(() => setArchiveNumber(null));
         }
     }, [visible, unitId]);
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const selectedPeriod = periods.find(p => p.fiscalYear === values.fiscalYear);
+            const selectedPeriod = periods.find((p) => p.fiscalYear === values.fiscalYear);
             if (!selectedPeriod) {
                 message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
                 return;
             }
-
-            console.log("📤 شماره بایگانی در payload:", archiveNumber);
 
             const payload = {
                 clientId,
@@ -76,7 +78,6 @@ const DocumentFormModal = ({
             form.resetFields();
             onSuccess();
         } catch (err) {
-            console.error("❌ خطا در ثبت سند", err);
             message.error("❌ خطا در ثبت سند");
         }
     };
@@ -86,15 +87,32 @@ const DocumentFormModal = ({
             open={visible}
             title="ثبت سند جدید"
             onCancel={onCancel}
-            onOk={handleSubmit}
-            okText="ثبت"
-            cancelText="انصراف"
-            style={{ overflow: "visible" }}
+            footer={[
+                <Button
+                    key="cancel"
+                    onClick={onCancel}
+                    style={{
+                        borderRadius: 6,
+                        backgroundColor: "#f5f5f5",
+                        border: "1px solid #d9d9d9"
+                    }}
+                >
+                    انصراف
+                </Button>,
+                <Button key="submit" type="primary" icon={<FileAddOutlined />} onClick={handleSubmit}>
+                    ثبت سند
+                </Button>
+            ]}
+            style={{ direction: "rtl" }}
+            bodyStyle={{ padding: "24px 32px", background: "#fafafa", borderRadius: 8 }}
         >
             <Form
                 form={form}
-                layout="vertical"
+                layout="horizontal"
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
                 initialValues={{ documentDate: moment() }}
+                style={{ maxWidth: 700 }}
             >
                 <Form.Item label="سرویس">
                     <Input value={serviceName || "—"} disabled />
@@ -115,7 +133,15 @@ const DocumentFormModal = ({
                         inputFormat="jYYYY/jMM/jDD"
                         value={archiveDate}
                         onChange={(value) => setArchiveDate(value)}
-                        inputProps={{ readOnly: true }}
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
+                            }
+                        }}
                         placeholder="انتخاب تاریخ بایگانی"
                     />
                 </Form.Item>
@@ -126,7 +152,7 @@ const DocumentFormModal = ({
                     rules={[{ required: true, message: "انتخاب سال مالی الزامی است" }]}
                 >
                     <Select placeholder="انتخاب سال مالی">
-                        {periods.map(p => (
+                        {periods.map((p) => (
                             <Select.Option key={p.id} value={p.fiscalYear}>
                                 {p.fiscalYear}
                             </Select.Option>
@@ -152,7 +178,15 @@ const DocumentFormModal = ({
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
                         onChange={(value) => form.setFieldsValue({ documentDate: value })}
-                        inputProps={{ readOnly: true }}
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
+                            }
+                        }}
                         placeholder="انتخاب تاریخ سند"
                     />
                 </Form.Item>
