@@ -88,36 +88,49 @@ function ClientDoc({ accessLevel, roles }) {
     );
 
     return (
-        <div style={{ display: "flex", gap: "2rem", padding: "1rem" }}>
+        <div style={{display: "flex", gap: "1rem", padding: "1rem"}}>
             {/* ستون سمت راست: لیست واحدها */}
-            <div style={{ width: 220 }}>
-                <Title level={5}>لیست واحدها</Title>
+            <div
+                style={{
+                    width: 140,
+                    minWidth: 140,
+                    flexShrink: 0,
+                    backgroundColor: "#fff",
+                    borderRight: "1px solid #eee",
+                    paddingRight: "0.5rem"
+                }}
+            >
+                <Title level={5} style={{marginBottom: "0.75rem", textAlign: "center"}}>
+                    لیست واحدها
+                </Title>
 
                 <Input
                     allowClear
-                    prefix={<SearchOutlined />}
+                    prefix={<SearchOutlined/>}
                     placeholder="جست‌وجو واحد"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    style={{ marginBottom: "1rem" }}
+                    style={{marginBottom: "0.75rem"}}
                 />
 
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{display: "flex", flexDirection: "column", gap: "6px"}}>
                     <div
                         style={{
-                            display: "flex",
                             fontWeight: "bold",
                             paddingBottom: "4px",
-                            borderBottom: "1px solid #ccc"
+                            borderBottom: "1px solid #ccc",
+                            textAlign: "center"
                         }}
                     >
-                        <div style={{ width: "100%", textAlign: "center" }}>نام واحد</div>
+                        نام واحد
                     </div>
 
                     {loadingUnits ? (
-                        <Spin />
+                        <Spin/>
                     ) : filteredUnits.length === 0 ? (
-                        <div style={{ color: "#999", marginTop: "1rem" }}>موردی یافت نشد</div>
+                        <div style={{color: "#999", marginTop: "1rem", textAlign: "center"}}>
+                            موردی یافت نشد
+                        </div>
                     ) : (
                         filteredUnits.map((unit) => (
                             <div
@@ -129,7 +142,8 @@ function ClientDoc({ accessLevel, roles }) {
                                     cursor: "pointer",
                                     textAlign: "center",
                                     backgroundColor:
-                                        selectedClient?.unitId === unit.id ? "#f0faff" : "transparent"
+                                        selectedClient?.unitId === unit.id ? "#e6f7ff" : "transparent",
+                                    borderRadius: 4
                                 }}
                             >
                                 {unit.name}
@@ -140,7 +154,7 @@ function ClientDoc({ accessLevel, roles }) {
             </div>
 
             {/* ستون سمت چپ: اطلاعات مشتری و DocGrid */}
-            <div style={{ flex: 1 }}>
+            <div style={{flexGrow: 1}}>
                 {selectedClient ? (
                     <>
                         <div
@@ -149,13 +163,11 @@ function ClientDoc({ accessLevel, roles }) {
                                 borderRadius: 8,
                                 padding: "0.75rem",
                                 marginBottom: "0.75rem",
-                                lineHeight: "1.2rem"
+                                lineHeight: "1.2rem",
+                                backgroundColor: "#fafafa"
                             }}
                         >
-                            {/*<Title level={5} style={{ marginBottom: "0.4rem" }}>*/}
-                            {/*    اطلاعات مشتری انتخاب‌شده*/}
-                            {/*</Title>*/}
-                            <p style={{ margin: 0 }}>
+                            <p style={{margin: 0}}>
                                 <strong>واحد:</strong> {selectedClient.unitName}
                             </p>
                         </div>

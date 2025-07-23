@@ -216,10 +216,10 @@ const DocGrid = ({
                     return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
                 }
             },
-            { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
-            { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
+            { field: "documentNumber", headerName: "شماره سند", minWidth: 100 },
+            { field: "fiscalYear", headerName: "سال مالی", minWidth: 80 },
             // { field: "serviceName", headerName: "سرویس", minWidth: 140 },
-            { field: "description", headerName: "شرح", minWidth: 180 },
+            { field: "description", headerName: "شرح", minWidth: 150 },
             {
                 field: "documentTimestamp",
                 headerName: "تاریخ سند",
