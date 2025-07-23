@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Form, Input, Select, message } from "antd";
 import DatePicker from "react-datepicker2";
 import moment from "moment-jalaali";
-import { getPeriods, createDocument } from "../../api/api";
+import { getPeriods, createDocument, getArchivePreview } from "../../api/api";
 
 moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
 
@@ -20,12 +20,29 @@ const DocumentFormModal = ({
                            }) => {
     const [form] = Form.useForm();
     const [periods, setPeriods] = useState([]);
+    const [archiveNumber, setArchiveNumber] = useState(null);
+    const [archiveDate, setArchiveDate] = useState(moment());
 
     useEffect(() => {
         getPeriods()
             .then((res) => setPeriods(res.data))
             .catch(() => setPeriods([]));
     }, []);
+
+    useEffect(() => {
+        if (visible && unitId) {
+            console.log("📦 درخواست شماره بایگانی برای واحد:", unitId);
+            getArchivePreview(unitId)
+                .then((res) => {
+                    console.log("📥 شماره دریافت‌شده:", res.data);
+                    setArchiveNumber(res.data);
+                })
+                .catch((err) => {
+                    console.warn("❌ خطا در دریافت شماره:", err);
+                    setArchiveNumber(null);
+                });
+        }
+    }, [visible, unitId]);
 
     const handleSubmit = async () => {
         try {
@@ -35,6 +52,8 @@ const DocumentFormModal = ({
                 message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
                 return;
             }
+
+            console.log("📤 شماره بایگانی در payload:", archiveNumber);
 
             const payload = {
                 clientId,
@@ -46,6 +65,8 @@ const DocumentFormModal = ({
                 fiscalYear: selectedPeriod.fiscalYear,
                 documentNumber: values.documentNumber,
                 documentTimestamp: values.documentDate?.valueOf(),
+                archiveNumber,
+                archiveDate: archiveDate?.valueOf(),
                 description: values.description || "",
                 status: "DRAFT"
             };
@@ -54,7 +75,8 @@ const DocumentFormModal = ({
             message.success("✅ سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
-        } catch {
+        } catch (err) {
+            console.error("❌ خطا در ثبت سند", err);
             message.error("❌ خطا در ثبت سند");
         }
     };
@@ -80,6 +102,22 @@ const DocumentFormModal = ({
 
                 <Form.Item label="واحد">
                     <Input value={unitName || "—"} disabled />
+                </Form.Item>
+
+                <Form.Item label="شماره بایگانی">
+                    <Input value={archiveNumber ?? "در حال دریافت..."} disabled />
+                </Form.Item>
+
+                <Form.Item label="تاریخ بایگانی">
+                    <DatePicker
+                        isGregorian={false}
+                        timePicker={false}
+                        inputFormat="jYYYY/jMM/jDD"
+                        value={archiveDate}
+                        onChange={(value) => setArchiveDate(value)}
+                        inputProps={{ readOnly: true }}
+                        placeholder="انتخاب تاریخ بایگانی"
+                    />
                 </Form.Item>
 
                 <Form.Item
@@ -114,7 +152,7 @@ const DocumentFormModal = ({
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
                         onChange={(value) => form.setFieldsValue({ documentDate: value })}
-                        inputProps={{ readOnly: true }} // ✅ غیرقابل تایپ دستی
+                        inputProps={{ readOnly: true }}
                         placeholder="انتخاب تاریخ سند"
                     />
                 </Form.Item>

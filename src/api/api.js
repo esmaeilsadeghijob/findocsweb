@@ -135,3 +135,6 @@ export const getClientsView = () => axios.get("/api/clients/view");
 
 export const getClientsByUnit = (unitId) =>
     API.get(`/api/clients/by-unit/${unitId}`);
+
+export const getArchivePreview = (unitId) =>
+    API.get(`/api/units/${unitId}/archive-preview`);

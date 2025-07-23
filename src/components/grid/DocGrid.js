@@ -201,6 +201,21 @@ const DocGrid = ({
 
     const columns = useMemo(() => {
         const baseColumns = [
+            {
+                field: "archiveNumber",
+                headerName: "شماره بایگانی",
+                minWidth: 120,
+                cellRenderer: (params) => params.data.archiveNumber ?? "—"
+            },
+            {
+                field: "archiveDate",
+                headerName: "تاریخ بایگانی",
+                minWidth: 140,
+                cellRenderer: (params) => {
+                    const date = moment(params.data.archiveDate);
+                    return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
+                }
+            },
             { field: "documentNumber", headerName: "شماره سند", minWidth: 120 },
             { field: "fiscalYear", headerName: "سال مالی", minWidth: 100 },
             // { field: "serviceName", headerName: "سرویس", minWidth: 140 },
