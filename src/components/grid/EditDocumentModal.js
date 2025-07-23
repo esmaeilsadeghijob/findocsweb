@@ -3,12 +3,19 @@ import {
     Modal,
     Form,
     Input,
-    DatePicker,
     Select,
     message,
+    Button,
+    DatePicker as AntDatePicker,
+    Row,
+    Col
 } from "antd";
 import moment from "moment-jalaali";
 import { updateDocument, getPeriods } from "../../api/api";
+import DatePicker from "react-datepicker2";
+import { FileAddOutlined } from "@ant-design/icons";
+
+moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
 
 const { Option } = Select;
 
@@ -16,13 +23,13 @@ const EditDocumentModal = ({
                                visible,
                                onCancel,
                                onSuccess,
-                               editData,
+                               editData
                            }) => {
     const [form] = Form.useForm();
     const [periods, setPeriods] = useState([]);
+    const [archiveDate, setArchiveDate] = useState(moment());
 
     useEffect(() => {
-        // واکشی سال‌های مالی از سرور
         getPeriods()
             .then((res) => setPeriods(res.data || []))
             .catch(() => setPeriods([]));
@@ -34,26 +41,26 @@ const EditDocumentModal = ({
                 documentNumber: editData.documentNumber ?? "",
                 documentDate: editData.documentDate ? moment(editData.documentDate) : null,
                 description: editData.description ?? "",
-                nature: editData.nature ?? "",
-                periodId: editData.periodId ?? null,
+                periodId: editData.periodId ?? null
             });
+            setArchiveDate(editData.archiveDate ? moment(editData.archiveDate) : moment());
         }
-    }, [editData, form]);
+    }, [editData]);
 
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
             const payload = {
                 ...values,
-                documentDate: values.documentDate?.format("YYYY-MM-DD"),
+                archiveDate: archiveDate?.valueOf(),
+                documentDate: values.documentDate?.valueOf()
             };
 
             await updateDocument(editData.id, payload);
-            message.success(" تغییرات سند با موفقیت ثبت شد");
+            message.success("✅ تغییرات سند با موفقیت ثبت شد");
             onSuccess?.();
         } catch (err) {
-            console.error("❌ خطا در بروزرسانی سند:", err);
-            message.error("خطا در ثبت تغییرات سند");
+            message.error("❌ خطا در ثبت تغییرات سند");
         }
     };
 
@@ -62,26 +69,75 @@ const EditDocumentModal = ({
             title="ویرایش سند"
             open={visible}
             onCancel={onCancel}
-            onOk={handleSubmit}
-            okText="ثبت تغییرات"
-            cancelText="انصراف"
+            footer={[
+                <Button
+                    key="cancel"
+                    onClick={onCancel}
+                    style={{
+                        borderRadius: 6,
+                        backgroundColor: "#f5f5f5",
+                        border: "1px solid #d9d9d9"
+                    }}
+                >
+                    انصراف
+                </Button>,
+                <Button
+                    key="submit"
+                    type="primary"
+                    icon={<FileAddOutlined />}
+                    onClick={handleSubmit}
+                >
+                    ثبت تغییرات
+                </Button>
+            ]}
+            style={{ direction: "rtl" }}
+            bodyStyle={{ padding: "24px 32px", background: "#fafafa", borderRadius: 8 }}
         >
-            <Form layout="vertical" form={form}>
-                <div style={{ marginBottom: 16, fontSize: "0.9rem", color: "#555" }}>
-                    <p><strong>سرویس:</strong> {editData.serviceName ?? "—"}</p>
-                    <p><strong>واحد:</strong> {editData.unitName ?? "—"}</p>
-                </div>
+            <Form
+                form={form}
+                layout="horizontal"
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
+                style={{ maxWidth: 700 }}
+            >
+                <Form.Item label="سرویس">
+                    <Input value={editData.serviceName ?? "—"} disabled />
+                </Form.Item>
+
+                <Form.Item label="واحد">
+                    <Input value={editData.unitName ?? "—"} disabled />
+                </Form.Item>
+
+                <Form.Item label="شماره بایگانی">
+                    <Input value={editData.archiveNumber ?? "—"} disabled />
+                </Form.Item>
+
+                <Form.Item label="تاریخ بایگانی">
+                    <DatePicker
+                        isGregorian={false}
+                        timePicker={false}
+                        inputFormat="jYYYY/jMM/jDD"
+                        value={archiveDate}
+                        onChange={(value) => setArchiveDate(value)}
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
+                            }
+                        }}
+                        placeholder="انتخاب تاریخ بایگانی"
+                    />
+                </Form.Item>
 
                 <Form.Item
                     name="periodId"
                     label="سال مالی"
                     rules={[{ required: true, message: "انتخاب سال مالی الزامی است" }]}
                 >
-                    <Select
-                        placeholder="انتخاب سال مالی"
-                        showSearch
-                        optionFilterProp="children"
-                    >
+                    <Select placeholder="انتخاب سال مالی">
                         {periods.map((p) => (
                             <Option key={p.id} value={p.id}>
                                 {p.fiscalYear}
@@ -95,7 +151,7 @@ const EditDocumentModal = ({
                     label="شماره سند"
                     rules={[{ required: true, message: "شماره سند الزامی است" }]}
                 >
-                    <Input />
+                    <Input placeholder="مثلاً: ۱۲۵" />
                 </Form.Item>
 
                 <Form.Item
@@ -103,7 +159,22 @@ const EditDocumentModal = ({
                     label="تاریخ سند"
                     rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
                 >
-                    <DatePicker format="jYYYY/jMM/jDD" />
+                    <DatePicker
+                        isGregorian={false}
+                        timePicker={false}
+                        inputFormat="jYYYY/jMM/jDD"
+                        onChange={(value) => form.setFieldsValue({ documentDate: value })}
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
+                            }
+                        }}
+                        placeholder="انتخاب تاریخ سند"
+                    />
                 </Form.Item>
 
                 <Form.Item
@@ -111,16 +182,8 @@ const EditDocumentModal = ({
                     label="شرح سند"
                     rules={[{ required: true, message: "شرح سند الزامی است" }]}
                 >
-                    <Input.TextArea rows={3} />
+                    <Input.TextArea rows={3} placeholder="توضیحات اختیاری..." />
                 </Form.Item>
-
-                {/*<Form.Item name="nature" label="نوع سند">*/}
-                {/*    <Select allowClear placeholder="انتخاب نوع سند">*/}
-                {/*        <Option value="عمومی">عمومی</Option>*/}
-                {/*        <Option value="محرمانه">محرمانه</Option>*/}
-                {/*        <Option value="فوری">فوری</Option>*/}
-                {/*    </Select>*/}
-                {/*</Form.Item>*/}
             </Form>
         </Modal>
     );
