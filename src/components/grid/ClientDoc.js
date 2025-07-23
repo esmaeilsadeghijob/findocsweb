@@ -98,18 +98,14 @@ function ClientDoc({accessLevel, roles}) {
             {/* ستون سمت راست: لیست واحدها */}
             <div
                 style={{
-                    width: 140,
-                    minWidth: 140,
+                    width: 180, // ← افزایش عرض
+                    minWidth: 180,
                     flexShrink: 0,
                     backgroundColor: "#fff",
                     borderRight: "1px solid #eee",
-                    paddingRight: "0.5rem"
+                    paddingRight: "0.75rem"
                 }}
             >
-                {/*<Title level={5} style={{marginBottom: "0.75rem", textAlign: "center"}}>*/}
-                {/*    لیست واحدها*/}
-                {/*</Title>*/}
-
                 <Input
                     allowClear
                     prefix={<SearchOutlined/>}
@@ -130,7 +126,6 @@ function ClientDoc({accessLevel, roles}) {
                     >
                         لیست واحدها
                     </div>
-
 
                     {canReadGlobal && (
                         loadingUnits ? (
