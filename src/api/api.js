@@ -126,3 +126,12 @@ export const deleteCategory = (id) => API.delete(`/api/categories/${id}`);
 
 export const verifyPassword = (password) =>
     API.post("/api/auth/verify-password", { password });
+
+export const getUser = (userId) => {
+    return API.get(`/api/users/${userId}`);
+};
+
+export const getClientsView = () => axios.get("/api/clients/view");
+
+export const getClientsByUnit = (unitId) =>
+    API.get(`/api/clients/by-unit/${unitId}`);

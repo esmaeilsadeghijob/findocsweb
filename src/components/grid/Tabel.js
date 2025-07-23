@@ -10,6 +10,7 @@ import {
     Popconfirm
 } from "antd";
 import {
+    EyeOutlined,
     MinusSquareOutlined,
     PlusSquareOutlined,
     UploadOutlined
@@ -19,7 +20,7 @@ import {
     deleteAttachment
 } from "../../api/api";
 import UploadModal from "./UploadModal";
-
+import { DeleteOutlined } from "@ant-design/icons";
 const Tabel = ({
                    columnDefs,
                    rowData,
@@ -152,6 +153,13 @@ const Tabel = ({
         }
     };
 
+    const getPreviewUrl = (file) => {
+        if (file.fileData && file.mimeType) {
+            return `data:${file.mimeType};base64,${file.fileData}`;
+        }
+        return "#";
+    };
+
     return (
         <div className="w-full flex flex-col gap-6">
             {/* نوار بالا */}
@@ -270,35 +278,32 @@ const Tabel = ({
                                             </thead>
                                             <tbody>
                                             {matchingFiles.map((file) => (
-                                                <tr key={file.id} style={{ textAlign: "center" }}>
-                                                    <td>{file.name}</td>
-                                                    <td>{file.type}</td>
+                                                <tr key={file.id} style={{textAlign: "center"}}>
+                                                    <td>{file.fileName}</td>
+                                                    <td>{file.extension}</td>
                                                     <td>{file.description || "—"}</td>
                                                     <td>{file.companyName || "—"}</td>
                                                     <td>{new Date(file.uploadedAt).toLocaleDateString("fa-IR")}</td>
-                                                    <td>{file.uploaderName || "—"}</td>
+                                                    <td>{file.uploadedBy || "—"}</td>
                                                     <td>
                                                         <a
-                                                            href={file.previewUrl}
+                                                            href={getPreviewUrl(file)}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
+                                                            title="مشاهده فایل"
                                                         >
-                                                            مشاهده
+                                                            <EyeOutlined style={{fontSize: 16, color: "#1890ff"}}/>
                                                         </a>
                                                     </td>
                                                     {canManageAttachments && (
                                                         <td>
                                                             <Popconfirm
                                                                 title="آیا از حذف فایل مطمئن هستید؟"
-                                                                onConfirm={() =>
-                                                                    handleDeleteFile(row.id, file.id)
-                                                                }
+                                                                onConfirm={() => handleDeleteFile(row.id, file.id)}
                                                                 okText="بله"
                                                                 cancelText="خیر"
                                                             >
-                                                                <Button type="text" danger>
-                                                                    حذف
-                                                                </Button>
+                                                                <Button type="text" danger icon={<DeleteOutlined/>}/>
                                                             </Popconfirm>
                                                         </td>
                                                     )}

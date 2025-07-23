@@ -10,7 +10,7 @@ import React, {useEffect, useState} from "react";
 import UsersApproval from "../components/UsersApproval";
 import ReferenceManagement from "./ReferenceManagement";
 import CompanyManagement from "../components/CompanyManagement";
-import ClientDocument from "./ClientDocument";
+import ClientDoc from "../components/grid/ClientDoc";
 
 const {Header, Sider, Content} = Layout;
 
@@ -254,7 +254,9 @@ function Dashboard() {
                 </Sider>
 
                 <Content style={{margin: "1rem", padding: "1rem", background: "#fff"}}>
-                    {currentKey === "documents" && <ClientDocument/>}
+                    {/*{currentKey === "documents" && <ClientDocument/>}*/}
+                    {currentKey === "documents" && <ClientDoc accessLevel={accessLevel}
+                                                              roles={role}/>}
                     {currentKey === "users" && <UsersApproval/>}
                     {currentKey === "reference" && <ReferenceManagement/>}
                     {currentKey === "company" && <CompanyManagement/>}
