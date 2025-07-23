@@ -64,11 +64,11 @@ function AttachmentRow({ data }) {
             {showUploadModal && (
                 <UploadModal
                     documentId={data.id}
-                    visible
+                    visible={showUploadModal}
                     onClose={() => setShowUploadModal(false)}
                     onSuccess={() => {
                         setShowUploadModal(false);
-                        fetchAttachments(); // 🔁 ریفرش لیست فایل‌ها پس از آپلود موفق
+                        fetchAttachments();
                     }}
                 />
             )}

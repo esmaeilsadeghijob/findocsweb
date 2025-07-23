@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     Modal,
     Form,
@@ -6,21 +6,21 @@ import {
     Input,
     Select,
     message,
-    Divider,
     Button,
     Progress,
 } from "antd";
-import {InboxOutlined, DeleteOutlined} from "@ant-design/icons";
-import {uploadFile, getCompanies} from "../../api/api";
-import PreviewBox from "./PreviewBox"; // مسیر واقعی رو تنظیم کن
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { uploadFile, getCompanies, getCategories } from "../../api/api";
+import PreviewBox from "./PreviewBox";
 
-const {Dragger} = Upload;
-const {Option} = Select;
+const { Dragger } = Upload;
+const { Option } = Select;
 
-const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
+const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [form] = Form.useForm();
     const [files, setFiles] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -28,6 +28,10 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
         getCompanies()
             .then((res) => setCompanies(res.data || []))
             .catch(() => setCompanies([]));
+
+        getCategories()
+            .then((res) => setCategories(res.data || []))
+            .catch(() => setCategories([]));
     }, []);
 
     const props = {
@@ -39,6 +43,9 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
                     file,
                     description: "",
                     companyId: null,
+                    companyName: "",
+                    categoryId: null,
+                    categoryName: "",
                 },
             ]);
             return false;
@@ -69,21 +76,18 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
         setProgress(0);
 
         try {
-            for (let i = 0; i < files.length; i++) {
-                const f = files[i];
-                const formData = new FormData();
+            const formData = new FormData();
+
+            files.forEach((f) => {
                 formData.append("files", f.file);
                 formData.append("descriptions", f.description || "");
-                formData.append("companyId", f.companyId || "");
+                formData.append("companyIds", f.companyId || "");
+                formData.append("companyNames", f.companyName || "");
+                formData.append("categoryIds", f.categoryId || "");
+                formData.append("categoryNames", f.categoryName || "");
+            });
 
-                const company = companies.find((c) => c.id === f.companyId);
-                formData.append("companyNames", company?.name || "");
-
-                await uploadFile(documentId, formData);
-
-                const percent = Math.round(((i + 1) / files.length) * 100);
-                setProgress(percent);
-            }
+            await uploadFile(documentId, formData);
 
             await new Promise((resolve) => setTimeout(resolve, 600));
             message.success("فایل‌ها با موفقیت بارگذاری شدند");
@@ -108,23 +112,24 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
             okText="بارگذاری"
             cancelText="انصراف"
             width={700}
-            okButtonProps={{disabled: uploading}}
+            okButtonProps={{ disabled: uploading }}
+            destroyOnClose
         >
             <Form layout="vertical" form={form}>
                 <Form.Item label="انتخاب فایل‌ها">
                     <Dragger {...props}>
                         <p className="ant-upload-drag-icon">
-                            <InboxOutlined/>
+                            <InboxOutlined />
                         </p>
                         <p>فایل‌ها را اینجا بکشید یا کلیک کنید برای انتخاب</p>
-                        <p style={{fontSize: "12px", color: "#999"}}>
+                        <p style={{ fontSize: "12px", color: "#999" }}>
                             فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip، rar
                         </p>
                     </Dragger>
                 </Form.Item>
 
                 {uploading && (
-                    <div style={{marginBottom: 16}}>
+                    <div style={{ marginBottom: 16 }}>
                         <Progress
                             percent={progress}
                             status={progress === 100 ? "success" : "active"}
@@ -146,7 +151,6 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
                             gap: "12px",
                         }}
                     >
-                        {/* 🔹 محتوای دوتایی بالا: پیش‌نمایش + اطلاعات فایل */}
                         <div
                             style={{
                                 display: "flex",
@@ -155,22 +159,22 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
                                 alignItems: "flex-start",
                             }}
                         >
-                            <PreviewBox file={f.file}/>
+                            <PreviewBox file={f.file} />
 
-                            <div style={{flex: 1, display: "flex", flexDirection: "column", gap: 8}}>
-                                <div style={{fontWeight: "bold"}}>
+                            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                                <div style={{ fontWeight: "bold" }}>
                                     {f.file.name}
                                     <a
                                         href={URL.createObjectURL(f.file)}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        style={{marginRight: 12}}
+                                        style={{ marginRight: 12 }}
                                     >
                                         مشاهده فایل
                                     </a>
                                 </div>
 
-                                <Form.Item label="شرح فایل" style={{marginBottom: 4}}>
+                                <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
                                     <Input.TextArea
                                         rows={2}
                                         placeholder="توضیح اختیاری..."
@@ -179,13 +183,17 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
                                     />
                                 </Form.Item>
 
-                                <Form.Item label="شرکت / شخص" style={{marginBottom: 4}}>
+                                <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
                                     <Select
                                         showSearch
                                         placeholder="انتخاب شرکت"
                                         value={f.companyId}
-                                        onChange={(value) => handleFieldChange(i, "companyId", value)}
-                                        style={{width: "100%"}}
+                                        onChange={(value) => {
+                                            const selected = companies.find((c) => c.id === value);
+                                            handleFieldChange(i, "companyId", value);
+                                            handleFieldChange(i, "companyName", selected?.name || "");
+                                        }}
+                                        style={{ width: "100%" }}
                                         optionFilterProp="children"
                                     >
                                         {companies.map((c) => (
@@ -195,14 +203,34 @@ const UploadModal = ({documentId, visible, onClose, onSuccess}) => {
                                         ))}
                                     </Select>
                                 </Form.Item>
+
+                                <Form.Item label="دسته‌بندی" style={{ marginBottom: 4 }}>
+                                    <Select
+                                        showSearch
+                                        placeholder="انتخاب دسته‌بندی"
+                                        value={f.categoryId}
+                                        onChange={(value) => {
+                                            const selected = categories.find((cat) => cat.id === value);
+                                            handleFieldChange(i, "categoryId", value);
+                                            handleFieldChange(i, "categoryName", selected?.name || "");
+                                        }}
+                                        style={{ width: "100%" }}
+                                        optionFilterProp="children"
+                                    >
+                                        {categories.map((cat) => (
+                                            <Option key={cat.id} value={cat.id}>
+                                                {cat.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
                             </div>
                         </div>
 
-                        {/* 🔻 دکمه حذف مستقل و تمام‌عرض زیر دوتا بخش بالا */}
                         <Button
                             block
                             type="text"
-                            icon={<DeleteOutlined/>}
+                            icon={<DeleteOutlined />}
                             onClick={() => handleRemove(i)}
                             danger
                         >

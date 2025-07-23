@@ -10,6 +10,7 @@ import {
     Popconfirm
 } from "antd";
 import {
+    CloseOutlined,
     EyeOutlined,
     MinusSquareOutlined,
     PlusSquareOutlined,
@@ -270,6 +271,7 @@ const Tabel = ({
                                         <table style={{ width: "100%", fontSize: "0.9rem" }}>
                                             <thead>
                                             <tr style={{ background: "#f0f0f0", textAlign: "center" }}>
+                                                <th>دسته بندی</th>
                                                 <th>نام فایل</th>
                                                 <th>فرمت</th>
                                                 <th>شرح فایل</th>
@@ -283,6 +285,7 @@ const Tabel = ({
                                             <tbody>
                                             {matchingFiles.map((file) => (
                                                 <tr key={file.id} style={{textAlign: "center"}}>
+                                                    <td>{file.categoryName}</td>
                                                     <td>{file.fileName}</td>
                                                     <td>{file.extension}</td>
                                                     <td>{file.description || "—"}</td>
@@ -321,7 +324,7 @@ const Tabel = ({
                                                                 okText="بله"
                                                                 cancelText="خیر"
                                                             >
-                                                                <Button type="text" danger icon={<DeleteOutlined/>}/>
+                                                                <Button type="text" danger icon={<CloseOutlined/>}/>
                                                             </Popconfirm>
                                                         </td>
                                                     )}
