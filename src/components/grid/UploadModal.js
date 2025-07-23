@@ -12,7 +12,6 @@ import {
 } from "antd";
 import {InboxOutlined, DeleteOutlined} from "@ant-design/icons";
 import {uploadFile, getCompanies} from "../../api/api";
-import FilePreviewBox from "./FilePreviewBox"; // مسیر دقیق جای فایل خودت
 import PreviewBox from "./PreviewBox"; // مسیر واقعی رو تنظیم کن
 
 const {Dragger} = Upload;

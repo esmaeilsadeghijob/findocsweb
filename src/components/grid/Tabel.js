@@ -21,6 +21,8 @@ import {
 } from "../../api/api";
 import UploadModal from "./UploadModal";
 import { DeleteOutlined } from "@ant-design/icons";
+import PdfPreview from "./PdfPreview";
+
 const Tabel = ({
                    columnDefs,
                    rowData,
@@ -38,6 +40,8 @@ const Tabel = ({
     const [selectedRowId, setSelectedRowId] = useState(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [internalRows, setInternalRows] = useState([]);
+    const [showPdfModal, setShowPdfModal] = useState(false);
+    const [pdfBase64, setPdfBase64] = useState("");
 
     // ✅ برای حفظ ترتیب ردیف‌ها
     const updateRowById = (updatedRow) => {
@@ -286,15 +290,29 @@ const Tabel = ({
                                                     <td>{new Date(file.uploadedAt).toLocaleDateString("fa-IR")}</td>
                                                     <td>{file.uploadedBy || "—"}</td>
                                                     <td>
-                                                        <a
-                                                            href={getPreviewUrl(file)}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            title="مشاهده فایل"
-                                                        >
-                                                            <EyeOutlined style={{fontSize: 16, color: "#1890ff"}}/>
-                                                        </a>
+                                                        {file.mimeType === "application/pdf" ? (
+                                                            <Button
+                                                                type="text"
+                                                                onClick={() => {
+                                                                    setPdfBase64(file.fileData);
+                                                                    setShowPdfModal(true);
+                                                                }}
+                                                                icon={<EyeOutlined
+                                                                    style={{fontSize: 16, color: "#1890ff"}}/>}
+                                                                title="نمایش فایل PDF"
+                                                            />
+                                                        ) : (
+                                                            <a
+                                                                href={getPreviewUrl(file)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                title="مشاهده فایل"
+                                                            >
+                                                                <EyeOutlined style={{fontSize: 16, color: "#1890ff"}}/>
+                                                            </a>
+                                                        )}
                                                     </td>
+
                                                     {canManageAttachments && (
                                                         <td>
                                                             <Popconfirm
@@ -311,6 +329,11 @@ const Tabel = ({
                                             ))}
                                             </tbody>
                                         </table>
+                                        <PdfPreview
+                                            visible={showPdfModal}
+                                            base64Data={pdfBase64}
+                                            onClose={() => setShowPdfModal(false)}
+                                        />
                                     </div>
                                 </div>
                             )}
