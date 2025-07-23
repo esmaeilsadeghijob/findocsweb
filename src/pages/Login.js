@@ -21,6 +21,11 @@ function Login() {
             localStorage.setItem("displayName", res.data.displayName);
             message.success("ورود موفق");
             navigate("/");
+
+            console.log("***************************")
+            console.log(res.data)
+            console.log("***************************")
+
         } catch {
             message.error("نام کاربری یا رمز عبور اشتباه است");
         }

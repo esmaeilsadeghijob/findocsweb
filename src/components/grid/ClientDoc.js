@@ -22,10 +22,6 @@ function ClientDoc({accessLevel, roles}) {
 
     useEffect(() => {
 
-        console.log(":::::::::::::::::::::")
-        console.log(accessLevel, roles)
-        console.log(":::::::::::::::::::::")
-
         if (!userId || !role) return;
 
         setLoadingUnits(true);

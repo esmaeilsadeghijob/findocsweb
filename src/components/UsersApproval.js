@@ -23,7 +23,7 @@ import {
     getUsers,
     updateDefaultAccess,
     updateUser,
-    getClients,
+    getClients, getIdentifiers,
 } from "../api/api";
 
 const { Title } = Typography;
@@ -46,6 +46,7 @@ function UsersApproval() {
     const [units, setUnits] = useState([]);
     const [editingUserId, setEditingUserId] = useState(null);
     const [editValues, setEditValues] = useState({});
+    const [identifiers, setIdentifiers] = useState([]);
 
     const fetchData = () => {
         getPendingUsers()
@@ -86,6 +87,10 @@ function UsersApproval() {
             console.log("extractedUnits:", extractedUnits);
             setUnits(extractedUnits);
         });
+
+        getIdentifiers()
+            .then((res) => setIdentifiers(res.data || []))
+            .catch(() => setIdentifiers([]));
     }, []);
 
     const handleApprove = async (id) => {
@@ -252,6 +257,26 @@ function UsersApproval() {
         {
             title: "نقش",
             render: (_, r) => <Tag color="green">{r.role?.name || "نامشخص"}</Tag>,
+        },
+        {
+            title: "شرکت",
+            render: (_, r) =>
+                r.role?.name === "ROLE_ADMIN" ? (
+                    <span style={{ color: "#999" }}>—</span>
+                ) : (
+                    <Select
+                        mode="multiple"
+                        placeholder="لیست شناسه‌ها"
+                        disabled={identifiers.length === 0}
+                        value={identifiers.map((id) => id.id)}
+                        options={identifiers.map((id) => ({
+                            label: id.code || "شناسه نامشخص",
+                            value: id.id
+                        }))}
+                        style={{ width: "100%" }}
+                        dropdownStyle={{ fontSize: "0.9rem", backgroundColor: "#fffefc" }}
+                    />
+                )
         },
         {
             title: "واحدهای مرتبط",

@@ -81,6 +81,7 @@ export const deleteDocument = (id) => API.delete(`/api/documents/${id}`);
 export const getIdentifiers = () => API.get("/api/identifiers");
 export const createIdentifier = (data) => API.post("/api/identifiers", data);
 export const deleteIdentifier = (id) => API.delete(`/api/identifiers/${id}`);
+export const updateIdentifier = (id, data) => API.put(`/api/identifiers/${id}`, data);
 
 export const advanceDocumentStatus = (id) =>
     API.put(`/api/documents/${id}/status`);
@@ -112,9 +113,6 @@ export const getDocumentsByFilter = (clientId, unitId, serviceId) =>
     API.get("/api/documents/filter", {
         params: { clientId, unitId, serviceId }
     });
-
-export const updateIdentifier = (id, data) =>
-    API.put(`/api/identifiers/${id}`, data);
 
 export const getCategories = () => API.get("/api/categories");
 
