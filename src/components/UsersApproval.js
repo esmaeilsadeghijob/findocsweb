@@ -79,12 +79,10 @@ function UsersApproval() {
     useEffect(() => {
         fetchData();
         getClients().then((res) => {
-            console.log("ساختار کامل اولین مشتری:", res.data[0]);
             const extractedUnits = res.data.map((c) => ({
                 id: c.unitId,
                 unitName: c.unitName,
             })).filter((u) => u.id && u.unitName);
-            console.log("extractedUnits:", extractedUnits);
             setUnits(extractedUnits);
         });
 

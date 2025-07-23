@@ -1,9 +1,6 @@
 import {useRef, useState} from "react";
 
 function AttachmentPanel({documentId, status}) {
-    console.log("📎 AttachmentPanel mounted for:", documentId);
-
-
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
     const [showModal, setShowModal] = useState(false);

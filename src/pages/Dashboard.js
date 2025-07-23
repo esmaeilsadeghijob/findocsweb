@@ -30,10 +30,6 @@ function Dashboard() {
         const name = localStorage.getItem("unitName");
         setUnitName(name);
 
-        console.log(":::::::::::::::::::::")
-        console.log(identifierCode)
-        console.log(":::::::::::::::::::::")
-
     }, []);
 
     const handleMenuClick = (e) => {
