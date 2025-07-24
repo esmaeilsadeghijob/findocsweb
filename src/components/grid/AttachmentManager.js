@@ -16,7 +16,9 @@ import {
     EditOutlined,
     CloseOutlined,
     ReloadOutlined,
-    PlusOutlined, FileAddOutlined, CloudUploadOutlined, SearchOutlined,
+    FileAddOutlined,
+    CloudUploadOutlined,
+    SearchOutlined
 } from "@ant-design/icons";
 import {
     getDocumentsByFilter,
@@ -34,6 +36,13 @@ import PdfPreview from "./PdfPreview";
 import DocumentFormModal from "./DocumentFormModal";
 import EditDocumentModal from "./EditDocumentModal";
 import moment from "moment-jalaali";
+import {
+    canRead,
+    canCreate,
+    canEdit,
+    canManageAttachments,
+    canRevert
+} from "./accessUtils";
 
 moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
@@ -64,9 +73,11 @@ const AttachmentManager = ({
     const [searchText, setSearchText] = useState("");
     const [expandedKeys, setExpandedKeys] = useState([]);
 
-    const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
-    const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
-    const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
+    const allowRead = canRead(currentUser?.role, accessLevel);
+    const allowCreate = canCreate(currentUser?.role, accessLevel);
+    const allowEdit = canEdit(currentUser?.role, accessLevel);
+    const allowUpload = canManageAttachments(currentUser?.role, accessLevel);
+    const allowRevert = canRevert(currentUser?.role, accessLevel);
 
     useEffect(() => {
         getCategories().then((res) => setCategories(res.data || []));
@@ -162,181 +173,174 @@ const AttachmentManager = ({
         }
     };
 
-    const attachmentColumns = (docId) => [
-        {
-            title: "دسته‌بندی",
-            dataIndex: "categoryName",
-            render: (_, file) =>
-                editingFileId === file.id ? (
-                    <Select
-                        showSearch
-                        value={editValues.categoryName}
-                        onChange={(val) =>
-                            setEditValues((prev) => ({...prev, categoryName: val}))
-                        }
-                        options={categories.map((c) => ({
-                            label: c.name,
-                            value: c.name
-                        }))}
-                        style={{width: "100%"}}
-                        placeholder="انتخاب دسته‌بندی"
-                    />
-                ) : (
-                    file.categoryName || "—"
-                )
-        },
-        {
-            title: "نام فایل",
-            dataIndex: "fileName"
-        },
-        {
-            title: "فرمت",
-            dataIndex: "extension"
-        },
-        {
-            title: "شرح فایل",
-            dataIndex: "description",
-            render: (_, file) =>
-                editingFileId === file.id ? (
-                    <Input
-                        value={editValues.description}
-                        onChange={(e) =>
-                            setEditValues((prev) => ({...prev, description: e.target.value}))
-                        }
-                    />
-                ) : (
-                    file.description || "—"
-                )
-        },
-        {
-            title: "شرکت / شخص",
-            dataIndex: "companyName",
-            render: (_, file) =>
-                editingFileId === file.id ? (
-                    <Select
-                        showSearch
-                        value={editValues.companyName}
-                        onChange={(val) =>
-                            setEditValues((prev) => ({...prev, companyName: val}))
-                        }
-                        options={companies.map((c) => ({
-                            label: c.name,
-                            value: c.name
-                        }))}
-                        style={{width: "100%"}}
-                        placeholder="انتخاب شرکت / شخص"
-                    />
-                ) : (
-                    file.companyName || "—"
-                )
-        },
-        {
-            title: "تاریخ بارگذاری",
-            dataIndex: "uploadedAt",
-            render: (val) => new Date(val).toLocaleDateString("fa-IR")
-        },
-        {
-            title: "آپلودکننده",
-            dataIndex: "uploadedBy"
-        },
-        {
-            title: "پیش‌نمایش",
-            render: (_, file) =>
-                file.mimeType === "application/pdf" ? (
-                    <Button
-                        type="text"
-                        icon={<EyeOutlined style={{color: "#1890ff"}}/>}
-                        onClick={() => {
-                            setPdfBase64(file.fileData);
-                            setShowPdfModal(true);
-                        }}
-                    />
-                ) : (
-                    <a
-                        href={`data:${file.mimeType};base64,${file.fileData}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <EyeOutlined style={{color: "#1890ff"}}/>
-                    </a>
-                )
-        },
-        {
-            title: "عملیات",
-            render: (_, file) =>
-                editingFileId === file.id ? (
-                    <Space>
-                        <Button type="primary" size="small" onClick={() => handleSaveFile(docId, file.id)}>
-                            ذخیره
-                        </Button>
-                        <Button size="small" onClick={() => {
-                            setEditingFileId(null);
-                            setEditValues({});
-                        }}>
-                            لغو
-                        </Button>
-                    </Space>
-                ) : (
-                    <Space>
-                        <Button
-                            icon={<EditOutlined/>}
-                            size="small"
-                            onClick={() => {
-                                setEditingFileId(file.id);
-                                setEditValues({
-                                    categoryName: file.categoryName?.trim(),
-                                    description: file.description,
-                                    companyName: file.companyName?.trim()
-                                });
-                            }}
+    const attachmentColumns = (docId) => {
+        const allowEdit = canManageAttachments(currentUser?.role, accessLevel);
+        const allowRead = canRead(currentUser?.role, accessLevel);
+
+        const columns = [
+            {
+                title: "دسته‌بندی",
+                dataIndex: "categoryName",
+                render: (_, file) =>
+                    editingFileId === file.id && allowEdit ? (
+                        <Select
+                            showSearch
+                            value={editValues.categoryName}
+                            onChange={(val) =>
+                                setEditValues((prev) => ({ ...prev, categoryName: val }))
+                            }
+                            options={categories.map((c) => ({
+                                label: c.name,
+                                value: c.name
+                            }))}
+                            style={{ width: "100%" }}
+                            placeholder="انتخاب دسته‌بندی"
                         />
-                        <Popconfirm
-                            title="آیا از حذف فایل مطمئن هستید؟"
-                            onConfirm={() => handleDeleteFile(docId, file.id)}
-                            okText="بله"
-                            cancelText="خیر"
-                        >
-                            <Button type="text" danger icon={<CloseOutlined/>}/>
-                        </Popconfirm>
-                    </Space>
-                )
-        }
-    ];
-
-    const filteredDocuments = useMemo(() => {
-        if (!searchText) {
-            setExpandedKeys([]);
-            return documents;
-        }
-
-        const normalized = searchText.toLowerCase();
-        const matched = [];
-
-        documents.forEach((doc) => {
-            const docText = Object.values(doc)
-                .filter((val) => typeof val === "string")
-                .join(" ")
-                .toLowerCase();
-
-            const attachmentText = (doc.attachmentLinks ?? [])
-                .flatMap((file) =>
-                    Object.values(file)
-                        .filter((val) => typeof val === "string")
-                        .map((val) => val.toLowerCase())
-                )
-                .join(" ");
-
-            const allText = `${docText} ${attachmentText}`;
-            if (allText.includes(normalized)) {
-                matched.push(doc.id);
+                    ) : (
+                        file.categoryName || "—"
+                    )
+            },
+            {
+                title: "نام فایل",
+                dataIndex: "fileName"
+            },
+            {
+                title: "فرمت",
+                dataIndex: "extension"
+            },
+            {
+                title: "شرح فایل",
+                dataIndex: "description",
+                render: (_, file) =>
+                    editingFileId === file.id && allowEdit ? (
+                        <Input
+                            value={editValues.description}
+                            onChange={(e) =>
+                                setEditValues((prev) => ({
+                                    ...prev,
+                                    description: e.target.value
+                                }))
+                            }
+                        />
+                    ) : (
+                        file.description || "—"
+                    )
+            },
+            {
+                title: "شرکت / شخص",
+                dataIndex: "companyName",
+                render: (_, file) =>
+                    editingFileId === file.id && allowEdit ? (
+                        <Select
+                            showSearch
+                            value={editValues.companyName}
+                            onChange={(val) =>
+                                setEditValues((prev) => ({
+                                    ...prev,
+                                    companyName: val
+                                }))
+                            }
+                            options={companies.map((c) => ({
+                                label: c.name,
+                                value: c.name
+                            }))}
+                            style={{ width: "100%" }}
+                            placeholder="انتخاب شرکت / شخص"
+                        />
+                    ) : (
+                        file.companyName || "—"
+                    )
+            },
+            {
+                title: "تاریخ بارگذاری",
+                dataIndex: "uploadedAt",
+                render: (val) => new Date(val).toLocaleDateString("fa-IR")
+            },
+            {
+                title: "آپلودکننده",
+                dataIndex: "uploadedBy"
+            },
+            {
+                title: "پیش‌نمایش",
+                render: (_, file) =>
+                    allowRead ? (
+                        file.mimeType === "application/pdf" ? (
+                            <Button
+                                type="text"
+                                icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+                                onClick={() => {
+                                    setPdfBase64(file.fileData);
+                                    setShowPdfModal(true);
+                                }}
+                            />
+                        ) : (
+                            <a
+                                href={`data:${file.mimeType};base64,${file.fileData}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <EyeOutlined style={{ color: "#1890ff" }} />
+                            </a>
+                        )
+                    ) : null
             }
-        });
+        ];
 
-        setExpandedKeys(matched);
-        return documents.filter((doc) => matched.includes(doc.id));
-    }, [searchText, documents]);
+        // فقط اگر اجازهٔ ویرایش داریم، ستون عملیات رو اضافه کن
+        if (allowEdit) {
+            columns.push({
+                title: "عملیات",
+                render: (_, file) =>
+                    editingFileId === file.id ? (
+                        <Space>
+                            <Button
+                                type="primary"
+                                size="small"
+                                onClick={() => handleSaveFile(docId, file.id)}
+                            >
+                                ذخیره
+                            </Button>
+                            <Button
+                                size="small"
+                                onClick={() => {
+                                    setEditingFileId(null);
+                                    setEditValues({});
+                                }}
+                            >
+                                لغو
+                            </Button>
+                        </Space>
+                    ) : (
+                        <Space>
+                            <Button
+                                icon={<EditOutlined />}
+                                size="small"
+                                onClick={() => {
+                                    setEditingFileId(file.id);
+                                    setEditValues({
+                                        categoryName: file.categoryName?.trim(),
+                                        description: file.description,
+                                        companyName: file.companyName?.trim()
+                                    });
+                                }}
+                            />
+                            <Popconfirm
+                                title="آیا از حذف فایل مطمئن هستید؟"
+                                onConfirm={() => handleDeleteFile(docId, file.id)}
+                                okText="بله"
+                                cancelText="خیر"
+                            >
+                                <Button type="text" danger icon={<CloseOutlined />} />
+                            </Popconfirm>
+                        </Space>
+                    )
+            });
+        }
 
-    const mainColumns = [
+        return columns;
+    };
+
+    const baseColumns = [
         {
             title: "شماره سند",
             dataIndex: "documentNumber"
@@ -390,13 +394,8 @@ const AttachmentManager = ({
                             ? "orange"
                             : "default";
 
-                const allowAdvance =
-                    doc.status !== "FINALIZED" &&
-                    (isAdmin || ["OWNER", "ADMIN"].includes(accessLevel));
-
-                const allowRevert =
-                    doc.status === "FINALIZED" &&
-                    (isAdmin || ["OWNER", "ADMIN", "REVERT"].includes(accessLevel));
+                const allowAdvance = doc.status !== "FINALIZED" && allowEdit;
+                const allowRevertStatus = doc.status === "FINALIZED" && allowRevert;
 
                 return (
                     <Space>
@@ -406,16 +405,16 @@ const AttachmentManager = ({
                                 onClick={() => {
                                     if (allowAdvance) handleAdvanceStatus(doc.id);
                                 }}
-                                style={{cursor: allowAdvance ? "pointer" : "default"}}
+                                style={{ cursor: allowAdvance ? "pointer" : "default" }}
                             >
                                 {label}
                             </Tag>
                         </Tooltip>
-                        {allowRevert && (
+                        {allowRevertStatus && (
                             <Tooltip title="بازگردانی وضعیت سند">
                                 <Button
                                     type="text"
-                                    icon={<ReloadOutlined style={{fontSize: 18, color: "#fa8c16"}}/>}
+                                    icon={<ReloadOutlined style={{ fontSize: 18, color: "#fa8c16" }} />}
                                     onClick={() => handleRevertStatus(doc.id)}
                                 />
                             </Tooltip>
@@ -423,18 +422,21 @@ const AttachmentManager = ({
                     </Space>
                 );
             }
-        },
-        {
+        }
+    ];
+
+// فقط اگر کاربر اجازهٔ ویرایش داشته باشه، ستون عملیات رو اضافه کن
+    if (allowEdit) {
+        baseColumns.push({
             title: "عملیات",
             render: (_, doc) => {
                 const isFinalized = doc.status === "FINALIZED";
-                const allowEdit = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
-                const allowDelete = isAdmin || ["EDIT", "OWNER"].includes(accessLevel);
+
                 return (
                     <Space>
                         <Button
-                            icon={<EditOutlined style={{color: isFinalized ? "#ccc" : "#1890ff"}}/>}
-                            disabled={!allowEdit || isFinalized}
+                            icon={<EditOutlined style={{ color: isFinalized ? "#ccc" : "#1890ff" }} />}
+                            disabled={isFinalized}
                             onClick={() => {
                                 setEditDocument(doc);
                                 setShowEditModal(true);
@@ -445,37 +447,68 @@ const AttachmentManager = ({
                             onConfirm={() => handleDeleteDocument(doc.id)}
                             okText="بله"
                             cancelText="خیر"
-                            disabled={!allowDelete || isFinalized}
+                            disabled={isFinalized}
                         >
                             <Button
                                 type="text"
                                 danger
-                                icon={<CloseOutlined style={{color: isFinalized ? "#ccc" : "red"}}/>}
-                                disabled={!allowDelete || isFinalized}
+                                icon={<CloseOutlined style={{ color: isFinalized ? "#ccc" : "red" }} />}
+                                disabled={isFinalized}
                             />
                         </Popconfirm>
                     </Space>
                 );
             }
-        }
-    ];
+        });
+    }
 
-    if (!canReadGlobal) {
+    const mainColumns = baseColumns;
+
+    const filteredDocuments = useMemo(() => {
+        if (!searchText) {
+            setExpandedKeys([]);
+            return documents;
+        }
+
+        const normalized = searchText.toLowerCase();
+        const matched = [];
+
+        documents.forEach((doc) => {
+            const docText = Object.values(doc)
+                .filter((val) => typeof val === "string")
+                .join(" ")
+                .toLowerCase();
+
+            const attachmentText = (doc.attachmentLinks ?? [])
+                .flatMap((file) =>
+                    Object.values(file)
+                        .filter((val) => typeof val === "string")
+                        .map((val) => val.toLowerCase())
+                )
+                .join(" ");
+
+            const allText = `${docText} ${attachmentText}`;
+            if (allText.includes(normalized)) {
+                matched.push(doc.id);
+            }
+        });
+
+        setExpandedKeys(matched);
+        return documents.filter((doc) => matched.includes(doc.id));
+    }, [searchText, documents]);
+
+    if (!allowRead) {
         return <div style={{color: "red"}}>شما مجاز به مشاهده اسناد نیستید!</div>;
     }
 
     return (
         <>
             <div style={{display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem"}}>
-                {canCreate && (
+                {allowCreate && (
                     <Button
                         type="text"
                         icon={<FileAddOutlined/>}
-                        style={{
-                            fontSize: "1rem",
-                            padding: "0 6px",
-                            color: "#1890ff"
-                        }}
+                        style={{fontSize: "1rem", padding: "0 6px", color: "#1890ff"}}
                         onClick={() => {
                             if (serviceId && unitId) {
                                 setShowModal(true);
@@ -507,6 +540,11 @@ const AttachmentManager = ({
             <Table
                 rowKey="id"
                 columns={mainColumns}
+                locale={{
+                    triggerDesc: "کلیک برای مرتب‌سازی نزولی",
+                    triggerAsc: "کلیک برای مرتب‌سازی صعودی",
+                    cancelSort: "کلیک برای لغو مرتب‌سازی",
+                }}
                 dataSource={filteredDocuments}
                 expandable={{
                     expandedRowRender: (doc) => {
@@ -521,19 +559,21 @@ const AttachmentManager = ({
 
                         return (
                             <>
-                                <div style={{marginBottom: 8}}>
-                                    <Button
-                                        type="dashed"
-                                        icon={<CloudUploadOutlined/>}
-                                        onClick={() => {
-                                            setSelectedDocumentId(doc.id);
-                                            setShowUploadModal(true);
-                                        }}
-                                        disabled={doc.status === "FINALIZED"}
-                                    >
-                                        بارگذاری فایل جدید
-                                    </Button>
-                                </div>
+                                {allowUpload && (
+                                    <div style={{marginBottom: 8}}>
+                                        <Button
+                                            type="dashed"
+                                            icon={<CloudUploadOutlined/>}
+                                            onClick={() => {
+                                                setSelectedDocumentId(doc.id);
+                                                setShowUploadModal(true);
+                                            }}
+                                            disabled={doc.status === "FINALIZED"}
+                                        >
+                                            بارگذاری فایل جدید
+                                        </Button>
+                                    </div>
+                                )}
                                 <Table
                                     rowKey="id"
                                     columns={attachmentColumns(doc.id)}
@@ -549,7 +589,6 @@ const AttachmentManager = ({
                 }}
                 pagination={false}
                 size="middle"
-                // bordered
             />
 
             <PdfPreview

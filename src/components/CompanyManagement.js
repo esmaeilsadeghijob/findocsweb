@@ -263,11 +263,11 @@ function CompanyManager() {
                             nextIcon: <LeftOutlined/>,
                         }}
                         size="small"
-                        locale={{
-                            triggerDesc: "کلیک برای مرتب‌سازی نزولی",
-                            triggerAsc: "کلیک برای مرتب‌سازی صعودی",
-                            cancelSort: "کلیک برای لغو مرتب‌سازی",
-                        }}
+                            locale={{
+                                triggerDesc: "کلیک برای مرتب‌سازی نزولی",
+                                triggerAsc: "کلیک برای مرتب‌سازی صعودی",
+                                cancelSort: "کلیک برای لغو مرتب‌سازی",
+                            }}
                     />
                 </div>
             </Card>
