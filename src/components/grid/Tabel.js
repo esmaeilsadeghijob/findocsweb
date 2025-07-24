@@ -34,11 +34,7 @@ const Tabel = ({
                    columnDefs,
                    rowData,
                    actionElement,
-                   sortCol = false,
                    search = true,
-                   excel = true,
-                   csv = true,
-                   filter = true,
                    onRefreshRowData,
                    canManageAttachments,
                    accessLevel,
@@ -59,8 +55,6 @@ const Tabel = ({
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal =
         isAdmin || ["EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
-    const canCreate =
-        isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
 
     useEffect(() => {
         setInternalRows(rowData);
@@ -228,13 +222,7 @@ const Tabel = ({
             <div style={{ width: "100%" }}>
                 {filteredRows.map((row) => {
                     const isFinalized = row.status === "FINALIZED";
-                    const normalizedSearch = searchText.toLowerCase();
-
-                    const matchingFiles = (row.attachmentLinks ?? []).filter((file) =>
-                        Object.values(file)
-                            .filter((val) => typeof val === "string")
-                            .some((text) => text.toLowerCase().includes(normalizedSearch))
-                    );
+                    const matchingFiles = (row.attachmentLinks ?? []);
 
                     return (
                         <div key={row.id} style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>
@@ -408,9 +396,9 @@ const Tabel = ({
                                                                         onClick={() => {
                                                                             setEditingFileId(file.id);
                                                                             setEditValues({
-                                                                                categoryName: file.categoryName,
+                                                                                categoryName: file.categoryName?.trim(),
                                                                                 description: file.description,
-                                                                                companyName: file.companyName,
+                                                                                companyName: file.companyName?.trim(),
                                                                             });
                                                                         }}
                                                                     />
