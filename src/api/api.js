@@ -145,3 +145,27 @@ export const updateAttachment = (documentId, fileId, data) =>
             companyName: data.companyName,
         },
     });
+
+// بک‌آپ‌گیری دستی
+export const createBackup = (type, path) =>
+    API.post("/api/backup/create", { type, path });
+
+// بازگردانی بک‌آپ
+export const restoreBackup = (type, file) =>
+    API.post("/api/backup/restore", { type, file });
+
+// حذف بک‌آپ
+export const deleteBackup = (file) =>
+    API.delete("/api/backup/delete", { params: { file } });
+
+// دریافت لیست بک‌آپ‌ها
+export const getBackups = (path = "/opt/backups") =>
+    API.get("/api/backup/list", { params: { path } });
+
+// زمان‌بندی بک‌آپ خودکار
+export const scheduleBackup = (type, cron, path) =>
+    API.post("/api/backup/schedule", { type, cron, path });
+
+export const cancelSchedule = (type, path) =>
+    API.post("/api/backup/cancel", { type, path });
+

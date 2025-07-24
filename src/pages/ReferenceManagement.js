@@ -9,6 +9,7 @@ import "./ReferenceManagement.css";
 import CategoryManager from "../components/CategoryManager";
 import {canCreate} from "../components/grid/accessUtils";
 import CustomerManager from "../components/CustomerManager";
+import BackupManager from "../components/BackupManager";
 
 const tabStyle = {
     padding: 24,
@@ -79,6 +80,12 @@ function ReferenceManagement() {
                 <Tabs.TabPane tab="دسته بندی" key="7">
                     <div style={tabStyle}>
                         <CategoryManager/>
+                    </div>
+                </Tabs.TabPane>
+
+                <Tabs.TabPane tab="بکاپ" key="8">
+                    <div style={tabStyle}>
+                        <BackupManager/>
                     </div>
                 </Tabs.TabPane>
 

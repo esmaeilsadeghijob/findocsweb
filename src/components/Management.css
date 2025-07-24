@@ -49,3 +49,9 @@
     content: "";
     display: none;
 }
+
+.force-rtl {
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: right;
+}
