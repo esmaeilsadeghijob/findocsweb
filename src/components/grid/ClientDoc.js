@@ -113,16 +113,16 @@ function ClientDoc({accessLevel, roles}) {
                 />
 
                 <div style={{display: "flex", flexDirection: "column", gap: "6px"}}>
-                    <div
-                        style={{
-                            fontWeight: "bold",
-                            paddingBottom: "4px",
-                            borderBottom: "1px solid #ccc",
-                            textAlign: "center"
-                        }}
-                    >
-                        لیست واحدها
-                    </div>
+                    {/*<div*/}
+                    {/*    style={{*/}
+                    {/*        fontWeight: "bold",*/}
+                    {/*        paddingBottom: "4px",*/}
+                    {/*        borderBottom: "1px solid #ccc",*/}
+                    {/*        textAlign: "center"*/}
+                    {/*    }}*/}
+                    {/*>*/}
+                    {/*    لیست واحدها*/}
+                    {/*</div>*/}
 
                     {canReadGlobal && (
                         loadingUnits ? (

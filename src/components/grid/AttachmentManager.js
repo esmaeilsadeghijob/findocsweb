@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, {useEffect, useState, useMemo} from "react";
 import {
     Table,
     Button,
@@ -35,7 +35,7 @@ import DocumentFormModal from "./DocumentFormModal";
 import EditDocumentModal from "./EditDocumentModal";
 import moment from "moment-jalaali";
 
-moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
+moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
 const AttachmentManager = ({
                                clientId,
@@ -108,7 +108,7 @@ const AttachmentManager = ({
             const res = await getAttachments(docId);
             setDocuments((prev) =>
                 prev.map((d) =>
-                    d.id === docId ? { ...d, attachmentLinks: res.data || [] } : d
+                    d.id === docId ? {...d, attachmentLinks: res.data || []} : d
                 )
             );
             message.success("فایل حذف شد");
@@ -123,7 +123,7 @@ const AttachmentManager = ({
             const res = await getAttachments(docId);
             setDocuments((prev) =>
                 prev.map((d) =>
-                    d.id === docId ? { ...d, attachmentLinks: res.data || [] } : d
+                    d.id === docId ? {...d, attachmentLinks: res.data || []} : d
                 )
             );
             setEditingFileId(null);
@@ -172,13 +172,13 @@ const AttachmentManager = ({
                         showSearch
                         value={editValues.categoryName}
                         onChange={(val) =>
-                            setEditValues((prev) => ({ ...prev, categoryName: val }))
+                            setEditValues((prev) => ({...prev, categoryName: val}))
                         }
                         options={categories.map((c) => ({
                             label: c.name,
                             value: c.name
                         }))}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         placeholder="انتخاب دسته‌بندی"
                     />
                 ) : (
@@ -201,7 +201,7 @@ const AttachmentManager = ({
                     <Input
                         value={editValues.description}
                         onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, description: e.target.value }))
+                            setEditValues((prev) => ({...prev, description: e.target.value}))
                         }
                     />
                 ) : (
@@ -217,13 +217,13 @@ const AttachmentManager = ({
                         showSearch
                         value={editValues.companyName}
                         onChange={(val) =>
-                            setEditValues((prev) => ({ ...prev, companyName: val }))
+                            setEditValues((prev) => ({...prev, companyName: val}))
                         }
                         options={companies.map((c) => ({
                             label: c.name,
                             value: c.name
                         }))}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         placeholder="انتخاب شرکت / شخص"
                     />
                 ) : (
@@ -245,7 +245,7 @@ const AttachmentManager = ({
                 file.mimeType === "application/pdf" ? (
                     <Button
                         type="text"
-                        icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+                        icon={<EyeOutlined style={{color: "#1890ff"}}/>}
                         onClick={() => {
                             setPdfBase64(file.fileData);
                             setShowPdfModal(true);
@@ -257,7 +257,7 @@ const AttachmentManager = ({
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        <EyeOutlined style={{ color: "#1890ff" }} />
+                        <EyeOutlined style={{color: "#1890ff"}}/>
                     </a>
                 )
         },
@@ -279,10 +279,10 @@ const AttachmentManager = ({
                 ) : (
                     <Space>
                         <Button
-                            icon={<EditOutlined />}
+                            icon={<EditOutlined/>}
                             size="small"
                             onClick={() => {
-                                setEditingFileId(file.id                );
+                                setEditingFileId(file.id);
                                 setEditValues({
                                     categoryName: file.categoryName?.trim(),
                                     description: file.description,
@@ -296,7 +296,7 @@ const AttachmentManager = ({
                             okText="بله"
                             cancelText="خیر"
                         >
-                            <Button type="text" danger icon={<CloseOutlined />} />
+                            <Button type="text" danger icon={<CloseOutlined/>}/>
                         </Popconfirm>
                     </Space>
                 )
@@ -340,6 +340,21 @@ const AttachmentManager = ({
         {
             title: "شماره سند",
             dataIndex: "documentNumber"
+        },
+        {
+            title: "شماره بایگانی",
+            dataIndex: "archiveNumber",
+            sorter: (a, b) => (a.archiveNumber || 0) - (b.archiveNumber || 0),
+            defaultSortOrder: "descend"
+        },
+        {
+            title: "تاریخ بایگانی",
+            dataIndex: "archiveDate",
+            sorter: (a, b) => (a.archiveDate || 0) - (b.archiveDate || 0),
+            render: (val) => {
+                const date = moment(val);
+                return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
+            }
         },
         {
             title: "سال مالی",
@@ -391,7 +406,7 @@ const AttachmentManager = ({
                                 onClick={() => {
                                     if (allowAdvance) handleAdvanceStatus(doc.id);
                                 }}
-                                style={{ cursor: allowAdvance ? "pointer" : "default" }}
+                                style={{cursor: allowAdvance ? "pointer" : "default"}}
                             >
                                 {label}
                             </Tag>
@@ -400,7 +415,7 @@ const AttachmentManager = ({
                             <Tooltip title="بازگردانی وضعیت سند">
                                 <Button
                                     type="text"
-                                    icon={<ReloadOutlined style={{ fontSize: 18, color: "#fa8c16" }} />}
+                                    icon={<ReloadOutlined style={{fontSize: 18, color: "#fa8c16"}}/>}
                                     onClick={() => handleRevertStatus(doc.id)}
                                 />
                             </Tooltip>
@@ -418,7 +433,7 @@ const AttachmentManager = ({
                 return (
                     <Space>
                         <Button
-                            icon={<EditOutlined style={{ color: isFinalized ? "#ccc" : "#1890ff" }} />}
+                            icon={<EditOutlined style={{color: isFinalized ? "#ccc" : "#1890ff"}}/>}
                             disabled={!allowEdit || isFinalized}
                             onClick={() => {
                                 setEditDocument(doc);
@@ -435,7 +450,7 @@ const AttachmentManager = ({
                             <Button
                                 type="text"
                                 danger
-                                icon={<CloseOutlined style={{ color: isFinalized ? "#ccc" : "red" }} />}
+                                icon={<CloseOutlined style={{color: isFinalized ? "#ccc" : "red"}}/>}
                                 disabled={!allowDelete || isFinalized}
                             />
                         </Popconfirm>
@@ -446,7 +461,7 @@ const AttachmentManager = ({
     ];
 
     if (!canReadGlobal) {
-        return <div style={{ color: "red" }}>شما مجاز به مشاهده اسناد نیستید!</div>;
+        return <div style={{color: "red"}}>شما مجاز به مشاهده اسناد نیستید!</div>;
     }
 
     return (
@@ -455,7 +470,7 @@ const AttachmentManager = ({
                 {canCreate && (
                     <Button
                         type="text"
-                        icon={<FileAddOutlined />}
+                        icon={<FileAddOutlined/>}
                         style={{
                             fontSize: "1rem",
                             padding: "0 6px",
@@ -475,7 +490,7 @@ const AttachmentManager = ({
 
                 <Input
                     allowClear
-                    placeholder="جست‌وجو در اسناد و فایل‌ها"
+                    placeholder="جستجو"
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     style={{
@@ -484,7 +499,7 @@ const AttachmentManager = ({
                         textAlign: "right"
                     }}
                     prefix={
-                        !searchText && <SearchOutlined style={{ color: "#1890ff", fontSize: 16 }} />
+                        !searchText && <SearchOutlined style={{color: "#1890ff", fontSize: 16}}/>
                     }
                 />
             </div>
@@ -495,19 +510,21 @@ const AttachmentManager = ({
                 dataSource={filteredDocuments}
                 expandable={{
                     expandedRowRender: (doc) => {
-                        const normalized = searchText.toLowerCase();
-                        const filteredAttachments = doc.attachmentLinks?.filter((file) =>
-                            Object.values(file)
-                                .filter((val) => typeof val === "string")
-                                .some((val) => val.toLowerCase().includes(normalized))
-                        ) ?? [];
+                        const normalized = searchText.toLowerCase().trim();
+                        const filteredAttachments = !searchText
+                            ? doc.attachmentLinks
+                            : (doc.attachmentLinks ?? []).filter((file) =>
+                                Object.values(file)
+                                    .filter((val) => typeof val === "string")
+                                    .some((val) => val.toLowerCase().includes(normalized))
+                            );
 
                         return (
                             <>
-                                <div style={{ marginBottom: 8 }}>
+                                <div style={{marginBottom: 8}}>
                                     <Button
                                         type="dashed"
-                                        icon={<CloudUploadOutlined />}
+                                        icon={<CloudUploadOutlined/>}
                                         onClick={() => {
                                             setSelectedDocumentId(doc.id);
                                             setShowUploadModal(true);
