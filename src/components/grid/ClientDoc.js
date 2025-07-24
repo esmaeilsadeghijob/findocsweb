@@ -3,6 +3,7 @@ import {Typography, Input, Spin, message} from "antd";
 import {getUser, getClients, getClientsByUnit} from "../../api/api";
 import {SearchOutlined} from "@ant-design/icons";
 import DocGrid from "./DocGrid";
+import AttachmentManager from "./AttachmentManager";
 
 const {Title} = Typography;
 
@@ -172,7 +173,7 @@ function ClientDoc({accessLevel, roles}) {
                             </p>
                         </div>
 
-                        <DocGrid
+                        <AttachmentManager
                             clientId={selectedClient.id}
                             unitId={selectedClient.unitId}
                             unitName={selectedClient.unitName}
@@ -182,7 +183,7 @@ function ClientDoc({accessLevel, roles}) {
                             fiscalYear={selectedClient.fiscalYear}
                             accessLevel={accessLevel}
                             roles={roles}
-                            currentUser={{id: userId}}
+                            currentUser={{ id: userId }}
                         />
                     </>
                 ) : (
