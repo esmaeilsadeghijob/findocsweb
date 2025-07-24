@@ -6,22 +6,28 @@ import React, {
 } from "react";
 import {
     Button,
+    Input,
     message,
-    Popconfirm
+    Popconfirm,
+    Space,
+    Select
 } from "antd";
 import {
     CloseOutlined,
     EyeOutlined,
     MinusSquareOutlined,
     PlusSquareOutlined,
-    UploadOutlined
+    UploadOutlined,
+    EditOutlined
 } from "@ant-design/icons";
 import {
     getAttachments,
-    deleteAttachment
+    deleteAttachment,
+    updateAttachment,
+    getCategories,
+    getCompanies
 } from "../../api/api";
 import UploadModal from "./UploadModal";
-import {DeleteOutlined} from "@ant-design/icons";
 import PdfPreview from "./PdfPreview";
 
 const Tabel = ({
@@ -45,26 +51,25 @@ const Tabel = ({
     const [internalRows, setInternalRows] = useState([]);
     const [showPdfModal, setShowPdfModal] = useState(false);
     const [pdfBase64, setPdfBase64] = useState("");
-
+    const [editingFileId, setEditingFileId] = useState(null);
+    const [editValues, setEditValues] = useState({});
+    const [categories, setCategories] = useState([]);
+    const [companies, setCompanies] = useState([]);
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal =
         isAdmin || ["EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
-    // const canReadGlobal =
-    //     isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
     const canCreate =
         isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
-
-    // ✅ برای حفظ ترتیب ردیف‌ها
-    const updateRowById = (updatedRow) => {
-        setInternalRows((prev) =>
-            prev.map((row) => (row.id === updatedRow.id ? updatedRow : row))
-        );
-    };
 
     useEffect(() => {
         setInternalRows(rowData);
     }, [rowData]);
+
+    useEffect(() => {
+        getCategories().then((res) => setCategories(res.data || []));
+        getCompanies().then((res) => setCompanies(res.data || []));
+    }, []);
 
     useEffect(() => {
         if (!searchText) {
@@ -87,6 +92,12 @@ const Tabel = ({
 
         setExpandedRows(autoExpanded);
     }, [searchText, rowData]);
+
+    const updateRowById = (updatedRow) => {
+        setInternalRows((prev) =>
+            prev.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+        );
+    };
 
     const filteredRows = useMemo(() => {
         if (!searchText) return internalRows;
@@ -142,7 +153,7 @@ const Tabel = ({
 
             const updatedRow = internalRows.find((r) => r.id === docId);
             if (updatedRow) {
-                updateRowById({...updatedRow, attachmentLinks: updatedAttachments});
+                updateRowById({ ...updatedRow, attachmentLinks: updatedAttachments });
             }
         } catch {
             message.error("خطا در حذف فایل");
@@ -158,7 +169,7 @@ const Tabel = ({
 
             const updatedRow = internalRows.find((r) => r.id === selectedRowId);
             if (updatedRow) {
-                updateRowById({...updatedRow, attachmentLinks: updatedAttachments});
+                updateRowById({ ...updatedRow, attachmentLinks: updatedAttachments });
             }
         } catch {
             console.warn("خطا در دریافت ضمیمه‌های جدید");
@@ -178,11 +189,7 @@ const Tabel = ({
 
     return (
         <div className="w-full flex flex-col gap-6">
-            {/* نوار بالا */}
-            <div
-                className="flex justify-between items-center gap-3 flex-col sm:flex-row"
-                style={{marginBottom: "0.5rem"}}
-            >
+            <div className="flex justify-between items-center gap-3 flex-col sm:flex-row" style={{ marginBottom: "0.5rem" }}>
                 {actionElement}
                 {search && (
                     <input
@@ -201,28 +208,24 @@ const Tabel = ({
                 )}
             </div>
 
-            {/* ستون‌ها */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    paddingInline: 12,
-                    background: "#f5f5f5",
-                    fontWeight: "bold",
-                    borderBottom: "1px solid #ddd"
-                }}
-            >
-                <div style={{width: 36}}/>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                paddingInline: 12,
+                background: "#f5f5f5",
+                fontWeight: "bold",
+                borderBottom: "1px solid #ddd"
+            }}>
+                <div style={{ width: 36 }} />
                 {columnDefs.map((col) => (
-                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
+                    <div key={col.field || col.headerName} style={{ minWidth: col.minWidth || 120 }}>
                         {col.headerName ?? col.field}
                     </div>
                 ))}
             </div>
 
-            {/* ردیف‌ها */}
-            <div style={{width: "100%"}}>
+            <div style={{ width: "100%" }}>
                 {filteredRows.map((row) => {
                     const isFinalized = row.status === "FINALIZED";
                     const normalizedSearch = searchText.toLowerCase();
@@ -234,36 +237,24 @@ const Tabel = ({
                     );
 
                     return (
-                        <div key={row.id} style={{borderBottom: "1px solid #eee", padding: "8px 0"}}>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "12px",
-                                    paddingInline: 12
-                                }}
-                            >
+                        <div key={row.id} style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingInline: 12 }}>
                                 <Button
                                     type="text"
-                                    icon={
-                                        expandedRows[row.id]
-                                            ? <MinusSquareOutlined/>
-                                            : <PlusSquareOutlined/>
-                                    }
+                                    icon={expandedRows[row.id] ? <MinusSquareOutlined /> : <PlusSquareOutlined />}
                                     onClick={() => toggleExpand(row.id)}
                                 />
-
                                 {columnDefs.map((col) => (
-                                    <div key={col.field || col.headerName} style={{minWidth: col.minWidth || 120}}>
+                                    <div key={col.field || col.headerName} style={{ minWidth: col.minWidth || 120 }}>
                                         {typeof col.cellRenderer === "function"
-                                            ? col.cellRenderer({data: row})
+                                            ? col.cellRenderer({ data: row })
                                             : row[col.field]?.toString().trim() || "—"}
                                     </div>
                                 ))}
                             </div>
 
                             {expandedRows[row.id] && (
-                                <div style={{padding: "12px 40px", background: "#f7f7f7"}}>
+                                <div style={{ padding: "12px 40px", background: "#f7f7f7" }}>
                                     {canReadGlobal && (
                                         <div style={{ marginBottom: 8 }}>
                                             <Button
@@ -280,10 +271,10 @@ const Tabel = ({
                                         </div>
                                     )}
 
-                                    <div style={{border: "1px solid #ddd", borderRadius: 8, padding: "12px"}}>
-                                        <table style={{width: "100%", fontSize: "0.9rem"}}>
+                                    <div style={{ border: "1px solid #ddd", borderRadius: 8, padding: "12px" }}>
+                                        <table style={{ width: "100%", fontSize: "0.9rem" }}>
                                             <thead>
-                                            <tr style={{background: "#f0f0f0", textAlign: "center"}}>
+                                            <tr style={{ background: "#f0f0f0", textAlign: "center" }}>
                                                 <th>دسته بندی</th>
                                                 <th>نام فایل</th>
                                                 <th>فرمت</th>
@@ -292,17 +283,64 @@ const Tabel = ({
                                                 <th>تاریخ بارگذاری</th>
                                                 <th>آپلودکننده</th>
                                                 <th>پیش‌نمایش</th>
-                                                {canManageAttachments && <th>حذف</th>}
+                                                {canManageAttachments && <th>عملیات</th>}
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {matchingFiles.map((file) => (
-                                                <tr key={file.id} style={{textAlign: "center"}}>
-                                                    <td>{file.categoryName}</td>
+                                                <tr key={file.id} style={{ textAlign: "center" }}>
+                                                    <td>
+                                                        {editingFileId === file.id ? (
+                                                            <Select
+                                                                showSearch
+                                                                value={editValues.categoryName}
+                                                                onChange={(val) =>
+                                                                    setEditValues((prev) => ({ ...prev, categoryName: val }))
+                                                                }
+                                                                options={categories.map((c) => ({
+                                                                    label: c.name,
+                                                                    value: c.name
+                                                                }))}
+                                                                style={{ width: "100%" }}
+                                                                placeholder="انتخاب دسته‌بندی"
+                                                            />
+                                                        ) : (
+                                                            file.categoryName || "—"
+                                                        )}
+                                                    </td>
                                                     <td>{file.fileName}</td>
                                                     <td>{file.extension}</td>
-                                                    <td>{file.description || "—"}</td>
-                                                    <td>{file.companyName || "—"}</td>
+                                                    <td>
+                                                        {editingFileId === file.id ? (
+                                                            <Input
+                                                                value={editValues.description}
+                                                                onChange={(e) =>
+                                                                    setEditValues((prev) => ({ ...prev, description: e.target.value }))
+                                                                }
+                                                            />
+                                                        ) : (
+                                                            file.description || "—"
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {editingFileId === file.id ? (
+                                                            <Select
+                                                                showSearch
+                                                                value={editValues.companyName}
+                                                                onChange={(val) =>
+                                                                    setEditValues((prev) => ({ ...prev, companyName: val }))
+                                                                }
+                                                                options={companies.map((c) => ({
+                                                                    label: c.name,
+                                                                    value: c.name
+                                                                }))}
+                                                                style={{ width: "100%" }}
+                                                                placeholder="انتخاب شرکت / شخص"
+                                                            />
+                                                        ) : (
+                                                            file.companyName || "—"
+                                                        )}
+                                                    </td>
                                                     <td>{new Date(file.uploadedAt).toLocaleDateString("fa-IR")}</td>
                                                     <td>{file.uploadedBy || "—"}</td>
                                                     <td>
@@ -313,8 +351,7 @@ const Tabel = ({
                                                                     setPdfBase64(file.fileData);
                                                                     setShowPdfModal(true);
                                                                 }}
-                                                                icon={<EyeOutlined
-                                                                    style={{fontSize: 16, color: "#1890ff"}}/>}
+                                                                icon={<EyeOutlined style={{ fontSize: 16, color: "#1890ff" }} />}
                                                                 title="نمایش فایل PDF"
                                                             />
                                                         ) : (
@@ -324,27 +361,76 @@ const Tabel = ({
                                                                 rel="noopener noreferrer"
                                                                 title="مشاهده فایل"
                                                             >
-                                                                <EyeOutlined style={{fontSize: 16, color: "#1890ff"}}/>
+                                                                <EyeOutlined style={{ fontSize: 16, color: "#1890ff" }} />
                                                             </a>
                                                         )}
                                                     </td>
-
                                                     {canManageAttachments && (
                                                         <td>
-                                                            <Popconfirm
-                                                                title="آیا از حذف فایل مطمئن هستید؟"
-                                                                onConfirm={() => handleDeleteFile(row.id, file.id)}
-                                                                okText="بله"
-                                                                cancelText="خیر"
-                                                            >
-                                                                <Button type="text" danger icon={<CloseOutlined/>}/>
-                                                            </Popconfirm>
+                                                            {editingFileId === file.id ? (
+                                                                <Space>
+                                                                    <Button
+                                                                        type="primary"
+                                                                        size="small"
+                                                                        onClick={async () => {
+                                                                            await updateAttachment(row.id, file.id, editValues);
+                                                                            message.success("ویرایش انجام شد");
+
+                                                                            const res = await getAttachments(row.id);
+                                                                            const updatedAttachments = res.data || [];
+
+                                                                            const updatedRow = internalRows.find((r) => r.id === row.id);
+                                                                            if (updatedRow) {
+                                                                                updateRowById({ ...updatedRow, attachmentLinks: updatedAttachments });
+                                                                            }
+
+                                                                            setEditingFileId(null);
+                                                                            setEditValues({});
+                                                                        }}
+                                                                    >
+                                                                        ذخیره
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="small"
+                                                                        onClick={() => {
+                                                                            setEditingFileId(null);
+                                                                            setEditValues({});
+                                                                        }}
+                                                                    >
+                                                                        لغو
+                                                                    </Button>
+                                                                </Space>
+                                                            ) : (
+                                                                <Space>
+                                                                    <Button
+                                                                        icon={<EditOutlined />}
+                                                                        size="small"
+                                                                        onClick={() => {
+                                                                            setEditingFileId(file.id);
+                                                                            setEditValues({
+                                                                                categoryName: file.categoryName,
+                                                                                description: file.description,
+                                                                                companyName: file.companyName,
+                                                                            });
+                                                                        }}
+                                                                    />
+                                                                    <Popconfirm
+                                                                        title="آیا از حذف فایل مطمئن هستید؟"
+                                                                        onConfirm={() => handleDeleteFile(row.id, file.id)}
+                                                                        okText="بله"
+                                                                        cancelText="خیر"
+                                                                    >
+                                                                        <Button type="text" danger icon={<CloseOutlined />} />
+                                                                    </Popconfirm>
+                                                                </Space>
+                                                            )}
                                                         </td>
                                                     )}
                                                 </tr>
                                             ))}
                                             </tbody>
                                         </table>
+
                                         <PdfPreview
                                             visible={showPdfModal}
                                             base64Data={pdfBase64}
@@ -358,7 +444,6 @@ const Tabel = ({
                 })}
             </div>
 
-            {/* مودال آپلود فایل */}
             {showUploadModal && (
                 <UploadModal
                     visible={showUploadModal}

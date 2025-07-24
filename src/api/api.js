@@ -136,3 +136,12 @@ export const getClientsByUnit = (unitId) =>
 
 export const getArchivePreview = (unitId) =>
     API.get(`/api/units/${unitId}/archive-preview`);
+
+export const updateAttachment = (documentId, fileId, data) =>
+    API.put(`/api/attachments/${documentId}/${fileId}`, null, {
+        params: {
+            categoryName: data.categoryName,
+            description: data.description,
+            companyName: data.companyName,
+        },
+    });
