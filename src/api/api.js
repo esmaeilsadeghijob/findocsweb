@@ -171,3 +171,4 @@ export const scheduleBackup = (type, cron, path) =>
 export const cancelSchedule = (type, path) =>
     API.post("/api/backup/cancel", { type, path });
 
+export const getFrequentDescriptions = () => API.get("/api/attachments/frequent-descriptions");

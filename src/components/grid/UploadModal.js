@@ -8,10 +8,15 @@ import {
     Select,
     message,
     Button,
-    Progress,
+    Progress, AutoComplete,
 } from "antd";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
-import { uploadFile, getCompanies, getCategories } from "../../api/api";
+import {
+    uploadFile,
+    getCompanies,
+    getCategories,
+    getFrequentDescriptions
+} from "../../api/api";
 import PreviewBox from "./PreviewBox";
 
 const { Dragger } = Upload;
@@ -22,6 +27,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [files, setFiles] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [frequentDescriptions, setFrequentDescriptions] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -35,6 +41,10 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
         getCategories()
             .then((res) => setCategories(res.data || []))
             .catch(() => setCategories([]));
+
+        getFrequentDescriptions()
+            .then((res) => setFrequentDescriptions(res.data || []))
+            .catch(() => setFrequentDescriptions([]));
     }, [visible]);
 
     const props = {
@@ -90,9 +100,12 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                 formData.append("categoryNames", f.categoryName || "");
             });
 
-            await uploadFile(documentId, formData);
-            await new Promise((resolve) => setTimeout(resolve, 600));
+            await uploadFile(documentId, formData, (event) => {
+                const percent = Math.round((event.loaded * 100) / event.total);
+                setProgress(percent);
+            });
 
+            await new Promise((resolve) => setTimeout(resolve, 600));
             message.success("فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
             form.resetFields();
@@ -180,14 +193,46 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
                                     </a>
                                 </div>
 
+                                {/*<Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>*/}
+                                {/*    <Input.TextArea*/}
+                                {/*        rows={2}*/}
+                                {/*        placeholder="توضیح اختیاری..."*/}
+                                {/*        value={f.description}*/}
+                                {/*        onChange={(e) => handleFieldChange(i, "description", e.target.value)}*/}
+                                {/*        options={frequentDescriptions.map((desc) => ({*/}
+                                {/*            label: desc,*/}
+                                {/*            value: desc,*/}
+                                {/*        }))}*/}
+                                {/*    />*/}
+                                {/*</Form.Item>*/}
+
                                 <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
-                                    <Input.TextArea
-                                        rows={2}
-                                        placeholder="توضیح اختیاری..."
+                                    <AutoComplete
+                                        options={frequentDescriptions.map(desc => ({ value: desc }))}
+                                        filterOption={(inputValue, option) =>
+                                            option?.value?.toLowerCase().includes(inputValue.toLowerCase())
+                                        }
                                         value={f.description}
-                                        onChange={(e) => handleFieldChange(i, "description", e.target.value)}
-                                    />
+                                        onChange={(val) => handleFieldChange(i, "description", val)}
+                                        placeholder="شرح فایل را وارد یا انتخاب کنید"
+                                    >
+                                        <Input.TextArea rows={2} />
+                                    </AutoComplete>
                                 </Form.Item>
+
+
+                                {/*<Form.Item label="شرح‌های پرتکرار" style={{ marginBottom: 4 }}>*/}
+                                {/*    <Select*/}
+                                {/*        showSearch*/}
+                                {/*        allowClear*/}
+                                {/*        placeholder="انتخاب یک شرح پرتکرار"*/}
+                                {/*        onChange={(val) => handleFieldChange(i, "description", val)}*/}
+                                {/*        options={frequentDescriptions.map((desc) => ({*/}
+                                {/*            label: desc,*/}
+                                {/*            value: desc,*/}
+                                {/*        }))}*/}
+                                {/*    />*/}
+                                {/*</Form.Item>*/}
 
                                 <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
                                     <Select
