@@ -135,6 +135,16 @@ function UsersApproval() {
         }
     };
 
+    const handleUnitIdentifierId = async (userId, identifierId) => {
+        try {
+            await updateUser(userId, { identifierId });
+            message.success("شرکت بروزرسانی شدند");
+            fetchData(); // ✅ رفرش کامل برای داشتن داده درست
+        } catch {
+            message.error("خطا در بروزرسانی شرکت");
+        }
+    };
+
     const startEdit = (user) => {
         setEditingUserId(user.id);
         setEditValues({
@@ -263,10 +273,12 @@ function UsersApproval() {
                     <span style={{ color: "#999" }}>—</span>
                 ) : (
                     <Select
-                        mode="multiple"
-                        placeholder="لیست شناسه‌ها"
+                        placeholder="انتخاب شرکت"
                         disabled={identifiers.length === 0}
-                        value={identifiers.map((id) => id.id)}
+                        value={r.identifierId || identifiers[0]?.id || null}
+                        onChange={(selectedId) => {
+                            handleUnitIdentifierId(r.id, selectedId);
+                        }}
                         options={identifiers.map((id) => ({
                             label: id.code || "شناسه نامشخص",
                             value: id.id

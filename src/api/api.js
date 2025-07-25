@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: window._env_?.API_BASE || "http://localhost:8080",
+    // baseURL: process.env.REACT_APP_API_BASE,
+    // baseURL: "http://localhost:8080",
 });
 
 // افزودن توکن به هدر درخواست‌ها
