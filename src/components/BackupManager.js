@@ -34,10 +34,55 @@ function BackupManager() {
         fetchBackups();
     }, []);
 
+    // let isCreatingBackup = false;
+    //
+    // const fetchBackups = async () => {
+    //     if (isCreatingBackup) return; // ⛔ جلوگیری از اجراهای هم‌زمان
+    //     isCreatingBackup = true;
+    //
+    //     try {
+    //         const res = await getBackups(path);
+    //         let files = res.data;
+    //
+    //         if (!files || files.length === 0) {
+    //             console.log("1 #################################")
+    //             await createBackup(backupType, path);
+    //             message.success("هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
+    //             console.log("2 #################################")
+    //
+    //             const updatedRes = await getBackups(path);
+    //
+    //             files = updatedRes.data;
+    //             const sorted = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    //             setBackups(sorted);
+    //
+    //             const latest = sorted[0];
+    //             console.log("1 ^^^^^^^^^^^^^^^^^^^^^^^^^")
+    //             await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
+    //             message.success(`بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
+    //             console.log("2 ^^^^^^^^^^^^^^^^^^^^^^^^^")
+    //             return;
+    //         }
+    //
+    //         const sortedFiles = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    //         setBackups(sortedFiles);
+    //
+    //         const latest = sortedFiles[0];
+    //         console.log("3 ^^^^^^^^^^^^^^^^^^^^^^^^^")
+    //         await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
+    //         message.success(`آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
+    //         console.log("4 ^^^^^^^^^^^^^^^^^^^^^^^^^")
+    //     } catch (err) {
+    //         message.error("خطا در بارگذاری یا بازگردانی فایل اخیر");
+    //     } finally {
+    //         isCreatingBackup = false; //  برگردوندن کنترل بعد از پایان اجرا
+    //     }
+    // };
+
     let isCreatingBackup = false;
 
     const fetchBackups = async () => {
-        if (isCreatingBackup) return; // ⛔ جلوگیری از اجراهای هم‌زمان
+        if (isCreatingBackup) return;
         isCreatingBackup = true;
 
         try {
@@ -45,38 +90,31 @@ function BackupManager() {
             let files = res.data;
 
             if (!files || files.length === 0) {
+                console.log("🆕 هیچ بک‌آپی وجود ندارد، ساخت فایل جدید...");
                 await createBackup(backupType, path);
                 message.success("هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
 
                 const updatedRes = await getBackups(path);
-
                 files = updatedRes.data;
-                const sorted = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                setBackups(sorted);
-
-                const latest = sorted[0];
-                await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-                message.success(`بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
-                return;
             }
 
             const sortedFiles = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setBackups(sortedFiles);
 
-            const latest = sortedFiles[0];
-            await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-            message.success(`آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
         } catch (err) {
-            message.error("خطا در بارگذاری یا بازگردانی فایل اخیر");
+            message.error("خطا در بارگذاری لیست بک‌آپ‌ها");
         } finally {
-            isCreatingBackup = false; //  برگردوندن کنترل بعد از پایان اجرا
+            isCreatingBackup = false;
         }
     };
 
     const handleCreateBackup = async () => {
         try {
+            console.log("3 #################################")
             await createBackup(backupType, path);
             message.success("بک‌آپ گرفته شد");
+            console.log("4 #################################")
+
             await fetchBackups();
         } catch {
             message.error("خطا در بک‌آپ‌گیری");
@@ -85,8 +123,11 @@ function BackupManager() {
 
     const handleRestore = async (record) => {
         try {
+            console.log("5 ^^^^^^^^^^^^^^^^^^^^^^^^^")
             await restoreBackup(backupType, `${record.path}\\${record.filename}`);
             message.success("بازگردانی انجام شد");
+            fetchBackups()
+            console.log("6 ^^^^^^^^^^^^^^^^^^^^^^^^^")
         } catch {
             message.error("خطا در بازگردانی");
         }
@@ -215,17 +256,18 @@ function BackupManager() {
                             </Button>
                         </Tooltip>
 
-                        <Tooltip title="⏱ تعریف زمان‌بندی خودکار برای بک‌آپ‌گیری">
-                            <Button icon={<ClockCircleOutlined />} onClick={() => setModalOpen(true)} disabled={true}>
-                                زمان‌بندی
-                            </Button>
-                        </Tooltip>
+                        {/*<Tooltip title="⏱ تعریف زمان‌بندی خودکار برای بک‌آپ‌گیری">*/}
+                        {/*    <Button icon={<ClockCircleOutlined />} onClick={() => setModalOpen(true)} disabled={true}>*/}
+                        {/*        زمان‌بندی*/}
+                        {/*    </Button>*/}
+                        {/*</Tooltip>*/}
 
-                        <Tooltip title="🔄 بروزرسانی لیست بک‌آپ‌ها">
-                            <Button icon={<SyncOutlined />} onClick={fetchBackups}>
-                                بارگذاری مجدد
-                            </Button>
-                        </Tooltip>
+                        {/*<Tooltip title="🔄 بروزرسانی لیست بک‌آپ‌ها">*/}
+                        {/*    /!*<Button icon={<SyncOutlined />} onClick={fetchBackups} disabled={true}>*!/*/}
+                        {/*    <Button icon={<SyncOutlined />} disabled={true}>*/}
+                        {/*        بارگذاری مجدد*/}
+                        {/*    </Button>*/}
+                        {/*</Tooltip>*/}
                     </Space>
 
                     <Table
