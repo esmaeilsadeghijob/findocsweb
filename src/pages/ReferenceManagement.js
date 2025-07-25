@@ -83,13 +83,11 @@ function ReferenceManagement() {
                     </div>
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="بکاپ" key="8">
+                <Tabs.TabPane tab="پشتیبان" key="8">
                     <div style={tabStyle}>
                         <BackupManager/>
                     </div>
                 </Tabs.TabPane>
-
-
             </Tabs>
         </div>
     );

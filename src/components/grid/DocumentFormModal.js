@@ -5,13 +5,15 @@ import {
     Input,
     Select,
     message,
-    Button,
-    DatePicker as AntDatePicker,
-    Row,
-    Col
+    Button
 } from "antd";
 import moment from "moment-jalaali";
-import { getPeriods, createDocument, getArchivePreview } from "../../api/api";
+import {
+    getPeriods,
+    createDocument,
+    getArchivePreview,
+    checkDocumentExists
+} from "../../api/api";
 import { FileAddOutlined } from "@ant-design/icons";
 import DatePicker from "react-datepicker2";
 
@@ -33,6 +35,7 @@ const DocumentFormModal = ({
     const [periods, setPeriods] = useState([]);
     const [archiveNumber, setArchiveNumber] = useState(null);
     const [archiveDate, setArchiveDate] = useState(moment());
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getPeriods()
@@ -50,12 +53,32 @@ const DocumentFormModal = ({
 
     const handleSubmit = async () => {
         try {
+            setLoading(true);
             const values = await form.validateFields();
-            const selectedPeriod = periods.find((p) => p.fiscalYear === values.fiscalYear);
+            const selectedPeriod = periods.find(p => p.fiscalYear === values.fiscalYear);
+
             if (!selectedPeriod) {
                 message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
+                setLoading(false);
                 return;
             }
+
+            const checkRes = await checkDocumentExists({
+                unitId,
+                periodId: selectedPeriod.id
+            });
+
+            if (checkRes?.data?.documentNumber) {
+                message.warning(`❗ سندی با شماره "${checkRes.data.documentNumber}" در سال مالی "${selectedPeriod.fiscalYear}" قبلاً ثبت شده است.`);
+                setLoading(false);
+                return;
+            }
+
+            // if (checkRes?.data?.exists) {
+            //     message.warning("⚠️ در این سال مالی برای این واحد قبلاً سند ثبت شده است. لطفاً بررسی کنید.");
+            //     setLoading(false);
+            //     return;
+            // }
 
             const payload = {
                 clientId,
@@ -74,11 +97,13 @@ const DocumentFormModal = ({
             };
 
             await createDocument(payload);
-            message.success(" سند با موفقیت ثبت شد");
+            message.success("✅ سند با موفقیت ثبت شد");
             form.resetFields();
             onSuccess();
         } catch (err) {
-            message.error(" خطا در ثبت سند");
+            message.error("❌ خطا در ثبت سند");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -88,31 +113,25 @@ const DocumentFormModal = ({
             title="ثبت سند جدید"
             onCancel={onCancel}
             footer={[
-                <Button
-                    key="cancel"
-                    onClick={onCancel}
-                    style={{
-                        borderRadius: 6,
-                        backgroundColor: "#f5f5f5",
-                        border: "1px solid #d9d9d9"
-                    }}
-                >
+                <Button key="cancel" onClick={onCancel}>
                     انصراف
                 </Button>,
-                <Button key="submit" type="primary" icon={<FileAddOutlined />} onClick={handleSubmit}>
+                <Button
+                    key="submit"
+                    type="primary"
+                    icon={<FileAddOutlined />}
+                    onClick={handleSubmit}
+                    loading={loading}
+                >
                     ثبت سند
                 </Button>
             ]}
             style={{ direction: "rtl" }}
-            bodyStyle={{ padding: "24px 32px", background: "#fafafa", borderRadius: 8 }}
         >
             <Form
                 form={form}
                 layout="horizontal"
-                labelCol={{ span: 6 }}
-                wrapperCol={{ span: 18 }}
                 initialValues={{ documentDate: moment() }}
-                style={{ maxWidth: 700 }}
             >
                 <Form.Item label="سرویس">
                     <Input value={serviceName || "—"} disabled />
@@ -133,16 +152,8 @@ const DocumentFormModal = ({
                         inputFormat="jYYYY/jMM/jDD"
                         value={archiveDate}
                         onChange={(value) => setArchiveDate(value)}
-                        inputProps={{
-                            readOnly: true,
-                            style: {
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: 6,
-                                border: "1px solid #d9d9d9"
-                            }
-                        }}
-                        placeholder="انتخاب تاریخ بایگانی"
+                        inputProps={{ readOnly: true, style: { width: "100%" } }}
+                        placeholder="انتخاب تاریخ"
                     />
                 </Form.Item>
 
@@ -165,7 +176,7 @@ const DocumentFormModal = ({
                     label="شماره سند"
                     rules={[{ required: true, message: "شماره سند را وارد کنید" }]}
                 >
-                    <Input placeholder="مثلاً: ۱۲۵" />
+                    <Input />
                 </Form.Item>
 
                 <Form.Item
@@ -178,21 +189,13 @@ const DocumentFormModal = ({
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
                         onChange={(value) => form.setFieldsValue({ documentDate: value })}
-                        inputProps={{
-                            readOnly: true,
-                            style: {
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: 6,
-                                border: "1px solid #d9d9d9"
-                            }
-                        }}
-                        placeholder="انتخاب تاریخ سند"
+                        inputProps={{ readOnly: true, style: { width: "100%" } }}
+                        placeholder="انتخاب تاریخ"
                     />
                 </Form.Item>
 
                 <Form.Item name="description" label="شرح">
-                    <Input.TextArea rows={3} placeholder="توضیحات اختیاری..." />
+                    <Input.TextArea rows={3} />
                 </Form.Item>
             </Form>
         </Modal>

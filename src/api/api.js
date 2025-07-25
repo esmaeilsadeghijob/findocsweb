@@ -172,3 +172,8 @@ export const cancelSchedule = (type, path) =>
     API.post("/api/backup/cancel", { type, path });
 
 export const getFrequentDescriptions = () => API.get("/api/attachments/frequent-descriptions");
+
+export const checkDocumentExists = ({ unitId, periodId }) =>
+    API.get("/api/documents/check-duplicate", {
+        params: { unitId, periodId }
+    });

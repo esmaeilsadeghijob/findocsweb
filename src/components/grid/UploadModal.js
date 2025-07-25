@@ -208,13 +208,15 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
 
                                 <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
                                     <AutoComplete
-                                        options={frequentDescriptions.map(desc => ({ value: desc }))}
+                                        options={frequentDescriptions.map((desc) => ({ value: desc }))}
                                         filterOption={(inputValue, option) =>
-                                            option?.value?.toLowerCase().includes(inputValue.toLowerCase())
+                                            option?.value?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                                            option?.value?.toLowerCase().startsWith(inputValue.toLowerCase())
                                         }
                                         value={f.description}
                                         onChange={(val) => handleFieldChange(i, "description", val)}
                                         placeholder="شرح فایل را وارد یا انتخاب کنید"
+                                        style={{ width: "100%" }}
                                     >
                                         <Input.TextArea rows={2} />
                                     </AutoComplete>
