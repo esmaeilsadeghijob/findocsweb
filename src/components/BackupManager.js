@@ -34,25 +34,30 @@ function BackupManager() {
         fetchBackups();
     }, []);
 
+    let isCreatingBackup = false;
+
     const fetchBackups = async () => {
+        if (isCreatingBackup) return; // ⛔ جلوگیری از اجراهای هم‌زمان
+        isCreatingBackup = true;
+
         try {
             const res = await getBackups(path);
             let files = res.data;
 
             if (!files || files.length === 0) {
                 await createBackup(backupType, path);
-                message.success(" هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
+                message.success("هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
 
                 const updatedRes = await getBackups(path);
-                files = updatedRes.data;
 
+                files = updatedRes.data;
                 const sorted = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 setBackups(sorted);
 
                 const latest = sorted[0];
                 await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-                message.success(` بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
-                return; // ⛔ این return باید جلوی ادامه اجرا رو بگیره
+                message.success(`بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
+                return;
             }
 
             const sortedFiles = files.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -60,38 +65,40 @@ function BackupManager() {
 
             const latest = sortedFiles[0];
             await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-            message.success(` آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
-        } catch {
-            message.error(" خطا در بارگذاری یا بازگردانی فایل اخیر");
+            message.success(`آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
+        } catch (err) {
+            message.error("خطا در بارگذاری یا بازگردانی فایل اخیر");
+        } finally {
+            isCreatingBackup = false; //  برگردوندن کنترل بعد از پایان اجرا
         }
     };
 
     const handleCreateBackup = async () => {
         try {
             await createBackup(backupType, path);
-            message.success(" بک‌آپ گرفته شد");
-            await fetchBackups(); //  لیست رو بروزرسانی کن
+            message.success("بک‌آپ گرفته شد");
+            await fetchBackups();
         } catch {
-            message.error(" خطا در بک‌آپ‌گیری");
+            message.error("خطا در بک‌آپ‌گیری");
         }
     };
 
     const handleRestore = async (record) => {
         try {
             await restoreBackup(backupType, `${record.path}\\${record.filename}`);
-            message.success(" بازگردانی انجام شد");
+            message.success("بازگردانی انجام شد");
         } catch {
-            message.error(" خطا در بازگردانی");
+            message.error("خطا در بازگردانی");
         }
     };
 
     const handleDelete = async (record) => {
         try {
             await deleteBackup(`${record.path}\\${record.filename}`);
-            message.success(" بک‌آپ حذف شد");
+            message.success("بک‌آپ حذف شد");
             fetchBackups();
         } catch {
-            message.error(" خطا در حذف بک‌آپ");
+            message.error("خطا در حذف بک‌آپ");
         }
     };
 
@@ -106,7 +113,7 @@ function BackupManager() {
             message.success(`📅 زمان‌بندی ثبت شد: ${repeatType} @ ${hour}:${minute}`);
             setModalOpen(false);
         } catch {
-            message.error(" خطا در زمان‌بندی بک‌آپ‌گیری");
+            message.error("خطا در زمان‌بندی بک‌آپ‌گیری");
         }
     };
 
@@ -116,7 +123,7 @@ function BackupManager() {
             message.success("🛑 زمان‌بندی متوقف شد");
             setModalOpen(false);
         } catch {
-            message.error(" خطا در توقف زمان‌بندی");
+            message.error("خطا در توقف زمان‌بندی");
         }
     };
 
@@ -148,12 +155,12 @@ function BackupManager() {
             align: "center",
             render: (_, record) => (
                 <Space>
-                    <Tooltip title="بازگردانی اطلاعات">
+                    <Tooltip title="📤 بازگردانی این فایل بک‌آپ">
                         <Button icon={<CloudUploadOutlined />} onClick={() => handleRestore(record)}>
                             بازگردانی
                         </Button>
                     </Tooltip>
-                    <Tooltip title="حذف فایل بک‌آپ">
+                    <Tooltip title="🗑 حذف این بک‌آپ (غیرقابل بازگشت)">
                         <Popconfirm
                             title="آیا مطمئن هستید؟"
                             onConfirm={() => handleDelete(record)}
@@ -173,23 +180,26 @@ function BackupManager() {
             <Card className="company-card">
                 <Space direction="vertical" style={{ width: "100%" }}>
                     <Space wrap>
-                        <Select value={backupType} onChange={setBackupType}>
-                            <Option value="postgres">PostgreSQL</Option>
-                            <Option value="mongo">MongoDB</Option>
-                        </Select>
+                        <Tooltip title="🗄 نوع پایگاه داده برای بک‌آپ‌گیری">
+                            <Select value={backupType} onChange={setBackupType}>
+                                <Option value="postgres">PostgreSQL</Option>
+                                <Option value="mongo">MongoDB</Option>
+                            </Select>
+                        </Tooltip>
 
-                        <Input
-                            value={path}
-                            onChange={(e) => setPath(e.target.value)}
-                            // suffix={<FolderOpenOutlined onClick={handleFolderIconClick} />}
-                            addonBefore={<FolderOpenOutlined />}
-                            style={{
-                                width: 300,
-                                direction: "ltr",
-                                textAlign: "right",
-                                textAlignLast: "left"
-                        }}
-                        />
+                        <Tooltip title="📁 مسیر پوشه بک‌آپ‌گیری">
+                            <Input
+                                value={path}
+                                onChange={(e) => setPath(e.target.value)}
+                                addonBefore={<FolderOpenOutlined />}
+                                style={{
+                                    width: 300,
+                                    direction: "ltr",
+                                    textAlign: "right",
+                                    textAlignLast: "left"
+                                }}
+                            />
+                        </Tooltip>
 
                         <input
                             type="file"
@@ -199,17 +209,23 @@ function BackupManager() {
                             onChange={handleFolderSelect}
                         />
 
-                        <Button icon={<CloudDownloadOutlined />} onClick={handleCreateBackup}>
-                            بک‌آپ گیری
-                        </Button>
+                        <Tooltip title="📦 ایجاد بک‌آپ جدید">
+                            <Button icon={<CloudDownloadOutlined />} onClick={handleCreateBackup}>
+                                بک‌آپ گیری
+                            </Button>
+                        </Tooltip>
 
-                        <Button icon={<ClockCircleOutlined />} onClick={() => setModalOpen(true)} disabled={true}>
-                            زمان‌بندی
-                        </Button>
+                        <Tooltip title="⏱ تعریف زمان‌بندی خودکار برای بک‌آپ‌گیری">
+                            <Button icon={<ClockCircleOutlined />} onClick={() => setModalOpen(true)} disabled={true}>
+                                زمان‌بندی
+                            </Button>
+                        </Tooltip>
 
-                        <Button icon={<SyncOutlined />} onClick={fetchBackups}>
-                            بارگذاری مجدد
-                        </Button>
+                        <Tooltip title="🔄 بروزرسانی لیست بک‌آپ‌ها">
+                            <Button icon={<SyncOutlined />} onClick={fetchBackups}>
+                                بارگذاری مجدد
+                            </Button>
+                        </Tooltip>
                     </Space>
 
                     <Table
@@ -233,30 +249,48 @@ function BackupManager() {
                 open={modalOpen}
                 onCancel={() => setModalOpen(false)}
                 footer={[
-                    <Button key="stop" icon={<StopOutlined />} danger onClick={handleCancelSchedule}>
-                        توقف زمان‌بندی
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleScheduleBackup}>
-                        ثبت
-                    </Button>,
-                    <Button key="cancel" onClick={() => setModalOpen(false)}>
-                        انصراف
-                    </Button>
+                    <Tooltip title="🛑 لغو زمان‌بندی فعال فعلی برای بک‌آپ‌ها" key="stop">
+                        <Button icon={<StopOutlined />} danger onClick={handleCancelSchedule}>
+                            توقف زمان‌بندی
+                        </Button>
+                    </Tooltip>,
+                    <Tooltip title=" ثبت و فعال‌سازی زمان‌بندی جدید" key="submit">
+                        <Button type="primary" onClick={handleScheduleBackup}>
+                            ثبت
+                        </Button>
+                    </Tooltip>,
+                    <Tooltip title="❌ خروج بدون ذخیره تغییرات" key="cancel">
+                        <Button onClick={() => setModalOpen(false)}>
+                            انصراف
+                        </Button>
+                    </Tooltip>
                 ]}
             >
                 <Space direction="vertical" style={{ width: "100%" }}>
-                    <Select
-                        value={repeatType}
-                        onChange={setRepeatType}
-                        placeholder="نوع تکرار"
-                        style={{ width: "100%" }}
-                    >
-                        <Option value="hourly">هر ساعت</Option>
-                        <Option value="daily">روزانه</Option>
-                        <Option value="weekly">هفتگی</Option>
-                        <Option value="monthly">ماهانه</Option>
-                        <Option value="yearly">سالانه</Option>
-                    </Select>
+                    <Tooltip title="⏰ انتخاب نوع تکرار برای بک‌آپ‌گیری">
+                        <Select
+                            value={repeatType}
+                            onChange={setRepeatType}
+                            placeholder="نوع تکرار"
+                            style={{ width: "100%" }}
+                        >
+                            <Option value="hourly">هر ساعت</Option>
+                            <Option value="daily">روزانه</Option>
+                            <Option value="weekly">هفتگی</Option>
+                            <Option value="monthly">ماهانه</Option>
+                            <Option value="yearly">سالانه</Option>
+                        </Select>
+                    </Tooltip>
+
+                    <Tooltip title="📅 انتخاب ساعت دقیق برای اجرای بک‌آپ">
+                        <DatePicker
+                            showTime
+                            format="jYYYY/jMM/jDD HH:mm"
+                            value={selectedDate}
+                            onChange={setSelectedDate}
+                            style={{ width: "100%" }}
+                        />
+                    </Tooltip>
                 </Space>
             </Modal>
         </>
