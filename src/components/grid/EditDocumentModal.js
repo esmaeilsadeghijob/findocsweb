@@ -55,10 +55,10 @@ const EditDocumentModal = ({
             };
 
             await updateDocument(editData.id, payload);
-            message.success("✅ تغییرات سند با موفقیت ثبت شد");
+            message.success(" تغییرات سند با موفقیت ثبت شد");
             onSuccess?.();
         } catch (err) {
-            message.error("❌ خطا در ثبت تغییرات سند");
+            message.error(" خطا در ثبت تغییرات سند");
         }
     };
 

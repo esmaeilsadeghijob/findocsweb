@@ -63,7 +63,7 @@ function UsersApproval() {
                         ...u,
                         firstName,
                         lastName,
-                        units: u.units || [], // ✅ واحدها برای تگ‌گذاری
+                        units: u.units || [], //  واحدها برای تگ‌گذاری
                         unitIds: u.units?.map((unit) => unit.id) || [],
                         defaultAccess:
                             u.role?.name === "ROLE_ADMIN"
@@ -129,7 +129,7 @@ function UsersApproval() {
         try {
             await updateUser(userId, { unitIds });
             message.success("واحدها بروزرسانی شدند");
-            fetchData(); // ✅ رفرش کامل برای داشتن داده درست
+            fetchData(); //  رفرش کامل برای داشتن داده درست
         } catch {
             message.error("خطا در بروزرسانی واحدها");
         }
@@ -139,7 +139,7 @@ function UsersApproval() {
         try {
             await updateUser(userId, { identifierId });
             message.success("شرکت بروزرسانی شدند");
-            fetchData(); // ✅ رفرش کامل برای داشتن داده درست
+            fetchData(); //  رفرش کامل برای داشتن داده درست
         } catch {
             message.error("خطا در بروزرسانی شرکت");
         }

@@ -19,7 +19,7 @@ function ClientEditModal({ visible, client, onCancel, onSuccess }) {
             form.resetFields();
             onSuccess();
         } catch {
-            message.error("❌ خطا در ویرایش مشتری");
+            message.error(" خطا در ویرایش مشتری");
         }
     };
 

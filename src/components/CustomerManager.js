@@ -135,7 +135,7 @@ function CustomerManager() {
             message.success("مشتری حذف شد");
             fetchClients();
         } catch {
-            message.error("❌ خطا در حذف مشتری");
+            message.error(" خطا در حذف مشتری");
         }
     };
 

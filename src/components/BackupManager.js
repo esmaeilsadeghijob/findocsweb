@@ -41,7 +41,7 @@ function BackupManager() {
 
             if (!files || files.length === 0) {
                 await createBackup(backupType, path);
-                message.success("✅ هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
+                message.success(" هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
 
                 const updatedRes = await getBackups(path);
                 files = updatedRes.data;
@@ -51,7 +51,7 @@ function BackupManager() {
 
                 const latest = sorted[0];
                 await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-                message.success(`✅ بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
+                message.success(` بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
                 return; // ⛔ این return باید جلوی ادامه اجرا رو بگیره
             }
 
@@ -60,38 +60,38 @@ function BackupManager() {
 
             const latest = sortedFiles[0];
             await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
-            message.success(`✅ آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
+            message.success(` آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
         } catch {
-            message.error("❌ خطا در بارگذاری یا بازگردانی فایل اخیر");
+            message.error(" خطا در بارگذاری یا بازگردانی فایل اخیر");
         }
     };
 
     const handleCreateBackup = async () => {
         try {
             await createBackup(backupType, path);
-            message.success("✅ بک‌آپ گرفته شد");
-            await fetchBackups(); // ✅ لیست رو بروزرسانی کن
+            message.success(" بک‌آپ گرفته شد");
+            await fetchBackups(); //  لیست رو بروزرسانی کن
         } catch {
-            message.error("❌ خطا در بک‌آپ‌گیری");
+            message.error(" خطا در بک‌آپ‌گیری");
         }
     };
 
     const handleRestore = async (record) => {
         try {
             await restoreBackup(backupType, `${record.path}\\${record.filename}`);
-            message.success("✅ بازگردانی انجام شد");
+            message.success(" بازگردانی انجام شد");
         } catch {
-            message.error("❌ خطا در بازگردانی");
+            message.error(" خطا در بازگردانی");
         }
     };
 
     const handleDelete = async (record) => {
         try {
             await deleteBackup(`${record.path}\\${record.filename}`);
-            message.success("✅ بک‌آپ حذف شد");
+            message.success(" بک‌آپ حذف شد");
             fetchBackups();
         } catch {
-            message.error("❌ خطا در حذف بک‌آپ");
+            message.error(" خطا در حذف بک‌آپ");
         }
     };
 
@@ -106,7 +106,7 @@ function BackupManager() {
             message.success(`📅 زمان‌بندی ثبت شد: ${repeatType} @ ${hour}:${minute}`);
             setModalOpen(false);
         } catch {
-            message.error("❌ خطا در زمان‌بندی بک‌آپ‌گیری");
+            message.error(" خطا در زمان‌بندی بک‌آپ‌گیری");
         }
     };
 
@@ -116,7 +116,7 @@ function BackupManager() {
             message.success("🛑 زمان‌بندی متوقف شد");
             setModalOpen(false);
         } catch {
-            message.error("❌ خطا در توقف زمان‌بندی");
+            message.error(" خطا در توقف زمان‌بندی");
         }
     };
 

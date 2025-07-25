@@ -4,7 +4,7 @@ import ClientManager from "../components/ClientManager";
 import UnitManager from "../components/UnitManager";
 import PeriodManager from "../components/PeriodManager";
 import ServiceManager from "../components/ServiceManager";
-import CompanyManagement from "../components/CompanyManagement"; // ✅ جایگزین شده
+import CompanyManagement from "../components/CompanyManagement"; //  جایگزین شده
 import "./ReferenceManagement.css";
 import CategoryManager from "../components/CategoryManager";
 import {canCreate} from "../components/grid/accessUtils";

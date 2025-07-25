@@ -24,7 +24,7 @@ import {
     updateUnit,
     deleteUnit,
 } from "../api/api";
-import "./Management.css"; // ✅ استایل مشترک
+import "./Management.css"; //  استایل مشترک
 
 function UnitManager() {
     const [units, setUnits] = useState([]);

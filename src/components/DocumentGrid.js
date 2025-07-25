@@ -241,7 +241,7 @@
 //                     getRowNodeId={(data) => data.id}
 //                     suppressRowClickSelection={true}
 //                     enableCellTextSelection={true}
-//                     // ❌ بدون ستون agGroupCellRenderer
+//                     //  بدون ستون agGroupCellRenderer
 //                 />
 //
 //             </div>

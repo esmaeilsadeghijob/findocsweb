@@ -43,7 +43,7 @@ function ClientDoc({accessLevel, roles}) {
                     setUnits(Array.from(unitMap.values()));
                 })
                 .catch(() => {
-                    message.error("❌ خطا در دریافت لیست مشتری‌ها");
+                    message.error(" خطا در دریافت لیست مشتری‌ها");
                     setUnits([]);
                 })
                 .finally(() => {
@@ -60,7 +60,7 @@ function ClientDoc({accessLevel, roles}) {
                     setUnits(formatted);
                 })
                 .catch(() => {
-                    message.error("❌ خطا در دریافت اطلاعات کاربر");
+                    message.error(" خطا در دریافت اطلاعات کاربر");
                     setUnits([]);
                 })
                 .finally(() => {
@@ -81,7 +81,7 @@ function ClientDoc({accessLevel, roles}) {
                 }
             })
             .catch(() => {
-                message.error("❌ خطا در دریافت مشتری‌های واحد");
+                message.error(" خطا در دریافت مشتری‌های واحد");
                 setSelectedClient(null);
             });
     };

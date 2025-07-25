@@ -24,7 +24,7 @@ import {
     updatePeriod,
     deletePeriod,
 } from "../api/api";
-import "./Management.css"; // ✅ استایل مشترک
+import "./Management.css"; //  استایل مشترک
 
 function PeriodManager() {
     const [periods, setPeriods] = useState([]);

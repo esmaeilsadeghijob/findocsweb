@@ -96,7 +96,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             onSuccess();
             onClose();
         } catch {
-            message.error("❌ خطا در بارگذاری فایل‌ها");
+            message.error(" خطا در بارگذاری فایل‌ها");
         } finally {
             setUploading(false);
             setProgress(0);

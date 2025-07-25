@@ -89,7 +89,7 @@
 //                         localStorage.removeItem("unitName");
 //                     }
 //                 } catch {
-//                     message.error("❌ خطا در حذف مشتری");
+//                     message.error(" خطا در حذف مشتری");
 //                 }
 //             }
 //         });

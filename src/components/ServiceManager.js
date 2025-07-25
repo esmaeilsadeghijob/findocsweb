@@ -24,7 +24,7 @@ import {
     updateService,
     deleteService,
 } from "../api/api";
-import "./Management.css"; // ✅ استایل مشترک
+import "./Management.css"; //  استایل مشترک
 
 function ServiceManager() {
     const [services, setServices] = useState([]);
