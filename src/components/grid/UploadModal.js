@@ -1,3 +1,4 @@
+// UploadModal.jsx
 import React, { useEffect, useState } from "react";
 import {
     Modal,
@@ -25,6 +26,8 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
+        if (!visible) return;
+
         getCompanies()
             .then((res) => setCompanies(res.data || []))
             .catch(() => setCompanies([]));
@@ -32,7 +35,7 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
         getCategories()
             .then((res) => setCategories(res.data || []))
             .catch(() => setCategories([]));
-    }, []);
+    }, [visible]);
 
     const props = {
         multiple: true,
@@ -88,15 +91,15 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
             });
 
             await uploadFile(documentId, formData);
-
             await new Promise((resolve) => setTimeout(resolve, 600));
+
             message.success("فایل‌ها با موفقیت بارگذاری شدند");
             setFiles([]);
             form.resetFields();
             onSuccess();
             onClose();
         } catch {
-            message.error(" خطا در بارگذاری فایل‌ها");
+            message.error("خطا در بارگذاری فایل‌ها");
         } finally {
             setUploading(false);
             setProgress(0);
@@ -107,7 +110,10 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
         <Modal
             open={visible}
             title="بارگذاری فایل‌های جدید"
-            onCancel={onClose}
+            onCancel={() => {
+                console.log("Close pressed");
+                onClose();
+            }}
             onOk={handleSubmit}
             okText="بارگذاری"
             cancelText="انصراف"

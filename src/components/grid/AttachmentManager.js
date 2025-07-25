@@ -604,7 +604,7 @@ const AttachmentManager = ({
                     await fetchDocuments();
                     setShowUploadModal(false);
                 }}
-                onCancel={() => setShowUploadModal(false)}
+                onClose={() => setShowUploadModal(false)}
             />
 
             {showModal && (
