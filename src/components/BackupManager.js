@@ -110,10 +110,8 @@ function BackupManager() {
 
     const handleCreateBackup = async () => {
         try {
-            console.log("3 #################################")
             await createBackup(backupType, path);
             message.success("بک‌آپ گرفته شد");
-            console.log("4 #################################")
 
             await fetchBackups();
         } catch {
@@ -123,11 +121,9 @@ function BackupManager() {
 
     const handleRestore = async (record) => {
         try {
-            console.log("5 ^^^^^^^^^^^^^^^^^^^^^^^^^")
             await restoreBackup(backupType, `${record.path}\\${record.filename}`);
             message.success("بازگردانی انجام شد");
             fetchBackups()
-            console.log("6 ^^^^^^^^^^^^^^^^^^^^^^^^^")
         } catch {
             message.error("خطا در بازگردانی");
         }
