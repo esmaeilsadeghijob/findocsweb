@@ -18,7 +18,8 @@ import {
     ReloadOutlined,
     FileAddOutlined,
     CloudUploadOutlined,
-    SearchOutlined
+    SearchOutlined,
+    SaveOutlined
 } from "@ant-design/icons";
 import {
     getDocumentsByFilter,
@@ -293,22 +294,25 @@ const AttachmentManager = ({
                 render: (_, file) =>
                     editingFileId === file.id ? (
                         <Space>
-                            <Button
-                                type="primary"
-                                size="small"
-                                onClick={() => handleSaveFile(docId, file.id)}
-                            >
-                                ذخیره
-                            </Button>
-                            <Button
-                                size="small"
-                                onClick={() => {
-                                    setEditingFileId(null);
-                                    setEditValues({});
-                                }}
-                            >
-                                لغو
-                            </Button>
+                            <Tooltip title="ذخیره تغییرات">
+                                <Button
+                                    icon={<SaveOutlined />}
+                                    type="primary"
+                                    size="small"
+                                    onClick={() => handleSaveFile(docId, file.id)}
+                                />
+                            </Tooltip>
+
+                            <Tooltip title="لغو ویرایش">
+                                <Button
+                                    size="small"
+                                    icon={<CloseOutlined />}
+                                    onClick={() => {
+                                        setEditingFileId(null);
+                                        setEditValues({});
+                                    }}
+                                />
+                            </Tooltip>
                         </Space>
                     ) : (
                         <Space>
