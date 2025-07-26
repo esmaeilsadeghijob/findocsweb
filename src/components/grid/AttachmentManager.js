@@ -343,7 +343,8 @@ const AttachmentManager = ({
     const baseColumns = [
         {
             title: "شماره سند",
-            dataIndex: "documentNumber"
+            dataIndex: "documentNumber",
+            sorter: (a, b) => (a.documentNumber || 0) - (b.documentNumber || 0),
         },
         {
             title: "شماره بایگانی",
@@ -362,15 +363,18 @@ const AttachmentManager = ({
         },
         {
             title: "سال مالی",
-            dataIndex: "fiscalYear"
+            dataIndex: "fiscalYear",
+            sorter: (a, b) => (a.fiscalYear || 0) - (b.fiscalYear || 0),
         },
         {
             title: "شرح سند",
-            dataIndex: "description"
+            dataIndex: "description",
+            sorter: (a, b) => (a.description || 0) - (b.description || 0),
         },
         {
             title: "تاریخ سند",
             dataIndex: "documentTimestamp",
+            sorter: (a, b) => (a.documentTimestamp || 0) - (b.documentTimestamp || 0),
             render: (val) => {
                 const date = moment(val);
                 return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
