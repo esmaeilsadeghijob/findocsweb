@@ -147,6 +147,9 @@ const DocumentFormModal = ({
                 form={form}
                 layout="horizontal"
                 initialValues={{documentDate: moment()}}
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
+                style={{ maxWidth: 700 }}
             >
                 <Form.Item label="سرویس">
                     <Input value={serviceName || "—"} disabled/>
@@ -216,12 +219,12 @@ const DocumentFormModal = ({
                             readOnly: true,
                             style: {
                                 width: "100%",
-                                direction: "ltr",
                                 textAlign: "right",
-                                textAlignLast: "left"
+                                direction: "rtl"
                             }
                         }}
                         placeholder="انتخاب تاریخ"
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
