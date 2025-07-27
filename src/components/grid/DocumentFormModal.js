@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Modal,
     Form,
     Input,
     Select,
     message,
-    Button
+    Button, AutoComplete
 } from "antd";
 import moment from "moment-jalaali";
 import {
     getPeriods,
     createDocument,
     getArchivePreview,
-    checkDocumentExists
+    checkDocumentExists,
+    getFrequentDocumentsDescriptions
 } from "../../api/api";
-import { FileAddOutlined } from "@ant-design/icons";
+import {FileAddOutlined} from "@ant-design/icons";
 import DatePicker from "react-datepicker2";
 
-moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
+moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
 const DocumentFormModal = ({
                                visible,
@@ -36,6 +37,7 @@ const DocumentFormModal = ({
     const [archiveNumber, setArchiveNumber] = useState(null);
     const [archiveDate, setArchiveDate] = useState(moment());
     const [loading, setLoading] = useState(false);
+    const [descriptions, setDescriptions] = useState([]);
 
     useEffect(() => {
         getPeriods()
@@ -50,6 +52,25 @@ const DocumentFormModal = ({
                 .catch(() => setArchiveNumber(null));
         }
     }, [visible, unitId]);
+
+    useEffect(() => {
+        if (visible) {
+            getFrequentDocumentsDescriptions()
+                .then((res) => {
+                    if (Array.isArray(res.data)) {
+                        setDescriptions(res.data);
+                    } else {
+                        console.warn("پاسخ شرح پرتکرار معتبر نبود", res.data);
+                        setDescriptions([]);
+                    }
+                })
+                .catch((err) => {
+                    console.error("خطا در دریافت شرح‌های پرتکرار:", err);
+                    message.warning("❗ امکان دریافت شرح‌های پرتکرار وجود ندارد");
+                    setDescriptions([]);
+                });
+        }
+    }, [visible]);
 
     const handleSubmit = async () => {
         try {
@@ -73,12 +94,6 @@ const DocumentFormModal = ({
                 setLoading(false);
                 return;
             }
-
-            // if (checkRes?.data?.exists) {
-            //     message.warning("⚠️ در این سال مالی برای این واحد قبلاً سند ثبت شده است. لطفاً بررسی کنید.");
-            //     setLoading(false);
-            //     return;
-            // }
 
             const payload = {
                 clientId,
@@ -119,30 +134,30 @@ const DocumentFormModal = ({
                 <Button
                     key="submit"
                     type="primary"
-                    icon={<FileAddOutlined />}
+                    icon={<FileAddOutlined/>}
                     onClick={handleSubmit}
                     loading={loading}
                 >
                     ثبت سند
                 </Button>
             ]}
-            style={{ direction: "rtl" }}
+            style={{direction: "rtl"}}
         >
             <Form
                 form={form}
                 layout="horizontal"
-                initialValues={{ documentDate: moment() }}
+                initialValues={{documentDate: moment()}}
             >
                 <Form.Item label="سرویس">
-                    <Input value={serviceName || "—"} disabled />
+                    <Input value={serviceName || "—"} disabled/>
                 </Form.Item>
 
                 <Form.Item label="واحد">
-                    <Input value={unitName || "—"} disabled />
+                    <Input value={unitName || "—"} disabled/>
                 </Form.Item>
 
                 <Form.Item label="شماره بایگانی">
-                    <Input value={archiveNumber ?? "در حال دریافت..."} disabled />
+                    <Input value={archiveNumber ?? "در حال دریافت..."} disabled/>
                 </Form.Item>
 
                 <Form.Item label="تاریخ بایگانی">
@@ -152,15 +167,23 @@ const DocumentFormModal = ({
                         inputFormat="jYYYY/jMM/jDD"
                         value={archiveDate}
                         onChange={(value) => setArchiveDate(value)}
-                        inputProps={{ readOnly: true, style: { width: "100%" } }}
-                        placeholder="انتخاب تاریخ"
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
+                            }
+                        }}
+                        placeholder="انتخاب تاریخ بایگانی"
                     />
                 </Form.Item>
 
                 <Form.Item
                     name="fiscalYear"
                     label="سال مالی"
-                    rules={[{ required: true, message: "انتخاب سال مالی الزامی است" }]}
+                    rules={[{required: true, message: "انتخاب سال مالی الزامی است"}]}
                 >
                     <Select placeholder="انتخاب سال مالی">
                         {periods.map((p) => (
@@ -174,28 +197,51 @@ const DocumentFormModal = ({
                 <Form.Item
                     name="documentNumber"
                     label="شماره سند"
-                    rules={[{ required: true, message: "شماره سند را وارد کنید" }]}
+                    rules={[{required: true, message: "شماره سند را وارد کنید"}]}
                 >
-                    <Input />
+                    <Input/>
                 </Form.Item>
 
                 <Form.Item
                     name="documentDate"
                     label="تاریخ سند"
-                    rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
+                    rules={[{required: true, message: "تاریخ سند الزامی است"}]}
                 >
                     <DatePicker
                         isGregorian={false}
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
-                        onChange={(value) => form.setFieldsValue({ documentDate: value })}
-                        inputProps={{ readOnly: true, style: { width: "100%" } }}
+                        onChange={(value) => form.setFieldsValue({documentDate: value})}
+                        inputProps={{
+                            readOnly: true,
+                            style: {
+                                width: "100%",
+                                direction: "ltr",
+                                textAlign: "right",
+                                textAlignLast: "left"
+                            }
+                        }}
                         placeholder="انتخاب تاریخ"
                     />
                 </Form.Item>
 
-                <Form.Item name="description" label="شرح">
-                    <Input.TextArea rows={3} />
+                <Form.Item
+                    name="description"
+                    label="شرح"
+                    style={{marginBottom: 4}}
+                >
+                    <AutoComplete
+                        options={descriptions.map((desc) => ({value: desc}))}
+                        filterOption={(inputValue, option) =>
+                            option?.value?.toLowerCase().includes(inputValue?.toLowerCase()) ||
+                            option?.value?.toLowerCase().startsWith(inputValue?.toLowerCase())
+                        }
+                        onChange={(val) => form.setFieldsValue({description: val})}
+                        placeholder="شرح را وارد یا انتخاب کنید"
+                        style={{width: "100%"}}
+                    >
+                        <Input.TextArea rows={3} readOnly={false}/>
+                    </AutoComplete>
                 </Form.Item>
             </Form>
         </Modal>

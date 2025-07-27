@@ -177,3 +177,6 @@ export const checkDocumentExists = ({ unitId, periodId }) =>
     API.get("/api/documents/check-duplicate", {
         params: { unitId, periodId }
     });
+
+export const getFrequentDocumentsDescriptions = () =>
+    API.get("/api/documents/frequent-descriptions");
