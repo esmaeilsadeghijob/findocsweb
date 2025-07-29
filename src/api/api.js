@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: window._env_?.API_BASE || "http://185.208.175.196:8080",
+    baseURL: window._env_?.API_BASE || "http://localhost:8080",
     // baseURL: process.env.REACT_APP_API_BASE,
     // baseURL: "http://192.168.0.35:8080",
 });
@@ -173,9 +173,9 @@ export const cancelSchedule = (type, path) =>
 
 export const getFrequentDescriptions = () => API.get("/api/attachments/frequent-descriptions");
 
-export const checkDocumentExists = ({ unitId, periodId }) =>
+export const checkDocumentExists = ({ unitId, periodId, documentNumber }) =>
     API.get("/api/documents/check-duplicate", {
-        params: { unitId, periodId }
+        params: { unitId, periodId, documentNumber }
     });
 
 export const getFrequentDocumentsDescriptions = () =>

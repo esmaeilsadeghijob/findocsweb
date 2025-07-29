@@ -86,7 +86,8 @@ const DocumentFormModal = ({
 
             const checkRes = await checkDocumentExists({
                 unitId,
-                periodId: selectedPeriod.id
+                periodId: selectedPeriod.id,
+                documentNumber: values.documentNumber
             });
 
             if (checkRes?.data?.documentNumber) {
@@ -147,9 +148,9 @@ const DocumentFormModal = ({
                 form={form}
                 layout="horizontal"
                 initialValues={{documentDate: moment()}}
-                labelCol={{ span: 6 }}
-                wrapperCol={{ span: 18 }}
-                style={{ maxWidth: 700 }}
+                labelCol={{span: 6}}
+                wrapperCol={{span: 18}}
+                style={{maxWidth: 700}}
             >
                 <Form.Item label="سرویس">
                     <Input value={serviceName || "—"} disabled/>
@@ -164,23 +165,25 @@ const DocumentFormModal = ({
                 </Form.Item>
 
                 <Form.Item label="تاریخ بایگانی">
-                    <DatePicker
-                        isGregorian={false}
-                        timePicker={false}
-                        inputFormat="jYYYY/jMM/jDD"
-                        value={archiveDate}
-                        onChange={(value) => setArchiveDate(value)}
-                        inputProps={{
-                            readOnly: true,
-                            style: {
-                                width: "100%",
-                                padding: "8px",
-                                borderRadius: 6,
-                                border: "1px solid #d9d9d9"
-                            }
-                        }}
-                        placeholder="انتخاب تاریخ بایگانی"
-                    />
+                    <div style={{ maxWidth: "160px", display: "inline-block" }}>
+                        <DatePicker
+                            isGregorian={false}
+                            timePicker={false}
+                            inputFormat="jYYYY/jMM/jDD"
+                            value={archiveDate}
+                            onChange={(value) => setArchiveDate(value)}
+                            inputProps={{
+                                readOnly: true,
+                                style: {
+                                    padding: "4px 8px",
+                                    fontSize: "13px",
+                                    borderRadius: 6,
+                                    border: "1px solid #d9d9d9"
+                                }
+                            }}
+                            placeholder="انتخاب تاریخ بایگانی"
+                        />
+                    </div>
                 </Form.Item>
 
                 <Form.Item
@@ -211,20 +214,22 @@ const DocumentFormModal = ({
                     rules={[{required: true, message: "تاریخ سند الزامی است"}]}
                 >
                     <DatePicker
+                        size="small"
                         isGregorian={false}
                         timePicker={false}
                         inputFormat="jYYYY/jMM/jDD"
-                        onChange={(value) => form.setFieldsValue({documentDate: value})}
+                        value={archiveDate}
+                        onChange={(value) => setArchiveDate(value)}
                         inputProps={{
                             readOnly: true,
                             style: {
                                 width: "100%",
-                                textAlign: "right",
-                                direction: "rtl"
+                                padding: "8px",
+                                borderRadius: 6,
+                                border: "1px solid #d9d9d9"
                             }
                         }}
-                        placeholder="انتخاب تاریخ"
-                        style={{ width: "100%" }}
+                        placeholder="انتخاب تاریخ سند"
                     />
                 </Form.Item>
 
