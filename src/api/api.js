@@ -180,3 +180,8 @@ export const checkDocumentExists = ({ unitId, periodId, documentNumber }) =>
 
 export const getFrequentDocumentsDescriptions = () =>
     API.get("/api/documents/frequent-descriptions");
+
+export const getSuggestedDocumentNumber = ({ unitId, periodId }) =>
+    API.get("/api/documents/suggest-number", {
+        params: { unitId, periodId }
+    });

@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     Modal,
     Form,
     Input,
     Select,
     message,
-    Button, AutoComplete
+    Button,
+    AutoComplete
 } from "antd";
 import moment from "moment-jalaali";
 import {
@@ -13,12 +14,13 @@ import {
     createDocument,
     getArchivePreview,
     checkDocumentExists,
-    getFrequentDocumentsDescriptions
+    getFrequentDocumentsDescriptions,
+    getSuggestedDocumentNumber
 } from "../../api/api";
-import {FileAddOutlined} from "@ant-design/icons";
+import { FileAddOutlined } from "@ant-design/icons";
 import DatePicker from "react-datepicker2";
 
-moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
+moment.loadPersian({ usePersianDigits: true, dialect: "persian-modern" });
 
 const DocumentFormModal = ({
                                visible,
@@ -72,11 +74,31 @@ const DocumentFormModal = ({
         }
     }, [visible]);
 
+    const handleFiscalYearChange = async (fiscalYear) => {
+        const selectedPeriod = periods.find((p) => p.fiscalYear === fiscalYear);
+        if (!unitId || !selectedPeriod?.id) return;
+
+        try {
+            const res = await getSuggestedDocumentNumber({
+                unitId,
+                periodId: selectedPeriod.id
+            });
+
+            if (res?.data) {
+                form.setFieldsValue({ documentNumber: res.data });
+            }
+        } catch (err) {
+            console.error("خطا در دریافت شماره پیشنهادی:", err);
+        }
+    };
+
     const handleSubmit = async () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
-            const selectedPeriod = periods.find(p => p.fiscalYear === values.fiscalYear);
+            const selectedPeriod = periods.find(
+                (p) => p.fiscalYear === values.fiscalYear
+            );
 
             if (!selectedPeriod) {
                 message.error("❗ سال مالی انتخاب‌شده معتبر نیست");
@@ -91,7 +113,9 @@ const DocumentFormModal = ({
             });
 
             if (checkRes?.data?.documentNumber) {
-                message.warning(`❗ سندی با شماره "${checkRes.data.documentNumber}" در سال مالی "${selectedPeriod.fiscalYear}" قبلاً ثبت شده است.`);
+                message.warning(
+                    `❗ سندی با شماره "${checkRes.data.documentNumber}" در سال مالی "${selectedPeriod.fiscalYear}" قبلاً ثبت شده است.`
+                );
                 setLoading(false);
                 return;
             }
@@ -135,33 +159,33 @@ const DocumentFormModal = ({
                 <Button
                     key="submit"
                     type="primary"
-                    icon={<FileAddOutlined/>}
+                    icon={<FileAddOutlined />}
                     onClick={handleSubmit}
                     loading={loading}
                 >
                     ثبت سند
                 </Button>
             ]}
-            style={{direction: "rtl"}}
+            style={{ direction: "rtl" }}
         >
             <Form
                 form={form}
                 layout="horizontal"
-                initialValues={{documentDate: moment()}}
-                labelCol={{span: 6}}
-                wrapperCol={{span: 18}}
-                style={{maxWidth: 700}}
+                initialValues={{ documentDate: moment() }}
+                labelCol={{ span: 6 }}
+                wrapperCol={{ span: 18 }}
+                style={{ maxWidth: 700 }}
             >
                 <Form.Item label="سرویس">
-                    <Input value={serviceName || "—"} disabled/>
+                    <Input value={serviceName || "—"} disabled />
                 </Form.Item>
 
                 <Form.Item label="واحد">
-                    <Input value={unitName || "—"} disabled/>
+                    <Input value={unitName || "—"} disabled />
                 </Form.Item>
 
                 <Form.Item label="شماره بایگانی">
-                    <Input value={archiveNumber ?? "در حال دریافت..."} disabled/>
+                    <Input value={archiveNumber ?? "در حال دریافت..."} disabled />
                 </Form.Item>
 
                 <Form.Item label="تاریخ بایگانی">
@@ -189,9 +213,9 @@ const DocumentFormModal = ({
                 <Form.Item
                     name="fiscalYear"
                     label="سال مالی"
-                    rules={[{required: true, message: "انتخاب سال مالی الزامی است"}]}
+                    rules={[{ required: true, message: "انتخاب سال مالی الزامی است" }]}
                 >
-                    <Select placeholder="انتخاب سال مالی">
+                    <Select placeholder="انتخاب سال مالی" onChange={handleFiscalYearChange}>
                         {periods.map((p) => (
                             <Select.Option key={p.id} value={p.fiscalYear}>
                                 {p.fiscalYear}
@@ -203,15 +227,15 @@ const DocumentFormModal = ({
                 <Form.Item
                     name="documentNumber"
                     label="شماره سند"
-                    rules={[{required: true, message: "شماره سند را وارد کنید"}]}
+                    rules={[{ required: true, message: "شماره سند را وارد کنید" }]}
                 >
-                    <Input/>
+                    <Input />
                 </Form.Item>
 
                 <Form.Item
                     name="documentDate"
                     label="تاریخ سند"
-                    rules={[{required: true, message: "تاریخ سند الزامی است"}]}
+                    rules={[{ required: true, message: "تاریخ سند الزامی است" }]}
                 >
                     <DatePicker
                         size="small"
@@ -233,22 +257,18 @@ const DocumentFormModal = ({
                     />
                 </Form.Item>
 
-                <Form.Item
-                    name="description"
-                    label="شرح"
-                    style={{marginBottom: 4}}
-                >
+                <Form.Item name="description" label="شرح" style={{ marginBottom: 4 }}>
                     <AutoComplete
-                        options={descriptions.map((desc) => ({value: desc}))}
+                        options={descriptions.map((desc) => ({ value: desc }))}
                         filterOption={(inputValue, option) =>
                             option?.value?.toLowerCase().includes(inputValue?.toLowerCase()) ||
                             option?.value?.toLowerCase().startsWith(inputValue?.toLowerCase())
                         }
-                        onChange={(val) => form.setFieldsValue({description: val})}
+                        onChange={(val) => form.setFieldsValue({ description: val })}
                         placeholder="شرح را وارد یا انتخاب کنید"
-                        style={{width: "100%"}}
+                        style={{ width: "100%" }}
                     >
-                        <Input.TextArea rows={3} readOnly={false}/>
+                        <Input.TextArea rows={3} readOnly={false} />
                     </AutoComplete>
                 </Form.Item>
             </Form>
