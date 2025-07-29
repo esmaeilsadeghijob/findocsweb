@@ -1,6 +1,6 @@
-import {Button, Form, message, Modal, Select, Space,} from "antd";
-import {useEffect, useState} from "react";
-import {createClient, getIdentifiers, getServices, getUnits, updateClient,} from "../api/api";
+import { Button, Form, message, Modal, Select, Space } from "antd";
+import { useEffect, useState } from "react";
+import {createClient, getClients, getIdentifiers, getServices, getUnits, updateClient} from "../api/api";
 
 function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
     const [form] = Form.useForm();
@@ -37,34 +37,64 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
         try {
             if (initialData) {
                 await updateClient(initialData.id, values);
-                message.success("مشتری با موفقیت ویرایش شد");
+                message.success(" مشتری با موفقیت ویرایش شد");
             } else {
+                const allClients = await getClients();
+
+                const isDuplicate = allClients.data.some(
+                    (c) =>
+                        c.identifierCode === values.identifierCode &&
+                        c.unit?.id === values.unitId &&
+                        c.service?.id === values.serviceId &&
+                        c.active !== false
+                );
+
+                if (isDuplicate) {
+                    message.warning(
+                        " امکان ثبت وجود ندارد: مشتری با این شناسه، سرویس و واحد قبلاً ثبت شده است."
+                    );
+                    return;
+                }
+
                 await createClient(values);
-                message.success("مشتری با موفقیت ثبت شد");
+                message.success(" مشتری با موفقیت ثبت شد");
             }
+
             onSuccess?.();
         } catch (err) {
             const msg =
                 err?.response?.data?.message ||
                 err?.response?.data?.error ||
-                "خطا در ذخیره مشتری";
-            message.error(msg);
+                err?.response?.data || "";
+
+            if (typeof msg === "string" && msg.includes("مشتری با این اطلاعات وجود دارد")) {
+                message.warning(" ثبت مشتری ناممکن است: ترکیب شناسه، سرویس و واحد از قبل ثبت شده");
+            } else if (msg === "") {
+                message.warning(" ثبت مشتری انجام نشد — احتمالاً ترکیب اطلاعات تکراری است.");
+            } else {
+                message.error(" خطا در ذخیره مشتری");
+            }
         }
     };
 
     return (
         <Modal
             open
-            title={initialData ? "ویرایش مشتری" : "افزودن مشتری جدید"}
+            title={
+                <div style={{ fontFamily: "FarBaseet", fontSize: "1.6rem", textAlign: "center" }}>
+                    {initialData ? "ویرایش مشتری" : "افزودن مشتری جدید"}
+                </div>
+            }
             onCancel={onClose}
             footer={null}
             centered
+            style={{ fontFamily: "FarBaseet" }}
         >
             <Form
                 form={form}
                 layout="vertical"
                 onFinish={handleSubmit}
-                style={{ marginTop: 12 }}
+                style={{ marginTop: 12, fontFamily: "FarBaseet" }}
             >
                 <Form.Item
                     name="identifierCode"
@@ -79,6 +109,7 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: i.code,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
@@ -95,6 +126,7 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: s.name,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
@@ -111,15 +143,17 @@ function ClientCreateModal({ onClose, onSuccess, initialData = null }) {
                             label: u.name,
                         }))}
                         allowClear
+                        style={{ width: "100%" }}
                     />
                 </Form.Item>
 
-                <Space style={{ display: "flex", justifyContent: "end" }}>
+                {/*  دکمه‌ها وسط فرم */}
+                <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem", gap: "1rem" }}>
                     <Button onClick={onClose}>انصراف</Button>
                     <Button type="primary" htmlType="submit">
                         ذخیره
                     </Button>
-                </Space>
+                </div>
             </Form>
         </Modal>
     );

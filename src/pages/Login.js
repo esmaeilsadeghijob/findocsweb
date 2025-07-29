@@ -14,6 +14,11 @@ function Login() {
             const res = await login(values);
             loginContext(res.data.token);
             localStorage.setItem("role", res.data.role);
+            localStorage.setItem("identifierCode", res.data.identifierCode);
+            localStorage.setItem("userId", res.data.id);
+            localStorage.setItem("username", res.data.username);
+            localStorage.setItem("documentAccess", res.data.defaultAccessLevel);
+            localStorage.setItem("displayName", res.data.displayName);
             message.success("ورود موفق");
             navigate("/");
         } catch {
@@ -26,8 +31,8 @@ function Login() {
             {/* 📝 فرم ورود سمت چپ */}
             <div className="auth-left">
                 <div className="form-wrapper">
-                    <h1 className="auth-title">بایگانی اسناد</h1>
-                    <p className="auth-subtitle">سامانه بایگانی اسناد</p>
+                    <h1 className="auth-title">بایگانی الکترونیکی</h1>
+                    <p className="auth-subtitle">اسناد و مدارک</p>
 
                     <Form layout="vertical" onFinish={onFinish} className="auth-form">
                         <Form.Item
@@ -48,7 +53,7 @@ function Login() {
                         >
                             <Input.Password
                                 className="auth-input small-input"
-                                style={{ textAlign: "left" }}
+                                style={{ direction: "ltr", textAlign: "left" }}
                             />
                         </Form.Item>
 

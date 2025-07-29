@@ -1,0 +1,9 @@
+.ant-tabs-tab:not(.ant-tabs-tab-active) {
+    color: rgb(153, 153, 153) !important; /* یا مثلاً #888 برای تیرگی بیشتر */
+    opacity: 0.8;
+}
+
+.ant-tabs-tab-active {
+    font-weight: bold;
+    color: #1890ff;
+}

@@ -1,28 +1,25 @@
 import {useRef, useState} from "react";
 
 function AttachmentPanel({documentId, status}) {
-    console.log("📎 AttachmentPanel mounted for:", documentId);
-
-
     const [previewUrl, setPreviewUrl] = useState(null);
     const [fileType, setFileType] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const tableRef = useRef();
 
-    const handlePreview = (file) => {
-        const url = `http://localhost:8080/api/attachments/public/${documentId}/file/${file.id}`;
-        setPreviewUrl(url);
-
-        const ext =
-            file.extension || file.fileName?.split(".").pop()?.toLowerCase();
-        if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)) {
-            setFileType("image");
-        } else if (ext === "pdf") {
-            setFileType("pdf");
-        } else {
-            setFileType("other");
-        }
-    };
+    // const handlePreview = (file) => {
+    //     const url = `http://localhost:8080/api/attachments/public/${documentId}/file/${file.id}`;
+    //     setPreviewUrl(url);
+    //
+    //     const ext =
+    //         file.extension || file.fileName?.split(".").pop()?.toLowerCase();
+    //     if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext)) {
+    //         setFileType("image");
+    //     } else if (ext === "pdf") {
+    //         setFileType("pdf");
+    //     } else {
+    //         setFileType("other");
+    //     }
+    // };
 
     const handleRefresh = () => {
         tableRef.current?.reload();

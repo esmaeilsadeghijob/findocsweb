@@ -1,12 +1,38 @@
-import {Button, Card, Input, message, Modal, Table} from "antd";
-import {DeleteOutlined, LeftOutlined, PlusOutlined, RightOutlined,} from "@ant-design/icons";
-import {useEffect, useState} from "react";
-import {createIdentifier, deleteIdentifier, getIdentifiers,} from "../api/api";
+import { useEffect, useState } from "react";
+import {
+    Button,
+    Card,
+    Input,
+    message,
+    Modal,
+    Popconfirm,
+    Table,
+    Space,
+} from "antd";
+import {
+    PlusOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    SaveOutlined,
+    CloseOutlined,
+    LeftOutlined,
+    RightOutlined,
+} from "@ant-design/icons";
+import {
+    getIdentifiers,
+    createIdentifier,
+    deleteIdentifier,
+    updateIdentifier,
+} from "../api/api";
+import "./Management.css";
 
 function ClientManager() {
     const [identifiers, setIdentifiers] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [code, setCode] = useState("");
+    const [globalSearch, setGlobalSearch] = useState("");
+    const [editingKey, setEditingKey] = useState(null);
+    const [editedRow, setEditedRow] = useState({});
 
     useEffect(() => {
         loadIdentifiers();
@@ -17,24 +43,51 @@ function ClientManager() {
             const res = await getIdentifiers();
             setIdentifiers(res.data);
         } catch {
-            message.error("خطا در بارگذاری شناسه‌ها");
+            message.error("خطا در دریافت شناسه‌ها");
         }
-    };
-
-    const showModal = () => {
-        setCode("");
-        setModalOpen(true);
     };
 
     const handleSubmit = async () => {
         if (!code.trim()) return message.warning("شناسه مشتری الزامی است");
+
+        if (identifiers.length >= 1) {
+            message.warning("افزودن شناسه‌های بیشتر امکان‌پذیر نیست. لطفاً با مدیر اصلی تماس حاصل فرمایید.");
+            return;
+        }
+
         try {
             await createIdentifier({ code });
-            message.success("شناسه جدید ثبت شد");
+            message.success("ثبت شد");
             setModalOpen(false);
+            setCode("");
             loadIdentifiers();
         } catch {
-            message.error("عملیات انجام نشد");
+            message.error("خطا در ثبت شناسه");
+        }
+    };
+
+    const handleEdit = (record) => {
+        setEditingKey(record.id);
+        setEditedRow({ ...record });
+    };
+
+    const handleCancel = () => {
+        setEditingKey(null);
+        setEditedRow({});
+    };
+
+    const handleChange = (e) => {
+        setEditedRow((prev) => ({ ...prev, code: e.target.value }));
+    };
+
+    const handleSave = async (id) => {
+        try {
+            await updateIdentifier(id, editedRow);
+            message.success("ویرایش شد");
+            setEditingKey(null);
+            loadIdentifiers();
+        } catch {
+            message.error("خطا در ویرایش شناسه");
         }
     };
 
@@ -48,38 +101,91 @@ function ClientManager() {
         }
     };
 
+    const filtered = identifiers.filter((i) =>
+        i.code.toLowerCase().includes(globalSearch.toLowerCase())
+    );
+
     const columns = [
-        { title: "ردیف", render: (_, __, i) => i + 1 },
-        { title: "شناسه مشتری", dataIndex: "code" },
         {
-            title: "حذف",
-            render: (_, record) => (
-                <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDelete(record.id)}
-                />
-            ),
+            title: "#",
+            dataIndex: "rowIndex",
+            width: 50,
+            align: "center",
+            render: (_, __, index) => index + 1,
+        },
+        {
+            title: "شناسه مشتری",
+            dataIndex: "code",
+            render: (_, record) =>
+                editingKey === record.id ? (
+                    <Input value={editedRow.code} onChange={handleChange} />
+                ) : (
+                    record.code
+                ),
+        },
+        {
+            title: "عملیات",
+            key: "actions",
+            align: "center",
+            render: (_, record) =>
+                editingKey === record.id ? (
+                    <Space>
+                        <Button icon={<SaveOutlined />} onClick={() => handleSave(record.id)} />
+                        <Button
+                            type="text"
+                            danger
+                            icon={<CloseOutlined />}
+                            onClick={handleCancel}
+                        />
+                    </Space>
+                ) : (
+                    <Space>
+                        <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                        <Popconfirm
+                            title="آیا از حذف این شناسه مطمئن هستید؟"
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="بله"
+                            cancelText="خیر"
+                        >
+                            <Button danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    </Space>
+                ),
         },
     ];
 
     return (
         <>
-            <Card
-                title="مدیریت شناسه‌های مشتری"
-                extra={
-                    <Button type="dashed" icon={<PlusOutlined />} onClick={showModal}>
-                        افزودن شناسه
+            <Card className="company-card" bodyStyle={{ padding: 0, flex: 1 }}>
+                <div className="company-toolbar">
+                    <Button
+                        type="text"
+                        icon={<PlusOutlined />}
+                        className="add-company-btn"
+                        onClick={() => {
+                            if (identifiers.length >= 1) {
+                                message.warning("افزودن شناسه‌های بیشتر امکان‌پذیر نیست. لطفاً با مدیر اصلی تماس حاصل فرمایید.");
+                                return;
+                            }
+                            setModalOpen(true);
+                        }}
+                    >
+                        افزودن شناسه مشتری
                     </Button>
-                }
-                style={{ height: "100%", display: "flex", flexDirection: "column" }}
-                bodyStyle={{ padding: 0, flex: 1 }}
-            >
-                <div style={{ height: "100%", overflowY: "auto" }}>
+
+                    <Input
+                        allowClear
+                        placeholder="🔍 جستجو"
+                        value={globalSearch}
+                        onChange={(e) => setGlobalSearch(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
+
+                <div className="company-table-wrapper">
                     <Table
                         columns={columns}
-                        dataSource={identifiers}
+                        dataSource={filtered}
                         rowKey="id"
                         pagination={{
                             pageSize: 4,
@@ -100,12 +206,15 @@ function ClientManager() {
                 onOk={handleSubmit}
                 okText="ثبت"
                 cancelText="انصراف"
+                className="add-company-modal"
             >
-                <Input
-                    placeholder="شناسه مشتری"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                />
+                <Space direction="vertical" className="add-company-form">
+                    <Input
+                        placeholder="شناسه مشتری"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                    />
+                </Space>
             </Modal>
         </>
     );

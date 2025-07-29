@@ -6,8 +6,8 @@ import {
     message,
     Modal,
     Popconfirm,
-    Table,
     Space,
+    Table,
 } from "antd";
 import {
     EditOutlined,
@@ -19,31 +19,31 @@ import {
     RightOutlined,
 } from "@ant-design/icons";
 import {
-    getUnits,
-    createUnit,
-    updateUnit,
-    deleteUnit,
+    getCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
 } from "../api/api";
-import "./Management.css"; //  استایل مشترک
+import "./Management.css";
 
-function UnitManager() {
-    const [units, setUnits] = useState([]);
+function CategoryManager() {
+    const [categories, setCategories] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingKey, setEditingKey] = useState(null);
     const [editedRow, setEditedRow] = useState({});
+    const [newCategory, setNewCategory] = useState({ name: "" });
     const [globalSearch, setGlobalSearch] = useState("");
-    const [newUnit, setNewUnit] = useState({ name: "" });
 
     useEffect(() => {
-        loadUnits();
+        loadCategories();
     }, []);
 
-    const loadUnits = async () => {
+    const loadCategories = async () => {
         try {
-            const res = await getUnits();
-            setUnits(res.data);
+            const res = await getCategories();
+            setCategories(res.data);
         } catch {
-            message.error("خطا در دریافت واحدها");
+            message.error("خطا در دریافت دسته‌بندی‌ها");
         }
     };
 
@@ -58,59 +58,59 @@ function UnitManager() {
         setEditedRow((prev) => ({ ...prev, name: e.target.value }));
     };
 
-    const handleSave = async (id) => {
-        try {
-            await updateUnit(id, editedRow);
-            message.success("ویرایش شد");
-            setEditingKey(null);
-            loadUnits();
-        } catch {
-            message.error("خطا در ویرایش");
-        }
-    };
-
     const handleCancel = () => {
         setEditingKey(null);
         setEditedRow({});
     };
 
+    const handleSave = async (id) => {
+        try {
+            await updateCategory(id, editedRow);
+            message.success("ویرایش شد");
+            setEditingKey(null);
+            loadCategories();
+        } catch {
+            message.error("خطا در ویرایش دسته‌بندی");
+        }
+    };
+
     const handleDelete = async (id) => {
         try {
-            await deleteUnit(id);
+            await deleteCategory(id);
             message.success("حذف شد");
-            loadUnits();
+            loadCategories();
         } catch {
-            message.error("خطا در حذف واحد");
+            message.error("خطا در حذف دسته‌بندی");
         }
     };
 
     const handleCreate = async () => {
-        if (!newUnit.name.trim()) return message.warning("نام واحد الزامی است");
+        if (!newCategory.name.trim()) return message.warning("نام دسته‌بندی الزامی است");
 
         try {
-            await createUnit(newUnit);
-            message.success("واحد ثبت شد");
+            await createCategory(newCategory);
+            message.success("دسته‌بندی ثبت شد");
             setModalOpen(false);
-            setNewUnit({ name: "" });
-            loadUnits();
+            setNewCategory({ name: "" });
+            loadCategories();
         } catch {
-            message.error("خطا در افزودن واحد");
+            message.error("خطا در افزودن دسته‌بندی");
         }
     };
 
-    const filtered = units.filter((u) =>
-        u.name.toLowerCase().includes(globalSearch.toLowerCase())
+    const filtered = categories.filter((c) =>
+        c.name.toLowerCase().includes(globalSearch.toLowerCase())
     );
 
     const columns = [
         {
             title: "#",
-            width: 50,
             align: "center",
+            width: 50,
             render: (_, __, index) => index + 1,
         },
         {
-            title: "نام واحد",
+            title: "نام دسته‌بندی",
             dataIndex: "name",
             render: (_, record) =>
                 isEditing(record) ? (
@@ -133,7 +133,7 @@ function UnitManager() {
                     <Space>
                         <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
                         <Popconfirm
-                            title="آیا از حذف این واحد مطمئن هستید؟"
+                            title="آیا از حذف این دسته‌بندی مطمئن هستید؟"
                             onConfirm={() => handleDelete(record.id)}
                             okText="بله"
                             cancelText="خیر"
@@ -155,7 +155,7 @@ function UnitManager() {
                         className="add-company-btn"
                         onClick={() => setModalOpen(true)}
                     >
-                        افزودن واحد
+                        افزودن دسته‌بندی
                     </Button>
 
                     <Input
@@ -186,7 +186,7 @@ function UnitManager() {
 
             <Modal
                 open={modalOpen}
-                title="افزودن واحد جدید"
+                title="افزودن دسته‌بندی جدید"
                 onCancel={() => setModalOpen(false)}
                 onOk={handleCreate}
                 okText="ثبت"
@@ -195,11 +195,9 @@ function UnitManager() {
             >
                 <Space direction="vertical" className="add-company-form">
                     <Input
-                        placeholder="نام واحد"
-                        value={newUnit.name}
-                        onChange={(e) =>
-                            setNewUnit((prev) => ({ ...prev, name: e.target.value }))
-                        }
+                        placeholder="دسته‌بندی یک، دو ..."
+                        value={newCategory.name}
+                        onChange={(e) => setNewCategory({ name: e.target.value })}
                     />
                 </Space>
             </Modal>
@@ -207,4 +205,4 @@ function UnitManager() {
     );
 }
 
-export default UnitManager;
+export default CategoryManager;

@@ -46,10 +46,26 @@ function AddCompanyForm({ onSuccess = () => {} }) {
                     />
                 </Form.Item>
 
+                <Form.Item name="identifierCode" label="شماره شناسایی">
+                    <Input
+                        className="auth-input small-input"
+                        placeholder="مثلاً: ۴۵۹۸۷۳"
+                        style={{ textAlign: "right" }}
+                    />
+                </Form.Item>
+
                 <Form.Item name="nationalId" label="شناسه ملی / شماره ملی">
                     <Input
                         className="auth-input small-input"
-                        placeholder="مثلاً: ۱۰۳۲۲۲۳۰۰۹۰"
+                        placeholder="مثلاً: ۱۰۳۲۰۳۴۹۸۱۲"
+                        style={{ textAlign: "right" }}
+                    />
+                </Form.Item>
+
+                <Form.Item name="registrationNumber" label="شماره ثبت">
+                    <Input
+                        className="auth-input small-input"
+                        placeholder="مثلاً: ۸۹۲۱۳"
                         style={{ textAlign: "right" }}
                     />
                 </Form.Item>
