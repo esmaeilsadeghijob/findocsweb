@@ -188,6 +188,10 @@ const AttachmentManager = ({
         const allowEdit = canManageAttachments(currentUser?.role, accessLevel);
         const allowRead = canRead(currentUser?.role, accessLevel);
 
+        // بررسی وضعیت سند
+        const relatedDoc = documents.find((doc) => doc.id === docId);
+        const isFinalized = relatedDoc?.status === "FINALIZED";
+
         const columns = [
             {
                 title: "نام فایل",
@@ -201,7 +205,7 @@ const AttachmentManager = ({
                 title: "شرح فایل",
                 dataIndex: "description",
                 render: (_, file) =>
-                    editingFileId === file.id && allowEdit ? (
+                    editingFileId === file.id && allowEdit && !isFinalized ? (
                         <Input
                             value={editValues.description}
                             onChange={(e) =>
@@ -219,7 +223,7 @@ const AttachmentManager = ({
                 title: "شرکت / شخص",
                 dataIndex: "companyName",
                 render: (_, file) =>
-                    editingFileId === file.id && allowEdit ? (
+                    editingFileId === file.id && allowEdit && !isFinalized ? (
                         <Select
                             showSearch
                             value={editValues.companyName}
@@ -233,7 +237,7 @@ const AttachmentManager = ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{width: "100%"}}
+                            style={{ width: "100%" }}
                             placeholder="انتخاب شرکت / شخص"
                         />
                     ) : (
@@ -253,18 +257,18 @@ const AttachmentManager = ({
                 title: "دسته‌بندی",
                 dataIndex: "categoryName",
                 render: (_, file) =>
-                    editingFileId === file.id && allowEdit ? (
+                    editingFileId === file.id && allowEdit && !isFinalized ? (
                         <Select
                             showSearch
                             value={editValues.categoryName}
                             onChange={(val) =>
-                                setEditValues((prev) => ({...prev, categoryName: val}))
+                                setEditValues((prev) => ({ ...prev, categoryName: val }))
                             }
                             options={categories.map((c) => ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{width: "100%"}}
+                            style={{ width: "100%" }}
                             placeholder="انتخاب دسته‌بندی"
                         />
                     ) : (
@@ -273,10 +277,10 @@ const AttachmentManager = ({
             },
             {
                 title: "پیش‌نمایش",
-                align: "center", // 👈 وسط‌چینی ستون
+                align: "center",
                 render: (_, file) =>
                     allowRead ? (
-                        <div style={{ textAlign: "center" }}> {/* 👈 وسط‌چینی محتوا */}
+                        <div style={{ textAlign: "center" }}>
                             {file.mimeType === "application/pdf" ? (
                                 <Button
                                     type="text"
@@ -300,8 +304,8 @@ const AttachmentManager = ({
             }
         ];
 
-        // فقط اگر اجازهٔ ویرایش داریم، ستون عملیات رو اضافه کن
-        if (allowEdit) {
+        // فقط اگر اجازه ویرایش داریم و سند قطعی نیست، ستون عملیات رو اضافه کن
+        if (allowEdit && !isFinalized) {
             columns.push({
                 title: "عملیات",
                 render: (_, file) =>
@@ -689,7 +693,7 @@ const AttachmentManager = ({
                                         {allowUpload && (
                                             <Button
                                                 type="dashed"
-                                                icon={<CloudUploadOutlined/>}
+                                                icon={<CloudUploadOutlined />}
                                                 onClick={() => {
                                                     setSelectedDocumentId(doc.id);
                                                     setShowUploadModal(true);
@@ -753,8 +757,15 @@ const AttachmentManager = ({
                 visible={showUploadModal}
                 documentId={selectedDocumentId}
                 onSuccess={async () => {
+                    const docId = selectedDocumentId;
+
                     await fetchDocuments();
-                    setShowUploadModal(false);
+
+                    // فقط پس از ریفرش جدول، سند موردنظر رو باز نگه می‌داریم و بعد مودال رو می‌بندیم
+                    setTimeout(() => {
+                        setExpandedKeys((prev) => [...new Set([...prev, docId])]);
+                        setShowUploadModal(false);
+                    }, 150);
                 }}
                 onClose={() => setShowUploadModal(false)}
             />
