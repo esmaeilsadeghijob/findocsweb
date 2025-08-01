@@ -45,6 +45,7 @@ import {
     canRevert
 } from "./accessUtils";
 import faIR from 'antd/es/locale/fa_IR';
+import "./Attachment.css";
 
 moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
@@ -106,7 +107,7 @@ const AttachmentManager = ({
                         serviceName: doc.serviceName || "—",
                         archiveCode: doc.archiveCode || "—",
                         description: doc.description || "—",
-                        status: doc.status || "DRAFT"
+                        status: doc.status
                     };
                 })
             );
@@ -154,10 +155,12 @@ const AttachmentManager = ({
     };
 
     const handleAdvanceStatus = async (id) => {
+        console.log("clicked", id);
         try {
             await advanceDocumentStatus(id);
             fetchDocuments();
-        } catch {
+        } catch (err) {
+            console.error(err);
             message.error("خطا در تغییر وضعیت سند");
         }
     };
@@ -186,28 +189,6 @@ const AttachmentManager = ({
         const allowRead = canRead(currentUser?.role, accessLevel);
 
         const columns = [
-            {
-                title: "دسته‌بندی",
-                dataIndex: "categoryName",
-                render: (_, file) =>
-                    editingFileId === file.id && allowEdit ? (
-                        <Select
-                            showSearch
-                            value={editValues.categoryName}
-                            onChange={(val) =>
-                                setEditValues((prev) => ({...prev, categoryName: val}))
-                            }
-                            options={categories.map((c) => ({
-                                label: c.name,
-                                value: c.name
-                            }))}
-                            style={{width: "100%"}}
-                            placeholder="انتخاب دسته‌بندی"
-                        />
-                    ) : (
-                        file.categoryName || "—"
-                    )
-            },
             {
                 title: "نام فایل",
                 dataIndex: "fileName"
@@ -269,27 +250,52 @@ const AttachmentManager = ({
                 dataIndex: "uploadedBy"
             },
             {
+                title: "دسته‌بندی",
+                dataIndex: "categoryName",
+                render: (_, file) =>
+                    editingFileId === file.id && allowEdit ? (
+                        <Select
+                            showSearch
+                            value={editValues.categoryName}
+                            onChange={(val) =>
+                                setEditValues((prev) => ({...prev, categoryName: val}))
+                            }
+                            options={categories.map((c) => ({
+                                label: c.name,
+                                value: c.name
+                            }))}
+                            style={{width: "100%"}}
+                            placeholder="انتخاب دسته‌بندی"
+                        />
+                    ) : (
+                        file.categoryName || "—"
+                    )
+            },
+            {
                 title: "پیش‌نمایش",
+                align: "center", // 👈 وسط‌چینی ستون
                 render: (_, file) =>
                     allowRead ? (
-                        file.mimeType === "application/pdf" ? (
-                            <Button
-                                type="text"
-                                icon={<EyeOutlined style={{color: "#1890ff"}}/>}
-                                onClick={() => {
-                                    setPdfBase64(file.fileData);
-                                    setShowPdfModal(true);
-                                }}
-                            />
-                        ) : (
-                            <a
-                                href={`data:${file.mimeType};base64,${file.fileData}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <EyeOutlined style={{color: "#1890ff"}}/>
-                            </a>
-                        )
+                        <div style={{ textAlign: "center" }}> {/* 👈 وسط‌چینی محتوا */}
+                            {file.mimeType === "application/pdf" ? (
+                                <Button
+                                    type="text"
+                                    icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+                                    onClick={() => {
+                                        setPdfBase64(file.fileData);
+                                        setShowPdfModal(true);
+                                    }}
+                                />
+                            ) : (
+                                <a
+                                    href={`data:${file.mimeType};base64,${file.fileData}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <EyeOutlined style={{ color: "#1890ff" }} />
+                                </a>
+                            )}
+                        </div>
                     ) : null
             }
         ];
@@ -394,12 +400,13 @@ const AttachmentManager = ({
         {
             title: "کد بایگانی",
             dataIndex: "archiveCode",
+            align: "center", // وسط‌چینی ساده برای کل ستون
             render: (val) => {
                 const normalized = typeof val === "string" ? val.trim() : "";
                 if (!normalized || normalized === "—") {
-                    return <span style={{color: "#fa8c16"}}>کد ثبت نشده</span>;
+                    return <span style={{ color: "#fa8c16" }}> — </span>; // نمایش خط نارنجی
                 }
-                return normalized;
+                return <span style={{ display: "inline-block", width: "100%", textAlign: "center" }}>{normalized}</span>;
             },
             sorter: (a, b) => (a.archiveCode || "").localeCompare(b.archiveCode || "")
         },
@@ -407,32 +414,28 @@ const AttachmentManager = ({
             title: "وضعیت",
             dataIndex: "status",
             render: (_, doc) => {
-                const label =
-                    doc.status === "FINALIZED"
-                        ? "قطعی"
-                        : doc.status === "SUBMITTED"
-                            ? "ثبت‌شده"
-                            : "پیش‌نویس";
+                const statusMap = {
+                    UNARCHIVED: { label: "بایگانی نشده", color: "default" },
+                    NO_ATTACHMENTS: { label: "بدون ضمائم", color: "magenta" },
+                    DRAFT: { label: "پیش‌نویس", color: "blue" },
+                    SUBMITTED: { label: "ثبت‌شده", color: "orange" },
+                    FINALIZED: { label: "قطعی", color: "green" }
+                };
 
-                const color =
-                    doc.status === "FINALIZED"
-                        ? "green"
-                        : doc.status === "SUBMITTED"
-                            ? "orange"
-                            : "default";
+                const { label, color } = statusMap[doc.status] || { label: "نامشخص", color: "default" };
 
                 const allowAdvance = doc.status !== "FINALIZED" && allowEdit;
                 const allowRevertStatus = doc.status === "FINALIZED" && allowRevert;
 
                 return (
                     <Space>
-                        <Tooltip title={allowAdvance ? "تغییر وضعیت سند" : ""}>
+                        <Tooltip title={allowAdvance ? "تغییر وضعیت سند" : "غیرقابل تغییر"}>
                             <Tag
                                 color={color}
                                 onClick={() => {
                                     if (allowAdvance) handleAdvanceStatus(doc.id);
                                 }}
-                                style={{cursor: allowAdvance ? "pointer" : "default"}}
+                                style={{ cursor: allowAdvance ? "pointer" : "default" }}
                             >
                                 {label}
                             </Tag>
@@ -441,7 +444,7 @@ const AttachmentManager = ({
                             <Tooltip title="بازگردانی وضعیت سند">
                                 <Button
                                     type="text"
-                                    icon={<ReloadOutlined style={{fontSize: 18, color: "#fa8c16"}}/>}
+                                    icon={<ReloadOutlined style={{ fontSize: 18, color: "#fa8c16" }} />}
                                     onClick={() => handleRevertStatus(doc.id)}
                                 />
                             </Tooltip>
@@ -586,9 +589,25 @@ const AttachmentManager = ({
                                 );
 
                             return (
-                                <>
-                                    {allowUpload && (
-                                        <div style={{marginBottom: 8}}>
+                                <div style={{
+                                    backgroundColor: "#eef2f5", // رنگ پس‌زمینه کمی تیره‌تر
+                                    padding: "1rem",
+                                    borderRadius: "12px",
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                    border: "1px solid #d8dee9"
+                                }}>
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.5rem", // فاصله بین آیکن و دکمه
+                                        marginBottom: "0.5rem",
+                                        fontWeight: "600",
+                                        fontSize: "16px",
+                                        color: "#4b5563"
+                                    }}>
+                                        📂
+
+                                        {allowUpload && (
                                             <Button
                                                 type="dashed"
                                                 icon={<CloudUploadOutlined/>}
@@ -600,16 +619,22 @@ const AttachmentManager = ({
                                             >
                                                 بارگذاری فایل جدید
                                             </Button>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                     <Table
+                                        className="nested-table"
                                         rowKey="id"
                                         columns={attachmentColumns(doc.id)}
                                         dataSource={filteredAttachments}
                                         pagination={false}
                                         size="small"
+                                        style={{
+                                            backgroundColor: "#ffffff",
+                                            borderRadius: "6px",
+                                            border: "1px solid #e2e8f0"
+                                        }}
                                     />
-                                </>
+                                </div>
                             );
                         },
                         expandedRowKeys: expandedKeys,

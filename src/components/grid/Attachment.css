@@ -1,0 +1,38 @@
+/* سرستون‌های جدول تو درتو */
+.nested-table .ant-table-thead > tr > th {
+    background-color: #e0f2fe;     /* آبی خیلی روشن */
+    color: #1e3a8a;                /* آبی پررنگ برای متن */
+    font-weight: 600;
+    font-size: 13px;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+/* سطرهای جدول تو درتو — یکدست و کمی پررنگ‌تر */
+.nested-table .ant-table-tbody > tr:nth-child(odd),
+.nested-table .ant-table-tbody > tr:nth-child(even) {
+    background-color: #e2e8f0;     /* خاکستری آبی‌فام برای هماهنگی با هدر */
+}
+
+/* افکت هاور برای زیبایی و تعامل بیشتر */
+.nested-table .ant-table-tbody > tr:hover > td {
+    background-color: #e0f7fa;     /* رنگ ملایم آبی هنگام هاور */
+}
+
+.nested-table .ant-table-tbody > tr:hover {
+    box-shadow: 0 0 8px rgba(30, 58, 138, 0.2); /* سایه لطیف آبی‌فام */
+}
+
+/* ظاهر حرفه‌ای جدول تو درتو */
+.nested-table .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.nested-table .ant-table-cell {
+    border-color: #dbeafe;         /* مرزهای آبی لطیف */
+}
+
+/* انیمیشن برای تغییر رنگ و سایه */
+.nested-table .ant-table-tbody > tr {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
