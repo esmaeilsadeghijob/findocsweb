@@ -4584,6 +4584,18 @@ duplexer@^0.1.2:
   resolved "https://registry.npmjs.org/duplexer/-/duplexer-0.1.2.tgz"
   integrity sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==
 
+dwt@^19.1.0:
+  version "19.1.0"
+  resolved "https://registry.npmmirror.com/dwt/-/dwt-19.1.0.tgz#5008e5574446cc91d9379696b4524e7404c9549a"
+  integrity sha512-nBtwgGFPbQiDMkNizhY68k53rfCi84jk3lJRqO4mJFyaoAwemfACgBQThVSImNs386BS9yCmqcbj+Sz9vf6f0Q==
+  dependencies:
+    dynamsoft-core "*"
+
+dynamsoft-core@*:
+  version "3.4.31"
+  resolved "https://registry.npmmirror.com/dynamsoft-core/-/dynamsoft-core-3.4.31.tgz#a1194a4de3eda503ab28a293213beb9a7d3b845b"
+  integrity sha512-bgu1cDnYSCMVCc59wM8OpsNUdQg2tMezqAeRxHz+SCvSDs1RkMCZA2XlTU3pdtB0zo1xdLiza6l9uaKGrDf3UQ==
+
 eastasianwidth@^0.2.0:
   version "0.2.0"
   resolved "https://registry.npmjs.org/eastasianwidth/-/eastasianwidth-0.2.0.tgz"
