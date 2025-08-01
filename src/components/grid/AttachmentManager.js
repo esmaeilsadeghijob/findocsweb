@@ -389,12 +389,6 @@ const AttachmentManager = ({
 
     const baseColumns = [
         {
-            title: "شماره سند",
-            dataIndex: "documentNumber",
-            align: "center",
-            sorter: (a, b) => (a.documentNumber || 0) - (b.documentNumber || 0),
-        },
-        {
             title: "شماره بایگانی",
             dataIndex: "archiveNumber",
             align: "center",
@@ -435,6 +429,12 @@ const AttachmentManager = ({
                 .sort()
                 .map((year) => ({text: String(year), value: String(year)})),
             onFilter: (value, record) => String(record.fiscalYear) === String(value),
+        },
+        {
+            title: "شماره سند",
+            dataIndex: "documentNumber",
+            align: "center",
+            sorter: (a, b) => (a.documentNumber || 0) - (b.documentNumber || 0),
         },
         {
             title: "شرح سند",
@@ -659,6 +659,8 @@ const AttachmentManager = ({
             <ConfigProvider locale={faIR}>
                 <Table
                     rowKey="id"
+                    sticky
+                    scroll={{ y: 600 }}
                     columns={mainColumns}
                     locale={{
                         triggerDesc: "کلیک برای مرتب‌سازی نزولی",
