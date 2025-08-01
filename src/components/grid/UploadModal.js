@@ -1,3 +1,4 @@
+// UploadModal.jsx
 import React, { useEffect, useState } from "react";
 import {
     Modal,
@@ -7,23 +8,16 @@ import {
     Select,
     message,
     Button,
-    Progress,
-    AutoComplete,
+    Progress, AutoComplete,
 } from "antd";
-import {
-    InboxOutlined,
-    DeleteOutlined,
-    CameraOutlined,
-} from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
     uploadFile,
     getCompanies,
     getCategories,
-    getFrequentDescriptions,
+    getFrequentDescriptions
 } from "../../api/api";
-import PreviewBox from "./PreviewBox";
-import ScannerWidget from "./ScannerWidget";
-import scannerIcon from "../../assets/img/Scanner.512.png";
+import PreviewBox from "./PreviewBox";;
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -36,12 +30,9 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     const [frequentDescriptions, setFrequentDescriptions] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [mode, setMode] = useState("upload"); // 'upload' یا 'scanner'
 
     useEffect(() => {
         if (!visible) return;
-
-        setMode("upload"); // ریست حالت هنگام باز شدن مودال
 
         getCompanies()
             .then((res) => setCompanies(res.data || []))
@@ -88,21 +79,6 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
         setFiles(updated);
     };
 
-    const handleScannedFile = (file) => {
-        setFiles((prev) => [
-            ...prev,
-            {
-                file,
-                description: "",
-                companyId: null,
-                companyName: "",
-                categoryId: null,
-                categoryName: "",
-            },
-        ]);
-        setMode("upload");
-    };
-
     const handleSubmit = async () => {
         if (files.length === 0) {
             message.warning("لطفاً حداقل یک فایل انتخاب کنید");
@@ -146,157 +122,176 @@ const UploadModal = ({ documentId, visible, onClose, onSuccess }) => {
     return (
         <Modal
             open={visible}
-            title={mode === "upload" ? "بارگذاری فایل‌های جدید" : "اسکن فایل جدید"}
-            onCancel={onClose}
+            title="بارگذاری فایل‌های جدید"
+            onCancel={() => {
+                console.log("Close pressed");
+                onClose();
+            }}
             onOk={handleSubmit}
             okText="بارگذاری"
             cancelText="انصراف"
             width={700}
-            okButtonProps={{ disabled: uploading || mode === "scanner" }}
+            okButtonProps={{ disabled: uploading }}
             destroyOnClose
         >
-            {mode === "upload" ? (
-                <Form layout="vertical" form={form}>
-                    <Form.Item label="انتخاب فایل‌ها">
-                        <Dragger {...props}>
-                            <p className="ant-upload-drag-icon">
-                                <InboxOutlined />
-                            </p>
-                            <p>فایل‌ها را اینجا بکشید یا کلیک کنید برای انتخاب</p>
-                            <p style={{ fontSize: "12px", color: "#999" }}>
-                                فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip، rar
-                            </p>
-                        </Dragger>
-                        <div style={{ marginTop: "12px" }}>
-                            <Button
-                                icon={<img src={scannerIcon} alt="scanner" style={{ width: 18, marginRight: 8 }} />}
-                                onClick={() => setMode("scanner")}
-                                type="dashed"
-                            >
-                                استفاده از اسکنر سخت‌افزاری
-                            </Button>
-                        </div>
-                    </Form.Item>
+            <Form layout="vertical" form={form}>
+                <Form.Item label="انتخاب فایل‌ها">
+                    <Dragger {...props}>
+                        <p className="ant-upload-drag-icon">
+                            <InboxOutlined />
+                        </p>
+                        <p>فایل‌ها را اینجا بکشید یا کلیک کنید برای انتخاب</p>
+                        <p style={{ fontSize: "12px", color: "#999" }}>
+                            فرمت‌های مجاز: jpg، png، pdf، docx، xlsx، zip، rar
+                        </p>
+                    </Dragger>
+                </Form.Item>
 
-                    {uploading && (
-                        <div style={{ marginBottom: 16 }}>
-                            <Progress
-                                percent={progress}
-                                status={progress === 100 ? "success" : "active"}
-                            />
-                        </div>
-                    )}
+                {uploading && (
+                    <div style={{ marginBottom: 16 }}>
+                        <Progress
+                            percent={progress}
+                            status={progress === 100 ? "success" : "active"}
+                        />
+                    </div>
+                )}
 
-                    {files.map((f, i) => (
+                {files.map((f, i) => (
+                    <div
+                        key={i}
+                        style={{
+                            border: "1px solid #eee",
+                            padding: "10px",
+                            marginBottom: "12px",
+                            borderRadius: "8px",
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "12px",
+                        }}
+                    >
                         <div
-                            key={i}
                             style={{
-                                border: "1px solid #eee",
-                                padding: "10px",
-                                marginBottom: "12px",
-                                borderRadius: "8px",
-                                width: "100%",
                                 display: "flex",
-                                flexDirection: "column",
-                                gap: "12px",
+                                flexDirection: "row-reverse",
+                                gap: "16px",
+                                alignItems: "flex-start",
                             }}
                         >
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "row-reverse",
-                                    gap: "16px",
-                                    alignItems: "flex-start",
-                                }}
-                            >
-                                <PreviewBox file={f.file} />
-                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-                                    <div style={{ fontWeight: "bold" }}>
-                                        {f.file.name}
-                                        <a
-                                            href={URL.createObjectURL(f.file)}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ marginRight: 12 }}
-                                        >
-                                            مشاهده فایل
-                                        </a>
-                                    </div>
+                            <PreviewBox file={f.file} />
 
-                                    <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
-                                        <AutoComplete
-                                            options={frequentDescriptions.map((desc) => ({ value: desc }))}
-                                            filterOption={(input, option) =>
-                                                option.value.toLowerCase().includes(input.toLowerCase())
-                                            }
-                                            value={f.description}
-                                            onChange={(val) => handleFieldChange(i, "description", val)}
-                                            placeholder="شرح فایل را وارد یا انتخاب کنید"
-                                        >
-                                            <Input.TextArea rows={2} />
-                                        </AutoComplete>
-                                    </Form.Item>
-
-                                    <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
-                                        <Select
-                                            showSearch
-                                            placeholder="انتخاب شرکت"
-                                            value={f.companyId}
-                                            onChange={(val) => {
-                                                const selected = companies.find((c) => c.id === val);
-                                                handleFieldChange(i, "companyId", val);
-                                                handleFieldChange(i, "companyName", selected?.name || "");
-                                            }}
-                                            optionFilterProp="children"
-                                        >
-                                            {companies.map((c) => (
-                                                <Option key={c.id} value={c.id}>
-                                                    {c.name}
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-
-                                    <Form.Item label="دسته‌بندی" style={{ marginBottom: 4 }}>
-                                        <Select
-                                            showSearch
-                                            placeholder="انتخاب دسته‌بندی"
-                                            value={f.categoryId}
-                                            onChange={(val) => {
-                                                const selected = categories.find((cat) => cat.id === val);
-                                                handleFieldChange(i, "categoryId", val);
-                                                handleFieldChange(i, "categoryName", selected?.name || "");
-                                            }}
-                                            optionFilterProp="children"
-                                        >
-                                            {categories.map((cat) => (
-                                                <Option key={cat.id} value={cat.id}>
-                                                    {cat.name}
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
+                            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+                                <div style={{ fontWeight: "bold" }}>
+                                    {f.file.name}
+                                    <a
+                                        href={URL.createObjectURL(f.file)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ marginRight: 12 }}
+                                    >
+                                        مشاهده فایل
+                                    </a>
                                 </div>
 
-                                <Button
-                                    block
-                                    type="text"
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => handleRemove(i)}
-                                    danger
-                                >
-                                    حذف فایل
-                                </Button>
+                                {/*<Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>*/}
+                                {/*    <Input.TextArea*/}
+                                {/*        rows={2}*/}
+                                {/*        placeholder="توضیح اختیاری..."*/}
+                                {/*        value={f.description}*/}
+                                {/*        onChange={(e) => handleFieldChange(i, "description", e.target.value)}*/}
+                                {/*        options={frequentDescriptions.map((desc) => ({*/}
+                                {/*            label: desc,*/}
+                                {/*            value: desc,*/}
+                                {/*        }))}*/}
+                                {/*    />*/}
+                                {/*</Form.Item>*/}
+
+                                <Form.Item label="شرح فایل" style={{ marginBottom: 4 }}>
+                                    <AutoComplete
+                                        options={frequentDescriptions.map((desc) => ({ value: desc }))}
+                                        filterOption={(inputValue, option) =>
+                                            option?.value?.toLowerCase().includes(inputValue.toLowerCase()) ||
+                                            option?.value?.toLowerCase().startsWith(inputValue.toLowerCase())
+                                        }
+                                        value={f.description}
+                                        onChange={(val) => handleFieldChange(i, "description", val)}
+                                        placeholder="شرح فایل را وارد یا انتخاب کنید"
+                                        style={{ width: "100%" }}
+                                    >
+                                        <Input.TextArea rows={2} />
+                                    </AutoComplete>
+                                </Form.Item>
+
+
+                                {/*<Form.Item label="شرح‌های پرتکرار" style={{ marginBottom: 4 }}>*/}
+                                {/*    <Select*/}
+                                {/*        showSearch*/}
+                                {/*        allowClear*/}
+                                {/*        placeholder="انتخاب یک شرح پرتکرار"*/}
+                                {/*        onChange={(val) => handleFieldChange(i, "description", val)}*/}
+                                {/*        options={frequentDescriptions.map((desc) => ({*/}
+                                {/*            label: desc,*/}
+                                {/*            value: desc,*/}
+                                {/*        }))}*/}
+                                {/*    />*/}
+                                {/*</Form.Item>*/}
+
+                                <Form.Item label="شرکت / شخص" style={{ marginBottom: 4 }}>
+                                    <Select
+                                        showSearch
+                                        placeholder="انتخاب شرکت"
+                                        value={f.companyId}
+                                        onChange={(value) => {
+                                            const selected = companies.find((c) => c.id === value);
+                                            handleFieldChange(i, "companyId", value);
+                                            handleFieldChange(i, "companyName", selected?.name || "");
+                                        }}
+                                        style={{ width: "100%" }}
+                                        optionFilterProp="children"
+                                    >
+                                        {companies.map((c) => (
+                                            <Option key={c.id} value={c.id}>
+                                                {c.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+
+                                <Form.Item label="دسته‌بندی" style={{ marginBottom: 4 }}>
+                                    <Select
+                                        showSearch
+                                        placeholder="انتخاب دسته‌بندی"
+                                        value={f.categoryId}
+                                        onChange={(value) => {
+                                            const selected = categories.find((cat) => cat.id === value);
+                                            handleFieldChange(i, "categoryId", value);
+                                            handleFieldChange(i, "categoryName", selected?.name || "");
+                                        }}
+                                        style={{ width: "100%" }}
+                                        optionFilterProp="children"
+                                    >
+                                        {categories.map((cat) => (
+                                            <Option key={cat.id} value={cat.id}>
+                                                {cat.name}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
                             </div>
                         </div>
-                    ))}
-                </Form>
-            ) : (
-                <ScannerWidget
-                    onScanComplete={handleScannedFile}
-                    onClose={() => setMode("upload")}
-                />
-            )}
+
+                        <Button
+                            block
+                            type="text"
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleRemove(i)}
+                            danger
+                        >
+                            حذف فایل
+                        </Button>
+                    </div>
+                ))}
+            </Form>
         </Modal>
     );
 };

@@ -309,17 +309,29 @@ const AttachmentManager = ({
                         <Space>
                             <Tooltip title="ذخیره تغییرات">
                                 <Button
-                                    icon={<SaveOutlined/>}
+                                    icon={<SaveOutlined />}
                                     type="primary"
                                     size="small"
+                                    style={{
+                                        backgroundColor: "#1890ff",
+                                        borderColor: "#1890ff",
+                                        fontWeight: 600,
+                                        boxShadow: "none"
+                                    }}
                                     onClick={() => handleSaveFile(docId, file.id)}
                                 />
                             </Tooltip>
 
                             <Tooltip title="لغو ویرایش">
                                 <Button
+                                    icon={<CloseOutlined />}
                                     size="small"
-                                    icon={<CloseOutlined/>}
+                                    style={{
+                                        backgroundColor: "transparent",
+                                        border: "none",
+                                        color: "#1e3a8a",
+                                        fontWeight: 500
+                                    }}
                                     onClick={() => {
                                         setEditingFileId(null);
                                         setEditValues({});
@@ -330,8 +342,14 @@ const AttachmentManager = ({
                     ) : (
                         <Space>
                             <Button
-                                icon={<EditOutlined/>}
+                                icon={<EditOutlined />}
                                 size="small"
+                                style={{
+                                    backgroundColor: "#e0f2fe",
+                                    border: "none",
+                                    color: "#1e3a8a",
+                                    fontWeight: 500
+                                }}
                                 onClick={() => {
                                     setEditingFileId(file.id);
                                     setEditValues({
@@ -341,13 +359,22 @@ const AttachmentManager = ({
                                     });
                                 }}
                             />
+
                             <Popconfirm
                                 title="آیا از حذف فایل مطمئن هستید؟"
                                 onConfirm={() => handleDeleteFile(docId, file.id)}
                                 okText="بله"
                                 cancelText="خیر"
                             >
-                                <Button type="text" danger icon={<CloseOutlined/>}/>
+                                <Button
+                                    type="text"
+                                    danger
+                                    icon={<CloseOutlined />}
+                                    style={{
+                                        fontWeight: 600,
+                                        color: "#c53030"
+                                    }}
+                                />
                             </Popconfirm>
                         </Space>
                     )
