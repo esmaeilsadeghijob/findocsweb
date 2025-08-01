@@ -403,12 +403,31 @@ const AttachmentManager = ({
             render: (val) => {
                 const date = moment(val);
                 return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
-            }
+            },
+            filters: [
+                ...new Set(
+                    documents.map((d) =>
+                        moment(d.archiveDate).isValid()
+                            ? moment(d.archiveDate).format("jYYYY/jMM/jDD")
+                            : null
+                    )
+                ),
+            ]
+                .filter(Boolean)
+                .sort()
+                .map((dateStr) => ({ text: dateStr, value: dateStr })),
+            onFilter: (value, record) =>
+                moment(record.archiveDate).format("jYYYY/jMM/jDD") === value,
         },
         {
             title: "سال مالی",
             dataIndex: "fiscalYear",
             sorter: (a, b) => (a.fiscalYear || 0) - (b.fiscalYear || 0),
+            filters: [...new Set(documents.map((d) => d.fiscalYear))]
+                .filter(Boolean)
+                .sort()
+                .map((year) => ({ text: String(year), value: String(year) })),
+            onFilter: (value, record) => String(record.fiscalYear) === String(value),
         },
         {
             title: "شرح سند",
@@ -422,7 +441,22 @@ const AttachmentManager = ({
             render: (val) => {
                 const date = moment(val);
                 return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
-            }
+            },
+            filters: [
+                ...new Set(
+                    documents
+                        .map((d) =>
+                            moment(d.documentTimestamp).isValid()
+                                ? moment(d.documentTimestamp).format("jYYYY/jMM/jDD")
+                                : null
+                        )
+                ),
+            ]
+                .filter(Boolean)
+                .sort()
+                .map((dateStr) => ({ text: dateStr, value: dateStr })),
+            onFilter: (value, record) =>
+                moment(record.documentTimestamp).format("jYYYY/jMM/jDD") === value,
         },
         {
             title: "کد بایگانی",
@@ -440,6 +474,24 @@ const AttachmentManager = ({
         {
             title: "وضعیت",
             dataIndex: "status",
+            filters: [
+                ...new Set(documents.map((d) => d.status))
+            ]
+                .filter(Boolean)
+                .map((status) => {
+                    const statusMap = {
+                        UNARCHIVED: "بایگانی نشده",
+                        NO_ATTACHMENTS: "بدون ضمائم",
+                        DRAFT: "پیش‌نویس",
+                        SUBMITTED: "ثبت‌شده",
+                        FINALIZED: "قطعی"
+                    };
+                    return {
+                        text: statusMap[status] || "نامشخص",
+                        value: status
+                    };
+                }),
+            onFilter: (value, record) => record.status === value,
             render: (_, doc) => {
                 const statusMap = {
                     UNARCHIVED: { label: "بایگانی نشده", color: "default" },
