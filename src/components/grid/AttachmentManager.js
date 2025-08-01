@@ -99,6 +99,7 @@ const AttachmentManager = ({
                         documentNumber: doc.documentNumber || "—",
                         fiscalYear: doc.periodFiscalYear || "—",
                         serviceName: doc.serviceName || "—",
+                        archiveCode: doc.archiveCode || "—",
                         description: doc.description || "—",
                         status: doc.status || "DRAFT"
                     };
@@ -383,6 +384,18 @@ const AttachmentManager = ({
                 const date = moment(val);
                 return date.isValid() ? date.format("jYYYY/jMM/jDD") : "—";
             }
+        },
+        {
+            title: "کد بایگانی",
+            dataIndex: "archiveCode",
+            render: (val) => {
+                const normalized = typeof val === "string" ? val.trim() : "";
+                if (!normalized || normalized === "—") {
+                    return <span style={{ color: "#fa8c16" }}>کد ثبت نشده</span>;
+                }
+                return normalized;
+            },
+            sorter: (a, b) => (a.archiveCode || "").localeCompare(b.archiveCode || "")
         },
         {
             title: "وضعیت",

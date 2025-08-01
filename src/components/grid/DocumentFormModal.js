@@ -132,6 +132,7 @@ const DocumentFormModal = ({
                 documentTimestamp: values.documentDate?.valueOf(),
                 archiveNumber,
                 archiveDate: archiveDate?.valueOf(),
+                archiveCode: values.archiveCode,
                 description: values.description || "",
                 status: "DRAFT"
             };
@@ -255,6 +256,14 @@ const DocumentFormModal = ({
                         }}
                         placeholder="انتخاب تاریخ سند"
                     />
+                </Form.Item>
+
+                <Form.Item
+                    name="archiveCode"
+                    label="کد بایگانی"
+                    rules={[{ required: true, message: "کد بایگانی را وارد کنید" }]}
+                >
+                    <Input placeholder="مثلاً DEP-4292" />
                 </Form.Item>
 
                 <Form.Item name="description" label="شرح" style={{ marginBottom: 4 }}>

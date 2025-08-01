@@ -39,7 +39,8 @@ const EditDocumentModal = ({
                 documentNumber: editData.documentNumber ?? "",
                 documentDate: docDate.isValid() ? docDate : null,
                 description: editData.description ?? "",
-                periodId: editData.periodId ?? null
+                periodId: editData.periodId ?? null,
+                archiveCode: editData.archiveCode ?? ""
             });
             setArchiveDate(editData.archiveDate ? moment(Number(editData.archiveDate)) : moment());
         }
@@ -51,7 +52,8 @@ const EditDocumentModal = ({
             const payload = {
                 ...values,
                 archiveDate: archiveDate?.valueOf(),
-                documentTimestamp: values.documentDate?.valueOf()
+                documentTimestamp: values.documentDate?.valueOf(),
+                archiveCode: values.archiveCode?.trim()
             };
 
             await updateDocument(editData.id, payload);
@@ -173,6 +175,14 @@ const EditDocumentModal = ({
                         }}
                         placeholder="انتخاب تاریخ سند"
                     />
+                </Form.Item>
+
+                <Form.Item
+                    name="archiveCode"
+                    label="کد بایگانی"
+                    rules={[{ required: true, message: "کد بایگانی الزامی است" }]}
+                >
+                    <Input placeholder="مثلاً: DEP-8724" />
                 </Form.Item>
 
                 <Form.Item
