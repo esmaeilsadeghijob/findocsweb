@@ -8,7 +8,7 @@ import {
     Popconfirm,
     Tag,
     Tooltip,
-    message
+    message, ConfigProvider
 } from "antd";
 import {
     EyeOutlined,
@@ -30,7 +30,7 @@ import {
     revertDocumentStatus,
     getCategories,
     getCompanies,
-    deleteDocument
+    deleteDocument, getDocumentsByFilterPaged
 } from "../../api/api";
 import UploadModal from "./UploadModal";
 import PdfPreview from "./PdfPreview";
@@ -44,6 +44,7 @@ import {
     canManageAttachments,
     canRevert
 } from "./accessUtils";
+import faIR from 'antd/es/locale/fa_IR';
 
 moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
@@ -80,17 +81,21 @@ const AttachmentManager = ({
     const allowUpload = canManageAttachments(currentUser?.role, accessLevel);
     const allowRevert = canRevert(currentUser?.role, accessLevel);
 
+    const [totalDocs, setTotalDocs] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     useEffect(() => {
         getCategories().then((res) => setCategories(res.data || []));
         getCompanies().then((res) => setCompanies(res.data || []));
     }, []);
 
     const fetchDocuments = async () => {
-        if (!clientId) return;
+        if (!clientId || !unitId || !serviceId) return;
         try {
-            const resDocs = await getDocumentsByFilter(clientId, unitId, serviceId);
+            const res = await getDocumentsByFilterPaged(clientId, unitId, serviceId, currentPage, pageSize);
             const enriched = await Promise.all(
-                resDocs.data.map(async (doc) => {
+                res.data.data.map(async (doc) => {
                     const attachments = await getAttachments(doc.id).then((res) => res.data).catch(() => []);
                     return {
                         ...doc,
@@ -106,6 +111,7 @@ const AttachmentManager = ({
                 })
             );
             setDocuments(enriched);
+            setTotalDocs(res.data.totalElements);
         } catch {
             message.error("خطا در دریافت اسناد");
         }
@@ -113,7 +119,7 @@ const AttachmentManager = ({
 
     useEffect(() => {
         fetchDocuments();
-    }, [clientId]);
+    }, [clientId, unitId, serviceId, currentPage, pageSize]);
 
     const handleDeleteFile = async (docId, fileId) => {
         try {
@@ -189,13 +195,13 @@ const AttachmentManager = ({
                             showSearch
                             value={editValues.categoryName}
                             onChange={(val) =>
-                                setEditValues((prev) => ({ ...prev, categoryName: val }))
+                                setEditValues((prev) => ({...prev, categoryName: val}))
                             }
                             options={categories.map((c) => ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{ width: "100%" }}
+                            style={{width: "100%"}}
                             placeholder="انتخاب دسته‌بندی"
                         />
                     ) : (
@@ -246,7 +252,7 @@ const AttachmentManager = ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{ width: "100%" }}
+                            style={{width: "100%"}}
                             placeholder="انتخاب شرکت / شخص"
                         />
                     ) : (
@@ -269,7 +275,7 @@ const AttachmentManager = ({
                         file.mimeType === "application/pdf" ? (
                             <Button
                                 type="text"
-                                icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+                                icon={<EyeOutlined style={{color: "#1890ff"}}/>}
                                 onClick={() => {
                                     setPdfBase64(file.fileData);
                                     setShowPdfModal(true);
@@ -281,7 +287,7 @@ const AttachmentManager = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <EyeOutlined style={{ color: "#1890ff" }} />
+                                <EyeOutlined style={{color: "#1890ff"}}/>
                             </a>
                         )
                     ) : null
@@ -297,7 +303,7 @@ const AttachmentManager = ({
                         <Space>
                             <Tooltip title="ذخیره تغییرات">
                                 <Button
-                                    icon={<SaveOutlined />}
+                                    icon={<SaveOutlined/>}
                                     type="primary"
                                     size="small"
                                     onClick={() => handleSaveFile(docId, file.id)}
@@ -307,7 +313,7 @@ const AttachmentManager = ({
                             <Tooltip title="لغو ویرایش">
                                 <Button
                                     size="small"
-                                    icon={<CloseOutlined />}
+                                    icon={<CloseOutlined/>}
                                     onClick={() => {
                                         setEditingFileId(null);
                                         setEditValues({});
@@ -318,7 +324,7 @@ const AttachmentManager = ({
                     ) : (
                         <Space>
                             <Button
-                                icon={<EditOutlined />}
+                                icon={<EditOutlined/>}
                                 size="small"
                                 onClick={() => {
                                     setEditingFileId(file.id);
@@ -335,7 +341,7 @@ const AttachmentManager = ({
                                 okText="بله"
                                 cancelText="خیر"
                             >
-                                <Button type="text" danger icon={<CloseOutlined />} />
+                                <Button type="text" danger icon={<CloseOutlined/>}/>
                             </Popconfirm>
                         </Space>
                     )
@@ -391,7 +397,7 @@ const AttachmentManager = ({
             render: (val) => {
                 const normalized = typeof val === "string" ? val.trim() : "";
                 if (!normalized || normalized === "—") {
-                    return <span style={{ color: "#fa8c16" }}>کد ثبت نشده</span>;
+                    return <span style={{color: "#fa8c16"}}>کد ثبت نشده</span>;
                 }
                 return normalized;
             },
@@ -426,7 +432,7 @@ const AttachmentManager = ({
                                 onClick={() => {
                                     if (allowAdvance) handleAdvanceStatus(doc.id);
                                 }}
-                                style={{ cursor: allowAdvance ? "pointer" : "default" }}
+                                style={{cursor: allowAdvance ? "pointer" : "default"}}
                             >
                                 {label}
                             </Tag>
@@ -435,7 +441,7 @@ const AttachmentManager = ({
                             <Tooltip title="بازگردانی وضعیت سند">
                                 <Button
                                     type="text"
-                                    icon={<ReloadOutlined style={{ fontSize: 18, color: "#fa8c16" }} />}
+                                    icon={<ReloadOutlined style={{fontSize: 18, color: "#fa8c16"}}/>}
                                     onClick={() => handleRevertStatus(doc.id)}
                                 />
                             </Tooltip>
@@ -456,7 +462,7 @@ const AttachmentManager = ({
                 return (
                     <Space>
                         <Button
-                            icon={<EditOutlined style={{ color: isFinalized ? "#ccc" : "#1890ff" }} />}
+                            icon={<EditOutlined style={{color: isFinalized ? "#ccc" : "#1890ff"}}/>}
                             disabled={isFinalized}
                             onClick={() => {
                                 setEditDocument(doc);
@@ -473,7 +479,7 @@ const AttachmentManager = ({
                             <Button
                                 type="text"
                                 danger
-                                icon={<CloseOutlined style={{ color: isFinalized ? "#ccc" : "red" }} />}
+                                icon={<CloseOutlined style={{color: isFinalized ? "#ccc" : "red"}}/>}
                                 disabled={isFinalized}
                             />
                         </Popconfirm>
@@ -558,59 +564,80 @@ const AttachmentManager = ({
                 />
             </div>
 
-            <Table
-                rowKey="id"
-                columns={mainColumns}
-                locale={{
-                    triggerDesc: "کلیک برای مرتب‌سازی نزولی",
-                    triggerAsc: "کلیک برای مرتب‌سازی صعودی",
-                    cancelSort: "کلیک برای لغو مرتب‌سازی",
-                }}
-                dataSource={filteredDocuments}
-                expandable={{
-                    expandedRowRender: (doc) => {
-                        const normalized = searchText.toLowerCase().trim();
-                        const filteredAttachments = !searchText
-                            ? doc.attachmentLinks
-                            : (doc.attachmentLinks ?? []).filter((file) =>
-                                Object.values(file)
-                                    .filter((val) => typeof val === "string")
-                                    .some((val) => val.toLowerCase().includes(normalized))
-                            );
+            <ConfigProvider locale={faIR}>
+                <Table
+                    rowKey="id"
+                    columns={mainColumns}
+                    locale={{
+                        triggerDesc: "کلیک برای مرتب‌سازی نزولی",
+                        triggerAsc: "کلیک برای مرتب‌سازی صعودی",
+                        cancelSort: "کلیک برای لغو مرتب‌سازی",
+                    }}
+                    dataSource={filteredDocuments}
+                    expandable={{
+                        expandedRowRender: (doc) => {
+                            const normalized = searchText.toLowerCase().trim();
+                            const filteredAttachments = !searchText
+                                ? doc.attachmentLinks
+                                : (doc.attachmentLinks ?? []).filter((file) =>
+                                    Object.values(file)
+                                        .filter((val) => typeof val === "string")
+                                        .some((val) => val.toLowerCase().includes(normalized))
+                                );
 
-                        return (
-                            <>
-                                {allowUpload && (
-                                    <div style={{marginBottom: 8}}>
-                                        <Button
-                                            type="dashed"
-                                            icon={<CloudUploadOutlined/>}
-                                            onClick={() => {
-                                                setSelectedDocumentId(doc.id);
-                                                setShowUploadModal(true);
-                                            }}
-                                            disabled={doc.status === "FINALIZED"}
-                                        >
-                                            بارگذاری فایل جدید
-                                        </Button>
-                                    </div>
-                                )}
-                                <Table
-                                    rowKey="id"
-                                    columns={attachmentColumns(doc.id)}
-                                    dataSource={filteredAttachments}
-                                    pagination={false}
-                                    size="small"
-                                />
-                            </>
-                        );
-                    },
-                    expandedRowKeys: expandedKeys,
-                    onExpandedRowsChange: setExpandedKeys
-                }}
-                pagination={false}
-                size="middle"
-            />
+                            return (
+                                <>
+                                    {allowUpload && (
+                                        <div style={{marginBottom: 8}}>
+                                            <Button
+                                                type="dashed"
+                                                icon={<CloudUploadOutlined/>}
+                                                onClick={() => {
+                                                    setSelectedDocumentId(doc.id);
+                                                    setShowUploadModal(true);
+                                                }}
+                                                disabled={doc.status === "FINALIZED"}
+                                            >
+                                                بارگذاری فایل جدید
+                                            </Button>
+                                        </div>
+                                    )}
+                                    <Table
+                                        rowKey="id"
+                                        columns={attachmentColumns(doc.id)}
+                                        dataSource={filteredAttachments}
+                                        pagination={false}
+                                        size="small"
+                                    />
+                                </>
+                            );
+                        },
+                        expandedRowKeys: expandedKeys,
+                        onExpandedRowsChange: setExpandedKeys
+                    }}
+                    size="middle"
+                    pagination={{
+                        current: currentPage,
+                        pageSize: pageSize,
+                        total: totalDocs,
+                        onChange: (page, size) => {
+                            setCurrentPage(page);
+                            setPageSize(size);
+                        },
+                        showSizeChanger: true,
+                        // showQuickJumper: true,
+                        itemRender: (current, type, originalElement) => {
+                            if (type === "prev") {
+                                return <a>{"<"}</a>; // صفحه قبل با فلش ساده
+                            }
+                            if (type === "next") {
+                                return <a>{">"}</a>; // صفحه بعد با فلش ساده
+                            }
+                            return originalElement;
+                        }
+                    }}
+                />
+            </ConfigProvider>
 
             <PdfPreview
                 visible={showPdfModal}

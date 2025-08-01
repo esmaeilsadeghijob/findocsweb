@@ -185,3 +185,8 @@ export const getSuggestedDocumentNumber = ({ unitId, periodId }) =>
     API.get("/api/documents/suggest-number", {
         params: { unitId, periodId }
     });
+
+export const getDocumentsByFilterPaged = (clientId, unitId, serviceId, page, size) =>
+    API.get("/api/documents/filter-paged", {
+        params: { clientId, unitId, serviceId, page, size }
+    });
