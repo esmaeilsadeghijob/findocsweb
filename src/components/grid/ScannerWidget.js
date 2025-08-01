@@ -41,7 +41,6 @@ const ScannerWidget = ({ onClose }) => {
         <div style={{ padding: 24 }}>
             <h3>اسکن فایل جدید</h3>
 
-            {/* ✅ این div برای اتصال Dynamsoft */}
             <div
                 id="dwtcontrol"
                 style={{

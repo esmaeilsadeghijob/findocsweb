@@ -19,7 +19,7 @@ import {
     FileAddOutlined,
     CloudUploadOutlined,
     SearchOutlined,
-    SaveOutlined
+    SaveOutlined, PaperClipOutlined
 } from "@ant-design/icons";
 import {
     getDocumentsByFilter,
@@ -155,7 +155,6 @@ const AttachmentManager = ({
     };
 
     const handleAdvanceStatus = async (id) => {
-        console.log("clicked", id);
         try {
             await advanceDocumentStatus(id);
             fetchDocuments();
@@ -237,7 +236,7 @@ const AttachmentManager = ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{ width: "100%" }}
+                            style={{width: "100%"}}
                             placeholder="انتخاب شرکت / شخص"
                         />
                     ) : (
@@ -262,13 +261,13 @@ const AttachmentManager = ({
                             showSearch
                             value={editValues.categoryName}
                             onChange={(val) =>
-                                setEditValues((prev) => ({ ...prev, categoryName: val }))
+                                setEditValues((prev) => ({...prev, categoryName: val}))
                             }
                             options={categories.map((c) => ({
                                 label: c.name,
                                 value: c.name
                             }))}
-                            style={{ width: "100%" }}
+                            style={{width: "100%"}}
                             placeholder="انتخاب دسته‌بندی"
                         />
                     ) : (
@@ -280,11 +279,11 @@ const AttachmentManager = ({
                 align: "center",
                 render: (_, file) =>
                     allowRead ? (
-                        <div style={{ textAlign: "center" }}>
+                        <div style={{textAlign: "center"}}>
                             {file.mimeType === "application/pdf" ? (
                                 <Button
                                     type="text"
-                                    icon={<EyeOutlined style={{ color: "#1890ff" }} />}
+                                    icon={<EyeOutlined style={{color: "#1890ff"}}/>}
                                     onClick={() => {
                                         setPdfBase64(file.fileData);
                                         setShowPdfModal(true);
@@ -296,7 +295,7 @@ const AttachmentManager = ({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <EyeOutlined style={{ color: "#1890ff" }} />
+                                    <EyeOutlined style={{color: "#1890ff"}}/>
                                 </a>
                             )}
                         </div>
@@ -313,7 +312,7 @@ const AttachmentManager = ({
                         <Space>
                             <Tooltip title="ذخیره تغییرات">
                                 <Button
-                                    icon={<SaveOutlined />}
+                                    icon={<SaveOutlined/>}
                                     type="primary"
                                     size="small"
                                     style={{
@@ -328,7 +327,7 @@ const AttachmentManager = ({
 
                             <Tooltip title="لغو ویرایش">
                                 <Button
-                                    icon={<CloseOutlined />}
+                                    icon={<CloseOutlined/>}
                                     size="small"
                                     style={{
                                         backgroundColor: "transparent",
@@ -346,7 +345,7 @@ const AttachmentManager = ({
                     ) : (
                         <Space>
                             <Button
-                                icon={<EditOutlined />}
+                                icon={<EditOutlined/>}
                                 size="small"
                                 style={{
                                     backgroundColor: "#e0f2fe",
@@ -373,7 +372,7 @@ const AttachmentManager = ({
                                 <Button
                                     type="text"
                                     danger
-                                    icon={<CloseOutlined />}
+                                    icon={<CloseOutlined/>}
                                     style={{
                                         fontWeight: 600,
                                         color: "#c53030"
@@ -422,7 +421,7 @@ const AttachmentManager = ({
             ]
                 .filter(Boolean)
                 .sort()
-                .map((dateStr) => ({ text: dateStr, value: dateStr })),
+                .map((dateStr) => ({text: dateStr, value: dateStr})),
             onFilter: (value, record) =>
                 moment(record.archiveDate).format("jYYYY/jMM/jDD") === value,
         },
@@ -434,7 +433,7 @@ const AttachmentManager = ({
             filters: [...new Set(documents.map((d) => d.fiscalYear))]
                 .filter(Boolean)
                 .sort()
-                .map((year) => ({ text: String(year), value: String(year) })),
+                .map((year) => ({text: String(year), value: String(year)})),
             onFilter: (value, record) => String(record.fiscalYear) === String(value),
         },
         {
@@ -464,7 +463,7 @@ const AttachmentManager = ({
             ]
                 .filter(Boolean)
                 .sort()
-                .map((dateStr) => ({ text: dateStr, value: dateStr })),
+                .map((dateStr) => ({text: dateStr, value: dateStr})),
             onFilter: (value, record) =>
                 moment(record.documentTimestamp).format("jYYYY/jMM/jDD") === value,
         },
@@ -475,9 +474,9 @@ const AttachmentManager = ({
             render: (val) => {
                 const normalized = typeof val === "string" ? val.trim() : "";
                 if (!normalized || normalized === "—") {
-                    return <span style={{ color: "#fa8c16" }}> — </span>; // نمایش خط نارنجی
+                    return <span style={{color: "#fa8c16"}}> — </span>; // نمایش خط نارنجی
                 }
-                return <span style={{ display: "inline-block", width: "100%", textAlign: "center" }}>{normalized}</span>;
+                return <span style={{display: "inline-block", width: "100%", textAlign: "center"}}>{normalized}</span>;
             },
             sorter: (a, b) => (a.archiveCode || "").localeCompare(b.archiveCode || "")
         },
@@ -505,14 +504,14 @@ const AttachmentManager = ({
             onFilter: (value, record) => record.status === value,
             render: (_, doc) => {
                 const statusMap = {
-                    UNARCHIVED: { label: "بایگانی نشده", color: "default" },
-                    NO_ATTACHMENTS: { label: "بدون ضمائم", color: "magenta" },
-                    DRAFT: { label: "پیش‌نویس", color: "blue" },
-                    SUBMITTED: { label: "ثبت‌شده", color: "orange" },
-                    FINALIZED: { label: "قطعی", color: "green" }
+                    UNARCHIVED: {label: "بایگانی نشده", color: "default"},
+                    NO_ATTACHMENTS: {label: "بدون ضمائم", color: "magenta"},
+                    DRAFT: {label: "پیش‌نویس", color: "blue"},
+                    SUBMITTED: {label: "ثبت‌شده", color: "orange"},
+                    FINALIZED: {label: "قطعی", color: "green"}
                 };
 
-                const { label, color } = statusMap[doc.status] || { label: "نامشخص", color: "default" };
+                const {label, color} = statusMap[doc.status] || {label: "نامشخص", color: "default"};
 
                 const allowAdvance = doc.status !== "FINALIZED" && allowEdit;
                 const allowRevertStatus = doc.status === "FINALIZED" && allowRevert;
@@ -525,7 +524,7 @@ const AttachmentManager = ({
                                 onClick={() => {
                                     if (allowAdvance) handleAdvanceStatus(doc.id);
                                 }}
-                                style={{ cursor: allowAdvance ? "pointer" : "default" }}
+                                style={{cursor: allowAdvance ? "pointer" : "default"}}
                             >
                                 {label}
                             </Tag>
@@ -534,7 +533,7 @@ const AttachmentManager = ({
                             <Tooltip title="بازگردانی وضعیت سند">
                                 <Button
                                     type="text"
-                                    icon={<ReloadOutlined style={{ fontSize: 18, color: "#fa8c16" }} />}
+                                    icon={<ReloadOutlined style={{fontSize: 18, color: "#fa8c16"}}/>}
                                     onClick={() => handleRevertStatus(doc.id)}
                                 />
                             </Tooltip>
@@ -700,7 +699,7 @@ const AttachmentManager = ({
                                         {allowUpload && (
                                             <Button
                                                 type="dashed"
-                                                icon={<CloudUploadOutlined />}
+                                                icon={<CloudUploadOutlined/>}
                                                 onClick={() => {
                                                     setSelectedDocumentId(doc.id);
                                                     setShowUploadModal(true);
@@ -729,22 +728,22 @@ const AttachmentManager = ({
                         },
                         expandedRowKeys: expandedKeys,
                         onExpandedRowsChange: setExpandedKeys,
-                        expandIcon: ({ expanded, onExpand, record }) => (
+                        expandIcon: ({expanded, onExpand, record}) => (
                             <div
                                 onClick={(e) => onExpand(record, e)}
                                 style={{
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "8px",
+                                    justifyContent: "flex-start",
+                                    minWidth: "40px",
+                                    gap: "6px",
                                     cursor: "pointer"
                                 }}
                             >
-                                {/* علامت باز/بستن */}
-                                <span style={{ fontSize: "16px", color: "#475569", fontWeight: 700 }}>
-      {expanded ? "−" : "+"}
-    </span>
+                             <span style={{fontSize: "16px", color: "#475569", fontWeight: 700}}>
+                               {expanded ? "−" : "+"}
+                             </span>
 
-                                {/* آیکون گیره و عدد کنار هم */}
                                 {record.attachmentLinks?.length > 0 && (
                                     <span style={{
                                         display: "flex",
@@ -757,13 +756,12 @@ const AttachmentManager = ({
                                         color: "#00796b",
                                         fontWeight: 600
                                     }}>
-        <span>📎</span>
-        <span>{record.attachmentLinks.length}</span>
-      </span>
+                                   <PaperClipOutlined style={{fontSize: "14px"}}/>
+                                   <span>{record.attachmentLinks.length}</span>
+                                 </span>
                                 )}
                             </div>
                         )
-
                     }}
                     size="middle"
                     pagination={{

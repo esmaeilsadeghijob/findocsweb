@@ -45,10 +45,8 @@ function BackupManager() {
     //         let files = res.data;
     //
     //         if (!files || files.length === 0) {
-    //             console.log("1 #################################")
     //             await createBackup(backupType, path);
     //             message.success("هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
-    //             console.log("2 #################################")
     //
     //             const updatedRes = await getBackups(path);
     //
@@ -57,10 +55,8 @@ function BackupManager() {
     //             setBackups(sorted);
     //
     //             const latest = sorted[0];
-    //             console.log("1 ^^^^^^^^^^^^^^^^^^^^^^^^^")
     //             await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
     //             message.success(`بک‌آپ جدید (${latest.filename}) بازگردانی شد`);
-    //             console.log("2 ^^^^^^^^^^^^^^^^^^^^^^^^^")
     //             return;
     //         }
     //
@@ -68,10 +64,8 @@ function BackupManager() {
     //         setBackups(sortedFiles);
     //
     //         const latest = sortedFiles[0];
-    //         console.log("3 ^^^^^^^^^^^^^^^^^^^^^^^^^")
     //         await restoreBackup(backupType, `${latest.path}\\${latest.filename}`);
     //         message.success(`آخرین بک‌آپ (${latest.filename}) بازگردانی شد`);
-    //         console.log("4 ^^^^^^^^^^^^^^^^^^^^^^^^^")
     //     } catch (err) {
     //         message.error("خطا در بارگذاری یا بازگردانی فایل اخیر");
     //     } finally {
@@ -90,7 +84,6 @@ function BackupManager() {
             let files = res.data;
 
             if (!files || files.length === 0) {
-                console.log("🆕 هیچ بک‌آپی وجود ندارد، ساخت فایل جدید...");
                 await createBackup(backupType, path);
                 message.success("هیچ بک‌آپی نبود، فایل جدید ایجاد شد");
 
@@ -297,7 +290,7 @@ function BackupManager() {
                             ثبت
                         </Button>
                     </Tooltip>,
-                    <Tooltip title="❌ خروج بدون ذخیره تغییرات" key="cancel">
+                    <Tooltip title=" خروج بدون ذخیره تغییرات" key="cancel">
                         <Button onClick={() => setModalOpen(false)}>
                             انصراف
                         </Button>
