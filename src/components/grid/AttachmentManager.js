@@ -392,17 +392,20 @@ const AttachmentManager = ({
         {
             title: "شماره سند",
             dataIndex: "documentNumber",
+            align: "center",
             sorter: (a, b) => (a.documentNumber || 0) - (b.documentNumber || 0),
         },
         {
             title: "شماره بایگانی",
             dataIndex: "archiveNumber",
+            align: "center",
             sorter: (a, b) => (a.archiveNumber || 0) - (b.archiveNumber || 0),
             defaultSortOrder: "descend"
         },
         {
             title: "تاریخ بایگانی",
             dataIndex: "archiveDate",
+            align: "center",
             sorter: (a, b) => (a.archiveDate || 0) - (b.archiveDate || 0),
             render: (val) => {
                 const date = moment(val);
@@ -426,6 +429,7 @@ const AttachmentManager = ({
         {
             title: "سال مالی",
             dataIndex: "fiscalYear",
+            align: "center",
             sorter: (a, b) => (a.fiscalYear || 0) - (b.fiscalYear || 0),
             filters: [...new Set(documents.map((d) => d.fiscalYear))]
                 .filter(Boolean)
@@ -436,10 +440,12 @@ const AttachmentManager = ({
         {
             title: "شرح سند",
             dataIndex: "description",
+            align: "center",
             sorter: (a, b) => (a.description || 0) - (b.description || 0),
         },
         {
             title: "تاریخ سند",
+            align: "center",
             dataIndex: "documentTimestamp",
             sorter: (a, b) => (a.documentTimestamp || 0) - (b.documentTimestamp || 0),
             render: (val) => {
@@ -478,6 +484,7 @@ const AttachmentManager = ({
         {
             title: "وضعیت",
             dataIndex: "status",
+            align: "center",
             filters: [
                 ...new Set(documents.map((d) => d.status))
             ]
@@ -721,7 +728,42 @@ const AttachmentManager = ({
                             );
                         },
                         expandedRowKeys: expandedKeys,
-                        onExpandedRowsChange: setExpandedKeys
+                        onExpandedRowsChange: setExpandedKeys,
+                        expandIcon: ({ expanded, onExpand, record }) => (
+                            <div
+                                onClick={(e) => onExpand(record, e)}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                {/* علامت باز/بستن */}
+                                <span style={{ fontSize: "16px", color: "#475569", fontWeight: 700 }}>
+      {expanded ? "−" : "+"}
+    </span>
+
+                                {/* آیکون گیره و عدد کنار هم */}
+                                {record.attachmentLinks?.length > 0 && (
+                                    <span style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                        backgroundColor: "#e0f7fa",
+                                        padding: "2px 8px",
+                                        borderRadius: "12px",
+                                        fontSize: "12px",
+                                        color: "#00796b",
+                                        fontWeight: 600
+                                    }}>
+        <span>📎</span>
+        <span>{record.attachmentLinks.length}</span>
+      </span>
+                                )}
+                            </div>
+                        )
+
                     }}
                     size="middle"
                     pagination={{
