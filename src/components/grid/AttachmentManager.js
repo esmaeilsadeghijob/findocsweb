@@ -710,8 +710,8 @@ const AttachmentManager = ({
             <ConfigProvider locale={faIR}>
                 <Table
                     rowKey="id"
-                    sticky
-                    scroll={{y: 600}}
+                    // sticky
+                    // scroll={{y: 600}}
                     columns={mainColumns}
                     locale={{
                         triggerDesc: "کلیک برای مرتب‌سازی نزولی",
