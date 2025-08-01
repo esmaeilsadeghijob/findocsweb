@@ -19,7 +19,7 @@ import {
     FileAddOutlined,
     CloudUploadOutlined,
     SearchOutlined,
-    SaveOutlined, PaperClipOutlined
+    SaveOutlined, PaperClipOutlined, InfoCircleOutlined
 } from "@ant-design/icons";
 import {
     getDocumentsByFilter,
@@ -620,6 +620,22 @@ const AttachmentManager = ({
         return <div style={{color: "red"}}>شما مجاز به مشاهده اسناد نیستید!</div>;
     }
 
+    const statusMap = {
+        UNARCHIVED: { label: "بایگانی نشده", color: "default" },
+        NO_ATTACHMENTS: { label: "بدون ضمائم", color: "magenta" },
+        DRAFT: { label: "پیش‌نویس", color: "blue" },
+        SUBMITTED: { label: "ثبت‌شده", color: "orange" },
+        FINALIZED: { label: "قطعی", color: "green" }
+    };
+
+    const statusCounts = {
+        UNARCHIVED: filteredDocuments.filter(doc => doc.status === "UNARCHIVED").length,
+        NO_ATTACHMENTS: filteredDocuments.filter(doc => (doc.attachmentLinks?.length ?? 0) === 0).length,
+        DRAFT: filteredDocuments.filter(doc => doc.status === "DRAFT").length,
+        SUBMITTED: filteredDocuments.filter(doc => doc.status === "SUBMITTED").length,
+        FINALIZED: filteredDocuments.filter(doc => doc.status === "FINALIZED").length
+    };
+
     return (
         <>
             <div style={{display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem"}}>
@@ -646,7 +662,7 @@ const AttachmentManager = ({
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     style={{
-                        maxWidth: 400,
+                        maxWidth: 450,
                         direction: "rtl",
                         textAlign: "right"
                     }}
@@ -654,13 +670,48 @@ const AttachmentManager = ({
                         !searchText && <SearchOutlined style={{color: "#1890ff", fontSize: 16}}/>
                     }
                 />
+
+                {/* 👇 اضافه کردن این استایل تگ‌ها رو می‌فرسته سمت مخالف */}
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        alignItems: "center",
+                        marginInlineStart: "auto"
+                    }}
+                >
+                    {Object.entries(statusMap).map(([key, {label, color}]) => {
+                        const count = statusCounts[key];
+                        if (count === 0) return null;
+
+                        return (
+                            <Tooltip title={`${label}: ${count} مورد`} key={key}>
+                                <Tag
+                                    color={color}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                        padding: "0 8px",
+                                        fontWeight: 500,
+                                        cursor: "pointer",
+                                        borderRadius: "16px"
+                                    }}
+                                >
+                                    <InfoCircleOutlined/>
+                                    <span>{count}</span>
+                                </Tag>
+                            </Tooltip>
+                        );
+                    })}
+                </div>
             </div>
 
             <ConfigProvider locale={faIR}>
                 <Table
                     rowKey="id"
                     sticky
-                    scroll={{ y: 600 }}
+                    scroll={{y: 600}}
                     columns={mainColumns}
                     locale={{
                         triggerDesc: "کلیک برای مرتب‌سازی نزولی",
