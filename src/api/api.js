@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: window._env_?.API_BASE || "http://localhost:8080",
+    baseURL: window._env_?.API_BASE || "http://localhost:3031",
     // baseURL: process.env.REACT_APP_API_BASE,
     // baseURL: "http://192.168.0.35:8080",
 });
@@ -189,4 +189,20 @@ export const getSuggestedDocumentNumber = ({ unitId, periodId }) =>
 export const getDocumentsByFilterPaged = (clientId, unitId, serviceId, page, size) =>
     API.get("/api/documents/filter-paged", {
         params: { clientId, unitId, serviceId, page, size }
+    });
+
+export const updateAttachmentFile = (documentId, fileId, formData, onProgress) =>
+    API.put(`/api/attachments/${documentId}/${fileId}/replace`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+            if (onProgress) onProgress(event);
+        },
+    });
+
+export const uploadNewAttachment = (documentId, formData, onProgress) =>
+    API.post(`/api/attachments/${documentId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+            if (onProgress) onProgress(event);
+        },
     });

@@ -46,6 +46,7 @@ import {
 } from "./accessUtils";
 import faIR from 'antd/es/locale/fa_IR';
 import "./Attachment.css";
+import ReplaceAttachmentModal from "./ReplaceAttachmentModal";
 
 moment.loadPersian({usePersianDigits: true, dialect: "persian-modern"});
 
@@ -85,7 +86,9 @@ const AttachmentManager = ({
     const [totalDocs, setTotalDocs] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [replaceParams, setReplaceParams] = useState({ fileId: null });
 
+    const [showReplaceModal, setShowReplaceModal] = useState(false);
     // const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     // const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
     // const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
@@ -203,7 +206,26 @@ const AttachmentManager = ({
         const columns = [
             {
                 title: "نام فایل",
-                dataIndex: "fileName"
+                dataIndex: "fileName",
+                render: (_, file) => (
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        {allowEdit && !isFinalized && (
+                            <Tooltip title="جایگزینی فایل">
+                                <Button
+                                    icon={<CloudUploadOutlined />}
+                                    type="default"
+                                    size="small"
+                                    onClick={() => {
+                                        setSelectedDocumentId(docId);
+                                        setReplaceParams({ fileId: file.id });
+                                        setShowReplaceModal(true);
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                        <span>{file.fileName}</span>
+                    </div>
+                )
             },
             {
                 title: "فرمت",
@@ -849,6 +871,24 @@ const AttachmentManager = ({
                 />
             </ConfigProvider>
 
+            <ReplaceAttachmentModal
+                documentId={selectedDocumentId}
+                fileId={replaceParams.fileId} // ✅ اینجا مقدار دقیق داره
+                visible={showReplaceModal}
+                onClose={() => {
+                    setShowReplaceModal(false);
+                    setReplaceParams({ fileId: null });
+                }}
+                onSuccess={async () => {
+                    await fetchDocuments();
+                    setTimeout(() => {
+                        setExpandedKeys((prev) => [...new Set([...prev, selectedDocumentId])]);
+                        setShowReplaceModal(false);
+                        setReplaceParams({ fileId: null });
+                    }, 150);
+                }}
+            />
+
             <PdfPreview
                 visible={showPdfModal}
                 base64Data={pdfBase64}
@@ -858,6 +898,7 @@ const AttachmentManager = ({
             <UploadModal
                 visible={showUploadModal}
                 documentId={selectedDocumentId}
+                editingFileId={editingFileId}
                 onSuccess={async () => {
                     const docId = selectedDocumentId;
 
