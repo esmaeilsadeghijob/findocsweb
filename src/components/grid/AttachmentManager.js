@@ -92,6 +92,7 @@ const AttachmentManager = ({
     // const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     // const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
     // const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
+    const [searchMatchedKeys, setSearchMatchedKeys] = useState([]);
 
     useEffect(() => {
         getCategories().then((res) => setCategories(res.data || []));
@@ -137,12 +138,13 @@ const AttachmentManager = ({
     const handleDeleteFile = async (docId, fileId) => {
         try {
             await deleteAttachment(docId, fileId);
-            const res = await getAttachments(docId);
-            setDocuments((prev) =>
-                prev.map((d) =>
-                    d.id === docId ? {...d, attachmentLinks: res.data || []} : d
+            const { data } = await getAttachments(docId);
+            setDocuments(prev =>
+                prev.map(doc =>
+                    doc.id === docId ? { ...doc, attachmentLinks: data || [] } : doc
                 )
             );
+            setExpandedKeys(prev => [...new Set([...prev, docId])]); // 👈 حفظ سطر باز شده
             message.success("فایل حذف شد");
         } catch {
             message.error("خطا در حذف فایل");
@@ -152,12 +154,13 @@ const AttachmentManager = ({
     const handleSaveFile = async (docId, fileId) => {
         try {
             await updateAttachment(docId, fileId, editValues);
-            const res = await getAttachments(docId);
-            setDocuments((prev) =>
-                prev.map((d) =>
-                    d.id === docId ? {...d, attachmentLinks: res.data || []} : d
+            const { data } = await getAttachments(docId);
+            setDocuments(prev =>
+                prev.map(doc =>
+                    doc.id === docId ? { ...doc, attachmentLinks: data || [] } : doc
                 )
             );
+            setExpandedKeys(prev => [...new Set([...prev, docId])]); // 👈 حفظ سطر باز شده
             setEditingFileId(null);
             setEditValues({});
             message.success("ویرایش انجام شد");
@@ -616,11 +619,11 @@ const AttachmentManager = ({
 
     const filteredDocuments = useMemo(() => {
         if (!searchText) {
-            setExpandedKeys([]);
+            setSearchMatchedKeys([]);
             return documents;
         }
 
-        const normalized = searchText.toLowerCase();
+        const normalized = searchText.toLowerCase().trim();
         const matched = [];
 
         documents.forEach((doc) => {
@@ -637,13 +640,12 @@ const AttachmentManager = ({
                 )
                 .join(" ");
 
-            const allText = `${docText} ${attachmentText}`;
-            if (allText.includes(normalized)) {
+            if (`${docText} ${attachmentText}`.includes(normalized)) {
                 matched.push(doc.id);
             }
         });
 
-        setExpandedKeys(matched);
+        setSearchMatchedKeys(matched);
         return documents.filter((doc) => matched.includes(doc.id));
     }, [searchText, documents]);
 
@@ -666,6 +668,8 @@ const AttachmentManager = ({
         SUBMITTED: filteredDocuments.filter(doc => doc.status === "SUBMITTED").length,
         FINALIZED: filteredDocuments.filter(doc => doc.status === "FINALIZED").length
     };
+
+    const combinedExpandedKeys = [...new Set([...expandedKeys, ...searchMatchedKeys])];
 
     return (
         <>
@@ -810,7 +814,8 @@ const AttachmentManager = ({
                                 </div>
                             );
                         },
-                        expandedRowKeys: expandedKeys,
+                        // expandedRowKeys: expandedKeys,
+                        expandedRowKeys: combinedExpandedKeys,
                         onExpandedRowsChange: setExpandedKeys,
                         expandIcon: ({expanded, onExpand, record}) => (
                             <div
