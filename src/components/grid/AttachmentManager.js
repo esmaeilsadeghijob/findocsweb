@@ -76,15 +76,19 @@ const AttachmentManager = ({
     const [searchText, setSearchText] = useState("");
     const [expandedKeys, setExpandedKeys] = useState([]);
 
-    const allowRead = canRead(currentUser?.role, accessLevel);
-    const allowCreate = canCreate(currentUser?.role, accessLevel);
-    const allowEdit = canEdit(currentUser?.role, accessLevel);
-    const allowUpload = canManageAttachments(currentUser?.role, accessLevel);
-    const allowRevert = canRevert(currentUser?.role, accessLevel);
+    const allowRead = canRead(roles, accessLevel);
+    const allowCreate = canCreate(roles, accessLevel);
+    const allowEdit = canEdit(roles, accessLevel);
+    const allowUpload = canManageAttachments(roles, accessLevel);
+    const allowRevert = canRevert(roles, accessLevel);
 
     const [totalDocs, setTotalDocs] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+
+    // const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
+    // const canCreate = isAdmin || ["CREATE", "OWNER", "ADMIN"].includes(accessLevel);
+    // const canReadGlobal = isAdmin || ["READ", "EDIT", "DOWNLOAD", "OWNER", "REVERT", "ADMIN", "CREATE"].includes(accessLevel);
 
     useEffect(() => {
         getCategories().then((res) => setCategories(res.data || []));
@@ -120,6 +124,11 @@ const AttachmentManager = ({
 
     useEffect(() => {
         fetchDocuments();
+
+        console.log(":::::::::::::::::::");
+        console.log("canRead = ", canRead(roles, accessLevel));
+        console.log(":::::::::::::::::::");
+
     }, [clientId, unitId, serviceId, currentPage, pageSize]);
 
     const handleDeleteFile = async (docId, fileId) => {

@@ -13,7 +13,7 @@ function ClientDoc({accessLevel, roles}) {
     const [searchText, setSearchText] = useState("");
     const [selectedClient, setSelectedClient] = useState(null);
     const userId = localStorage.getItem("userId");
-    const role = localStorage.getItem("role");
+    const role = (localStorage.getItem("role") || "").toUpperCase();
 
     const isAdmin = Array.isArray(roles) && roles.includes("ROLE_ADMIN");
     const canReadGlobal =

@@ -1,18 +1,37 @@
 // بررسی اجازه مشاهده اسناد
-export function canRead(role, accessLevel) {
-    return role === "ROLE_ADMIN" || [
+// export function canRead(role, accessLevel) {
+//     return role === "ROLE_ADMIN" || [
+//         "READ",
+//         "EDIT",
+//         "DOWNLOAD",
+//         "REVERT",
+//         "OWNER"
+//     ].includes(accessLevel);
+// }
+
+export function canRead(roles, accessLevel) {
+    const normalizedRoles = Array.isArray(roles)
+        ? roles
+        : typeof roles === "string"
+            ? [roles]
+            : [];
+
+    return normalizedRoles.includes("ROLE_ADMIN") || [
         "READ",
+        "CREATE",
         "EDIT",
         "DOWNLOAD",
         "REVERT",
-        "OWNER"
+        "OWNER",
+        "ADMIN"
     ].includes(accessLevel);
 }
 
 // بررسی اجازه ساخت سند یا مشتری
 export function canCreate(role, accessLevel) {
     return role === "ROLE_ADMIN" || [
-        // "CREATE",
+        "CREATE",
+        "EDIT",
         "ADMIN",
         "OWNER"
     ].includes(accessLevel);
@@ -37,6 +56,7 @@ export function canManageClients(role, accessLevel) {
 // بررسی اجازه بارگذاری یا حذف ضمیمه
 export function canManageAttachments(role, accessLevel) {
     return role === "ROLE_ADMIN" || [
+        "CREATE",
         "EDIT",
         "OWNER"
     ].includes(accessLevel);
